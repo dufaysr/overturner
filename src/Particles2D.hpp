@@ -20,6 +20,7 @@ class Particles2D
 		double *mY, *mZ;
 
 		Particles2D(int nParticles, double yStart, double zStart);
+		Particles2D(int nParticles, double* yStart, double* zStart);
 		Particles2D(const Particles2D& otherParticles);
 		~Particles2D();
 		double GetY(int ithParticle) const; // 1-based indexing

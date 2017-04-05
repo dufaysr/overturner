@@ -24,6 +24,20 @@ Particles2D::Particles2D(int nParticles, double yStart, double zStart)
 	}
 }
 
+Particles2D::Particles2D(int nParticles, double* yStart, double* zStart)
+{
+	mTime = 0.;
+	mN = nParticles;
+	mY = new double [nParticles];
+	mZ = new double [nParticles];
+
+	for (int i=0; i<nParticles; i++)
+	{
+		mY[i] = yStart[i];
+		mZ[i] = zStart[i];
+	}
+}
+
 Particles2D::Particles2D(const Particles2D& otherParticles)
 {
 	mN = otherParticles.mN;

@@ -27,11 +27,13 @@ class Solver
 		std::normal_distribution<double> wiener;
 
 	public:
-		Solver(int N, double dt, double T, double yStart, double zStart);
+		Solver(int N, double yStart, double zStart, double dt, double T);
+		Solver(int N, double* yStart, double* zStart, double dt, double T);
+		Solver(Particles2D particles, double dt, double T);
 		virtual void UpdatePosition() =0;		// Pure virtual function
 		virtual void UpdatePositionAdim() =0;	// Pure virtual function
-		void Run();
-		void RunAdim();
+		Particles2D Run();
+		Particles2D RunAdim();
 		void DisplayParticles() const;
 		void PrintParticles() const;
 		void PrintParameters() const;
@@ -42,7 +44,9 @@ class Solver
 class EMSolver : public Solver
 {
 	public:
-		EMSolver(int N, double dt, double T, double yStart, double zStart);
+		EMSolver(int N, double yStart, double zStart, double dt, double T);
+		EMSolver(int N, double* yStart, double* zStart, double dt, double T);
+		EMSolver(Particles2D particles, double dt, double T);
 		void UpdatePosition();
 		void UpdatePositionAdim();
 };
@@ -51,7 +55,9 @@ class EMSolver : public Solver
 class BISolver : public Solver
 {
 	public:
-		BISolver(int N, double dt, double T, double yStart, double zStart);
+		BISolver(int N, double yStart, double zStart, double dt, double T);
+		BISolver(int N, double* yStart, double* zStart, double dt, double T);
+		BISolver(Particles2D particles, double dt, double T);
 		void UpdatePosition();
 		void UpdatePositionAdim();
 };

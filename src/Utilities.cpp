@@ -10,6 +10,57 @@
 
 
 using namespace constants;
+
+void ReadIniFile(std::string filename)
+{
+	std::ifstream iniFile(filename.c_str(), std::ios::in);
+    if(iniFile)
+    {
+        std::string content, tmp, value;
+        char* pEnd;
+        while(std::getline(iniFile, content,' '))
+        {
+            std::getline(iniFile,tmp,' ');
+        	std::getline(iniFile, value);
+            double val = strtod(value.c_str(), &pEnd);
+            if (pEnd[0])
+            {
+                if (pEnd[0] == '/')
+                    val /= strtod(&(pEnd[1]),NULL);
+                else
+                    std::cerr << "Unexpected nonnumeric character in \"" << value << "\" : cannot interpret char \"" << pEnd[0] << "\"." << std::endl;
+            }
+        	if (content == "Kh")
+        	  	constants::Kh = val;
+        	else if (content == "Kv1")
+        		constants::Kv1 = val;
+        	else if (content == "Kv2")
+        		constants::Kv2 = val;
+        	else if (content == "Kv3")
+        		constants::Kv3 = val;
+        	else if (content == "H")
+        		constants::H = val;
+        	else if (content == "L")
+        		constants::L = val;
+        	else if (content == "y0Prime")
+        		constants::y0Prime = val;
+        	else if (content == "z0Prime")
+        		constants::z0Prime = val;
+        	else if (content == "Psi")
+        		constants::Psi = val;
+        	else
+        		std::cerr << "Unexpected content \"" << content << "\" in ini file. Please provide an appropriate ini file" << std::endl;
+        }
+        constants::y0 = constants::y0Prime*constants::L;
+        constants::z0 = constants::z0Prime*constants::H;
+        iniFile.close();
+    }
+    else
+	{
+		std::cerr << "Unable to open ini file !" << std::endl;
+	}
+}
+
 double GetPhi(double xsi, double xsi0)
 {
 	int Chi = (xsi < xsi0);

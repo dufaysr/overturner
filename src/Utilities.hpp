@@ -9,21 +9,31 @@
 #ifndef UTILITIESHEADERFILE
 #define UTILITIESHEADERFILE
 
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <cstring>
+
 namespace constants
 {
-	const double Kh = 1e2;
-	const double Kv1 = 1e-1;
-	const double Kv2 = 5e-5;
-	const double Kv3 = 1e-3;
-	const double H = 4e3;
-	const double L = 12e6;
-	const double y0Prime = .9;
-	const double y0 = y0Prime*L;
-	const double z0Prime = 7./8.;
-	const double z0 = z0Prime*H;
-	const double Psi = 5;
+	// default model constants. Other models can be loaded using an ini file with readIniFile().
+	extern double Kh;
+	extern double Kv1;
+	extern double Kv2;
+	extern double Kv3;
+	extern double H;
+	extern double L;
+	extern double y0Prime;
+	extern double y0;
+	extern double z0Prime;
+	extern double z0;
+	extern double Psi;
+	extern int N;
+	extern double dt;
+	extern double T;
 }
 
+void ReadIniFile(std::string filename);
 double GetPhi(double xsi, double xsi0);
 double GetdPhi(double xsi, double xsi0);
 double GetV(double y, double z);

@@ -12,14 +12,28 @@
 #include "Solvers.hpp"
 
 /*-------------- Base Class Solver -----------------------*/
-Solver::Solver(int N, double dt, double T, double yStart, double zStart):
+Solver::Solver(int N, double yStart, double zStart, double dt, double T):
 	mParticles(N,yStart,zStart), mFinalTime(T), mDt(dt), 
 	seed(std::chrono::system_clock::now().time_since_epoch().count()),
 	generator(seed),
 	wiener(0.0,1.0)
 {}
 
-void Solver::Run()
+Solver::Solver(int N, double* yStart, double* zStart, double dt, double T):
+	mParticles(N,yStart,zStart), mFinalTime(T), mDt(dt), 
+	seed(std::chrono::system_clock::now().time_since_epoch().count()),
+	generator(seed),
+	wiener(0.0,1.0)
+{}
+
+Solver::Solver(Particles2D particles, double dt, double T):
+	mParticles(particles), mFinalTime(T), mDt(dt), 
+	seed(std::chrono::system_clock::now().time_since_epoch().count()),
+	generator(seed),
+	wiener(0.0,1.0)
+{}
+
+Particles2D Solver::Run()
 {
 	PrintParticles();
 	for(int i=0; i*mDt < mFinalTime; i++)
@@ -27,9 +41,10 @@ void Solver::Run()
 		UpdatePosition();
 		PrintParticles();		
 	}
+	return mParticles;
 }
 
-void Solver::RunAdim()
+Particles2D Solver::RunAdim()
 {
 	PrintParticles();
 	for(int i=0; i*mDt < mFinalTime; i++)
@@ -37,6 +52,7 @@ void Solver::RunAdim()
 		UpdatePositionAdim();
 		PrintParticles();		
 	}
+	return mParticles;
 }
 
 void Solver::DisplayParticles() const
@@ -86,8 +102,16 @@ void Solver::TestWiener()
 /*----------- Derived class from Solver : EMSolver ------------------*/
 /*------------ WRONG ! TO BE MODIFIED -------------------------------*/
 
-EMSolver::EMSolver(int N, double dt, double T, double yStart, double zStart):
-	Solver(N,dt,T,yStart,zStart)
+EMSolver::EMSolver(int N, double yStart, double zStart, double dt, double T):
+	Solver(N,yStart,zStart,dt,T)
+{}
+
+EMSolver::EMSolver(int N, double* yStart, double* zStart, double dt, double T):
+	Solver(N,yStart,zStart,dt,T)
+{}
+
+EMSolver::EMSolver(Particles2D particles, double dt, double T):
+	Solver(particles,dt,T)
 {}
 
 void EMSolver::UpdatePosition()
@@ -119,8 +143,16 @@ void EMSolver::UpdatePositionAdim()
 
 /*----------- Derived class from Solver : Backward Ito (BI) Solver ------------------*/
 
-BISolver::BISolver(int N, double dt, double T, double yStart, double zStart):
-	Solver(N,dt,T,yStart,zStart)
+BISolver::BISolver(int N, double yStart, double zStart, double dt, double T):
+	Solver(N,yStart,zStart,dt,T)
+{}
+
+BISolver::BISolver(int N, double* yStart, double* zStart, double dt, double T):
+	Solver(N,yStart,zStart,dt,T)
+{}
+
+BISolver::BISolver(Particles2D particles, double dt, double T):
+	Solver(particles,dt,T)
 {}
 
 void BISolver::UpdatePosition()

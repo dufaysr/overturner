@@ -9,7 +9,96 @@
 #include "Utilities.hpp"
 
 
+namespace constants
+{
+	// default model constants. Other models can be loaded using an ini file with readIniFile().
+	double Kh = 1e2;
+	double Kv1 = 1e-1;
+	double Kv2 = 5e-5;
+	double Kv3 = 1e-3;
+	double H = 4e3;
+	double L = 12e6;
+	double y0Prime = .9;
+	double y0 = y0Prime*L;
+	double z0Prime = 7./8.;
+	double z0 = z0Prime*H;
+	double Psi = 5;
+	int N = 10;
+	double dt = 3600*24.;
+	double T = 1000*365*dt;
+}
+
 using namespace constants;
+
+void ReadIniFile(std::string filename)
+{
+	std::ifstream iniFile(filename.c_str(), std::ios::in);
+    if(iniFile)
+    {
+        std::string content, tmp, value;
+        char *pEnd, *pEndtmp;
+        double val, tmpval;
+        while(std::getline(iniFile, content,' '))
+        {
+            std::getline(iniFile,tmp,' ');
+        	std::getline(iniFile, value);
+            val = strtod(value.c_str(), &pEnd);
+            while (pEnd[0])
+            {
+                if (pEnd[0] == '/')
+                    val /= strtod(&(pEnd[1]),&pEndtmp);
+                else if (pEnd[0] == '*')
+                {
+                	tmpval = strtod(&(pEnd[1]),&pEndtmp);
+                	if (tmpval)
+                		val *= tmpval;
+                	else if (strncmp("dt",&(pEnd[1]),2) || strncmp("Dt",&(pEnd[1]),2))
+                	{
+                		val *= dt;
+                		pEndtmp += 2;
+                	}
+                }
+                else
+                    std::cerr << "Unexpected nonnumeric character in \"" << value << "\" : cannot interpret char \"" << pEnd[0] << "\"." << std::endl;
+            	pEnd = pEndtmp;
+            }
+        	if (content == "Kh")
+        	  	Kh = val;
+        	else if (content == "Kv1")
+        		Kv1 = val;
+        	else if (content == "Kv2")
+        		Kv2 = val;
+        	else if (content == "Kv3")
+        		Kv3 = val;
+        	else if (content == "H")
+        		H = val;
+        	else if (content == "L")
+        		L = val;
+        	else if (content == "y0Prime")
+        		y0Prime = val;
+        	else if (content == "z0Prime")
+        		z0Prime = val;
+        	else if (content == "Psi")
+        		Psi = val;
+            else if (content == "dt" || content == "Dt")
+                dt = val;
+            else if (content == "T" || content == "tFinal" || content == "Tfinal")
+                T = val;
+            else if (content == "N" || content == "nParticles")
+                N = int(val);
+        	else
+        		std::cerr << "Unexpected content \"" << content << "\" in ini file. Please provide an appropriate ini file" << std::endl;
+        }
+        y0 = y0Prime*L;
+        z0 = z0Prime*H;
+        iniFile.close();
+    }
+    else
+	{
+		std::cerr << "Unable to open ini file !" << std::endl;
+	}
+}
+
 double GetPhi(double xsi, double xsi0)
 {
 	int Chi = (xsi < xsi0);

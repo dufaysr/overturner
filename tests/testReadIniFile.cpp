@@ -11,8 +11,8 @@ namespace constants
 void ReadIniFile(std::string filename)
 {
 	std::ifstream iniFile(filename.c_str(), std::ios::in);
-    if(iniFile)
-    {
+    assert(iniFile)
+    
         std::string content, tmp, value;
         char* pEnd;
         while(std::getline(iniFile, content,' '))
@@ -57,11 +57,6 @@ void ReadIniFile(std::string filename)
         constants::y0 = constants::y0Prime*constants::L;
         constants::z0 = constants::z0Prime*constants::H;
         iniFile.close();
-    }
-    else
-	{
-		std::cerr << "Unable to open ini file !" << std::endl;
-	}
 }
 
 using namespace constants;

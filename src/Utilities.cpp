@@ -59,7 +59,10 @@ void ReadIniFile(std::string filename)
                 	}
                 }
                 else
+                {
                     std::cerr << "Unexpected nonnumeric character in \"" << value << "\" : cannot interpret char \"" << pEnd[0] << "\"." << std::endl;
+                	abort();
+                }
             	pEnd = pEndtmp;
             }
         	if (content == "Kh")
@@ -96,6 +99,7 @@ void ReadIniFile(std::string filename)
     else
 	{
 		std::cerr << "Unable to open ini file !" << std::endl;
+		abort();
 	}
 }
 

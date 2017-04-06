@@ -72,7 +72,8 @@ void Field::Print(std::string filename) const
     }
     else
     {
-        std::cout << "Unable to open file " << filename << "\n";
+        std::cerr << "Unable to open file " << filename << "\n";
+        abort();
     }
 }
 

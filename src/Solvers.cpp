@@ -19,38 +19,73 @@ Solver::Solver(int N, double yStart, double zStart, double dt, double T):
 	wiener(0.0,1.0)
 {}
 
-Solver::Solver(int N, double* yStart, double* zStart, double dt, double T):
-	mParticles(N,yStart,zStart), mFinalTime(T), mDt(dt), 
+Solver::Solver(int N, double* yStart, double* zStart, int n, double dt, double T):
+	mParticles(N,yStart,zStart,n), mFinalTime(T), mDt(dt), 
 	seed(std::chrono::system_clock::now().time_since_epoch().count()),
 	generator(seed),
 	wiener(0.0,1.0)
 {}
 
-Solver::Solver(Particles2D particles, double dt, double T):
+Solver::Solver(int N, double* yStart, double* zStart, int ny, int nz, double dt, double T):
+	mParticles(N,yStart,zStart,ny,nz), mFinalTime(T), mDt(dt), 
+	seed(std::chrono::system_clock::now().time_since_epoch().count()),
+	generator(seed),
+	wiener(0.0,1.0)
+{}
+
+Solver::Solver(const Particles2D& particles, double dt, double T):
 	mParticles(particles), mFinalTime(T), mDt(dt), 
 	seed(std::chrono::system_clock::now().time_since_epoch().count()),
 	generator(seed),
 	wiener(0.0,1.0)
 {}
 
-Particles2D Solver::Run()
+Particles2D& Solver::Run()
 {
-	PrintParticles();
-	for(int i=0; i*mDt < mFinalTime; i++)
+	for (int i=0; i*mDt < mFinalTime; i++)
 	{
 		UpdatePosition();
-		PrintParticles();		
 	}
 	return mParticles;
 }
 
-Particles2D Solver::RunAdim()
+Particles2D& Solver::Run(std::string model, int nPrint)
 {
-	PrintParticles();
-	for(int i=0; i*mDt < mFinalTime; i++)
+	PrintParticles(model);
+	int i=0;
+	while (i*mDt < mFinalTime)
+	{
+		for (int j=0; j<nPrint; j++)
+		{
+			UpdatePosition();
+			i++;
+		}
+		PrintParticles(model); // print particles every 5 time steps
+	}
+	return mParticles;
+}
+
+Particles2D& Solver::RunAdim()
+{
+	for (int i=0; i*mDt < mFinalTime; i++)
 	{
 		UpdatePositionAdim();
-		PrintParticles();		
+	}
+	return mParticles;
+}
+
+Particles2D& Solver::RunAdim(std::string model, int nPrint)
+{
+	PrintParticles(model);
+	int i=0;
+	while (i*mDt < mFinalTime)
+	{
+		for (int j=0; j<nPrint; j++)
+		{
+			UpdatePositionAdim();
+			i++;
+		}
+		PrintParticles(model); // print particles every 5 time steps
 	}
 	return mParticles;
 }
@@ -63,9 +98,9 @@ void Solver::DisplayParticles() const
 	}
 }
 
-void Solver::PrintParticles() const
+void Solver::PrintParticles(std::string model) const
 {
-	mParticles.Print(); 
+	mParticles.Print(model); 
 }
 
 void Solver::PrintParameters() const
@@ -106,11 +141,15 @@ EMSolver::EMSolver(int N, double yStart, double zStart, double dt, double T):
 	Solver(N,yStart,zStart,dt,T)
 {}
 
-EMSolver::EMSolver(int N, double* yStart, double* zStart, double dt, double T):
-	Solver(N,yStart,zStart,dt,T)
+EMSolver::EMSolver(int N, double* yStart, double* zStart, int n, double dt, double T):
+	Solver(N,yStart,zStart,n,dt,T)
 {}
 
-EMSolver::EMSolver(Particles2D particles, double dt, double T):
+EMSolver::EMSolver(int N, double* yStart, double* zStart, int ny, int nz, double dt, double T):
+	Solver(N,yStart,zStart,ny,nz,dt,T)
+{}
+
+EMSolver::EMSolver(const Particles2D& particles, double dt, double T):
 	Solver(particles,dt,T)
 {}
 
@@ -147,11 +186,15 @@ BISolver::BISolver(int N, double yStart, double zStart, double dt, double T):
 	Solver(N,yStart,zStart,dt,T)
 {}
 
-BISolver::BISolver(int N, double* yStart, double* zStart, double dt, double T):
-	Solver(N,yStart,zStart,dt,T)
+BISolver::BISolver(int N, double* yStart, double* zStart, int n, double dt, double T):
+	Solver(N,yStart,zStart,n,dt,T)
 {}
 
-BISolver::BISolver(Particles2D particles, double dt, double T):
+BISolver::BISolver(int N, double* yStart, double* zStart, int ny, int nz, double dt, double T):
+	Solver(N,yStart,zStart,ny,nz,dt,T)
+{}
+
+BISolver::BISolver(const Particles2D& particles, double dt, double T):
 	Solver(particles,dt,T)
 {}
 

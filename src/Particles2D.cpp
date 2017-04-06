@@ -24,17 +24,46 @@ Particles2D::Particles2D(int nParticles, double yStart, double zStart)
 	}
 }
 
-Particles2D::Particles2D(int nParticles, double* yStart, double* zStart)
+Particles2D::Particles2D(int nParticles, double* yStart, double* zStart, int nPos)
 {
+	/*
+		nParticles particles at every couple (yStart[i], zStart[i]).
+		nPos is the length of yStart and zStart.
+	*/
 	mTime = 0.;
 	mN = nParticles;
-	mY = new double [nParticles];
-	mZ = new double [nParticles];
-
-	for (int i=0; i<nParticles; i++)
+	mY = new double [nPos*nParticles];
+	mZ = new double [nPos*nParticles];
+	for (int i=0; i<nPos; i++)
 	{
-		mY[i] = yStart[i];
-		mZ[i] = zStart[i];
+		for (int j=0; j<nParticles; j++)
+		{
+			mY[i*nParticles+j] = yStart[i];
+			mZ[i*nParticles+j] = zStart[i];
+		}
+	}
+}
+
+Particles2D::Particles2D(int nParticles, double* yStart, double* zStart, int ny, int nz)
+{
+	/*
+		nParticles particles at every couple (yStart[i], zStart[j]).
+		ny is the length of yStart and nz is the length of zStart.
+	*/
+	mTime = 0.;
+	mN = nParticles;
+	mY = new double [ny*nz*nParticles];
+	mZ = new double [ny*nz*nParticles];
+	for (int i=0; i<ny; i++)
+	{
+		for (int j=0; j<nz; j++)
+		{
+			for (int k=0; k<nParticles; k++)
+			{
+				mY[i*nz*nParticles+j*nParticles+k] = yStart[i];
+				mZ[i*nz*nParticles+j*nParticles+k] = zStart[j];
+			}
+		}
 	}
 }
 
@@ -100,9 +129,9 @@ double& Particles2D::SetTime(double T)
 }
 
 
-void Particles2D::Print() const
+void Particles2D::Print(std::string model) const
 {
-  	std::ofstream myfileT ("out/time.out", std::ios::out | std::ios::app);
+  	std::ofstream myfileT ("out/" + model + "time.out", std::ios::out | std::ios::app);
   	if (myfileT.is_open())
   	{
   		myfileT << mTime << "\n";
@@ -110,10 +139,11 @@ void Particles2D::Print() const
   	}
   	else
   	{
-  		std::cout << "Unable to open file Out/time.out\n";
+  		std::cout << "Unable to open file Out/" << model << "time.out\n";
+  		abort();
   	}
 
-	std::ofstream myfileY ("out/Y.out", std::ios::out | std::ios::app);
+	std::ofstream myfileY ("out/" + model + "Y.out", std::ios::out | std::ios::app);
 	if (myfileY.is_open())
   	{
   		myfileY.setf(std::ios::scientific);
@@ -127,10 +157,11 @@ void Particles2D::Print() const
   	}
   	else
   	{
-  		std::cout << "Unable to open file Out/Y.out\n";
+  		std::cerr << "Unable to open file Out" << model << "/Y.out\n";
+  		abort();
   	}
 
-  	std::ofstream myfileZ ("out/Z.out", std::ios::out | std::ios::app);
+  	std::ofstream myfileZ ("out/" + model + "Z.out", std::ios::out | std::ios::app);
 	if (myfileZ.is_open())
   	{	
   		myfileZ.setf(std::ios::scientific);
@@ -144,6 +175,7 @@ void Particles2D::Print() const
   	}
   	else
   	{
-  		std::cout << "Unable to open file Out/Z.out\n";
+  		std::cerr << "Unable to open file Out/" + model + "Z.out\n";
+  		abort();
   	}
 }

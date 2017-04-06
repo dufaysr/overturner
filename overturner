@@ -1,0 +1,12 @@
+#!/bin/bash
+
+if [ -z $1 ]; then
+	echo "Please provide a model name"
+else
+	if [ ! -e out/$1 ]; then
+		mkdir out/$1
+	else
+		rm *.out
+	fi
+	make run MODEL=$1
+fi

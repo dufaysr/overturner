@@ -11,6 +11,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <cassert>
 
 class Particles2D
 {
@@ -20,7 +21,8 @@ class Particles2D
 		double *mY, *mZ;
 
 		Particles2D(int nParticles, double yStart, double zStart);
-		Particles2D(int nParticles, double* yStart, double* zStart);
+		Particles2D(int nParticles, double* yStart, double* zStart, int nPos);
+		Particles2D(int nParticles, double* yStart, double* zStart, int ny, int nz);
 		Particles2D(const Particles2D& otherParticles);
 		~Particles2D();
 		double GetY(int ithParticle) const; // 1-based indexing
@@ -29,7 +31,7 @@ class Particles2D
 		double& SetY(int ithParticle);
 		double& SetZ(int ithParticle);
 		double& SetTime(double T);
-		void Print() const;
+		void Print(std::string model) const;
 };
 
 #endif

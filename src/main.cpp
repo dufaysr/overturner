@@ -16,9 +16,18 @@
 #include "Estimator.hpp"
 
 using namespace constants;
-int main()
+int main(int argc, char *argv[])
 {
-	ReadIniFile("in/model1.in");
+	if (argc == 2)
+	{
+		std::string model = argv[1];
+		ReadIniFile("in/" + model + ".in");
+	}
+	else
+	{
+		std::cerr << "Please provide an input file !" << std::endl;
+		return 0;
+	}
 
 	std::cout << "Kh = " << Kh << "\n";
     std::cout << "Kv1 = " << Kv1 << "\n";

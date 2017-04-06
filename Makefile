@@ -14,7 +14,7 @@ HEADDIR = src
 LIBDIR = lib
 BINDIR = bin
 
-EXEC=overturner
+EXEC=overturner.exe
 
 SRC= $(wildcard $(SRCDIR)/*.cpp)
 OBJ= $(SRC:$(SRCDIR)/%.cpp=$(LIBDIR)/%.o)
@@ -22,7 +22,7 @@ OBJ= $(SRC:$(SRCDIR)/%.cpp=$(LIBDIR)/%.o)
 all: $(BINDIR)/$(EXEC)
 
 run: all
-	./$(BINDIR)/$(EXEC)
+	./$(BINDIR)/$(EXEC) $(MODEL)
 
 $(BINDIR)/$(EXEC): $(OBJ)
 	$(CPP) -o $@ $^ $(LDFLAGS) $(GLLIBS)

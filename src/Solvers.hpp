@@ -28,14 +28,17 @@ class Solver
 
 	public:
 		Solver(int N, double yStart, double zStart, double dt, double T);
-		Solver(int N, double* yStart, double* zStart, double dt, double T);
-		Solver(Particles2D particles, double dt, double T);
+		Solver(int N, double* yStart, double* zStart, int n, double dt, double T);
+		Solver(int N, double* yStart, double* zStart, int ny, int nz, double dt, double T);
+		Solver(const Particles2D& particles, double dt, double T);
 		virtual void UpdatePosition() =0;		// Pure virtual function
 		virtual void UpdatePositionAdim() =0;	// Pure virtual function
-		Particles2D Run();
-		Particles2D RunAdim();
+		Particles2D& Run();
+		Particles2D& Run(std::string model, int nPrint = 5);
+		Particles2D& RunAdim();
+		Particles2D& RunAdim(std::string model, int nPrint = 5);
 		void DisplayParticles() const;
-		void PrintParticles() const;
+		void PrintParticles(std::string model) const;
 		void PrintParameters() const;
 		void TestWiener();
 };
@@ -45,8 +48,9 @@ class EMSolver : public Solver
 {
 	public:
 		EMSolver(int N, double yStart, double zStart, double dt, double T);
-		EMSolver(int N, double* yStart, double* zStart, double dt, double T);
-		EMSolver(Particles2D particles, double dt, double T);
+		EMSolver(int N, double* yStart, double* zStart, int n, double dt, double T);
+		EMSolver(int N, double* yStart, double* zStart, int ny, int nz, double dt, double T);
+		EMSolver(const Particles2D& particles, double dt, double T);
 		void UpdatePosition();
 		void UpdatePositionAdim();
 };
@@ -56,8 +60,9 @@ class BISolver : public Solver
 {
 	public:
 		BISolver(int N, double yStart, double zStart, double dt, double T);
-		BISolver(int N, double* yStart, double* zStart, double dt, double T);
-		BISolver(Particles2D particles, double dt, double T);
+		BISolver(int N, double* yStart, double* zStart, int n, double dt, double T);
+		BISolver(int N, double* yStart, double* zStart, int ny, int nz, double dt, double T);
+		BISolver(const Particles2D& particles, double dt, double T);
 		void UpdatePosition();
 		void UpdatePositionAdim();
 };

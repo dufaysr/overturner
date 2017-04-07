@@ -1,7 +1,7 @@
 % close all
 
-Y = load('out/Y.out');
-Z = load('out/Z.out');
+Y = load('out/model/Y.out');
+Z = load('out/model/Z.out');
 
 L = 12e6;
 H = 4e3;

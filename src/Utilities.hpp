@@ -13,10 +13,12 @@
 #include <fstream>
 #include <string>
 #include <cstring>
+#include <iomanip>
+#include <ctime>
 
-namespace constants
+namespace parameters
 {
-	// default model constants. Other models can be loaded using an ini file with readIniFile().
+	// model parameters have global scope
 	extern double Kh;
 	extern double Kv1;
 	extern double Kv2;
@@ -28,12 +30,14 @@ namespace constants
 	extern double z0Prime;
 	extern double z0;
 	extern double Psi;
-	extern int N;
+	extern int Nloc;
 	extern double dt;
 	extern double T;
+	extern double dtPrime;
+	extern double TPrime;
 }
 
-void ReadIniFile(std::string filename);
+void ReadIniFile(std::string model);
 double GetPhi(double xsi, double xsi0);
 double GetdPhi(double xsi, double xsi0);
 double GetV(double y, double z);

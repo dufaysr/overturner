@@ -27,12 +27,14 @@ run: all
 $(BINDIR)/$(EXEC): $(OBJ)
 	$(CPP) -o $@ $^ $(LDFLAGS) $(GLLIBS)
 
-$(LIBDIR)/Particles2D.o : $(SRCDIR)/Particles2D.hpp 
-$(LIBDIR)/Solvers.o: $(SRCDIR)/Particles2D.hpp $(SRCDIR)/Particles2D.cpp $(SRCDIR)/Solvers.hpp $(SRCDIR)/Utilities.hpp $(SRCDIR)/Utilities.cpp
-$(LIBDIR)/Utilities.o:  $(SRCDIR)/Utilities.hpp
+$(LIBDIR)/Particles2D.o : $(SRCDIR)/Particles2D.hpp
 $(LIBDIR)/Field.o: $(SRCDIR)/Field.hpp
-$(LIBDIR)/Estimator.o: $(SRCDIR)/Estimator.hpp $(SRCDIR)/Field.hpp $(SRCDIR)/Field.cpp $(SRCDIR)/Particles2D.hpp $(SRCDIR)/Particles2D.cpp 
-$(LIBDIR)/main.o:  $(SRCDIR)/Utilities.hpp
+$(LIBDIR)/Utilities.o:  $(SRCDIR)/Utilities.hpp
+$(LIBDIR)/Solvers.o: $(SRCDIR)/Solvers.hpp $(LIBDIR)/Particles2D.o $(LIBDIR)/Utilities.o
+$(LIBDIR)/Estimator.o: $(SRCDIR)/Estimator.hpp $(LIBDIR)/Field.o $(LIBDIR)/Particles2D.o 
+$(LIBDIR)/studyCases.o: $(SRCDIR)/studyCases.hpp $(LIBDIR)/Solvers.o $(LIBDIR)/Estimator.o
+$(LIBDIR)/main.o:  $(LIBDIR)/studyCases.o
+
 
 $(LIBDIR)/%.o: $(SRCDIR)/%.cpp
 	$(CPP) -o $@ -c $< $(CPPFLAGS) $(GLLIBS)

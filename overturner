@@ -6,7 +6,7 @@ else
 	if [ ! -e out/$1 ]; then
 		mkdir out/$1
 	else
-		rm *.out
+		rm out/$1/*.out
 	fi
 	make run MODEL=$1
 fi

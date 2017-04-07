@@ -12,29 +12,29 @@
 #include "Solvers.hpp"
 
 /*-------------- Base Class Solver -----------------------*/
-Solver::Solver(int N, double yStart, double zStart, double dt, double T):
-	mParticles(N,yStart,zStart), mFinalTime(T), mDt(dt), 
+Solver::Solver(int Nloc, double yStart, double zStart, double dt, double T):
+	mParticles(Nloc,yStart,zStart), mDt(dt), mFinalTime(T), 
 	seed(std::chrono::system_clock::now().time_since_epoch().count()),
 	generator(seed),
 	wiener(0.0,1.0)
 {}
 
-Solver::Solver(int N, double* yStart, double* zStart, int n, double dt, double T):
-	mParticles(N,yStart,zStart,n), mFinalTime(T), mDt(dt), 
+Solver::Solver(int Nloc, double* yStart, double* zStart, int n, double dt, double T):
+	mParticles(Nloc,yStart,zStart,n), mDt(dt), mFinalTime(T), 
 	seed(std::chrono::system_clock::now().time_since_epoch().count()),
 	generator(seed),
 	wiener(0.0,1.0)
 {}
 
-Solver::Solver(int N, double* yStart, double* zStart, int ny, int nz, double dt, double T):
-	mParticles(N,yStart,zStart,ny,nz), mFinalTime(T), mDt(dt), 
+Solver::Solver(int Nloc, double* yStart, double* zStart, int ny, int nz, double dt, double T):
+	mParticles(Nloc,yStart,zStart,ny,nz), mDt(dt), mFinalTime(T), 
 	seed(std::chrono::system_clock::now().time_since_epoch().count()),
 	generator(seed),
 	wiener(0.0,1.0)
 {}
 
 Solver::Solver(const Particles2D& particles, double dt, double T):
-	mParticles(particles), mFinalTime(T), mDt(dt), 
+	mParticles(particles), mDt(dt), mFinalTime(T),
 	seed(std::chrono::system_clock::now().time_since_epoch().count()),
 	generator(seed),
 	wiener(0.0,1.0)
@@ -103,11 +103,6 @@ void Solver::PrintParticles(std::string model) const
 	mParticles.Print(model); 
 }
 
-void Solver::PrintParameters() const
-{
-
-}
-
 void Solver::TestWiener()
 {
 	const int nrolls=10000;  // number of experiments
@@ -137,16 +132,16 @@ void Solver::TestWiener()
 /*----------- Derived class from Solver : EMSolver ------------------*/
 /*------------ WRONG ! TO BE MODIFIED -------------------------------*/
 
-EMSolver::EMSolver(int N, double yStart, double zStart, double dt, double T):
-	Solver(N,yStart,zStart,dt,T)
+EMSolver::EMSolver(int Nloc, double yStart, double zStart, double dt, double T):
+	Solver(Nloc,yStart,zStart,dt,T)
 {}
 
-EMSolver::EMSolver(int N, double* yStart, double* zStart, int n, double dt, double T):
-	Solver(N,yStart,zStart,n,dt,T)
+EMSolver::EMSolver(int Nloc, double* yStart, double* zStart, int n, double dt, double T):
+	Solver(Nloc,yStart,zStart,n,dt,T)
 {}
 
-EMSolver::EMSolver(int N, double* yStart, double* zStart, int ny, int nz, double dt, double T):
-	Solver(N,yStart,zStart,ny,nz,dt,T)
+EMSolver::EMSolver(int Nloc, double* yStart, double* zStart, int ny, int nz, double dt, double T):
+	Solver(Nloc,yStart,zStart,ny,nz,dt,T)
 {}
 
 EMSolver::EMSolver(const Particles2D& particles, double dt, double T):

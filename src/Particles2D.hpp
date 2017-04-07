@@ -13,25 +13,19 @@
 #include <fstream>
 #include <cassert>
 
-class Particles2D
+struct Particles2D
 {
-	public:
-		int mN; // number of particles
-		double mTime;
-		double *mY, *mZ;
+	int mN, mNloc; // total number of particles, number of particles per initial position
+	double mTime;
+	double *mY, *mZ;
 
-		Particles2D(int nParticles, double yStart, double zStart);
-		Particles2D(int nParticles, double* yStart, double* zStart, int nPos);
-		Particles2D(int nParticles, double* yStart, double* zStart, int ny, int nz);
-		Particles2D(const Particles2D& otherParticles);
-		~Particles2D();
-		double GetY(int ithParticle) const; // 1-based indexing
-		double GetZ(int ithParticle) const; // 1-based indexing
-		double GetN() const;
-		double& SetY(int ithParticle);
-		double& SetZ(int ithParticle);
-		double& SetTime(double T);
-		void Print(std::string model) const;
+	Particles2D(int Nloc, double yStart, double zStart);
+	Particles2D(int Nloc, double* yStart, double* zStart, int n); // assume ny = nz = n
+	Particles2D(int Nloc, double* yStart, double* zStart, int ny, int nz);
+	Particles2D(const Particles2D& otherParticles);
+	~Particles2D();
+	double& SetTime(double T);
+	void Print(std::string model) const;
 };
 
 #endif

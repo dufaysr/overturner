@@ -20,16 +20,16 @@ class Solver
 {
 	protected:
 		Particles2D mParticles;
-		double mFinalTime;
 		double mDt;
+		double mFinalTime;
 		unsigned seed;
 		std::default_random_engine generator;
 		std::normal_distribution<double> wiener;
 
 	public:
-		Solver(int N, double yStart, double zStart, double dt, double T);
-		Solver(int N, double* yStart, double* zStart, int n, double dt, double T);
-		Solver(int N, double* yStart, double* zStart, int ny, int nz, double dt, double T);
+		Solver(int Nloc, double yStart, double zStart, double dt, double T);
+		Solver(int Nloc, double* yStart, double* zStart, int n, double dt, double T);
+		Solver(int Nloc, double* yStart, double* zStart, int ny, int nz, double dt, double T);
 		Solver(const Particles2D& particles, double dt, double T);
 		virtual void UpdatePosition() =0;		// Pure virtual function
 		virtual void UpdatePositionAdim() =0;	// Pure virtual function
@@ -39,7 +39,6 @@ class Solver
 		Particles2D& RunAdim(std::string model, int nPrint = 5);
 		void DisplayParticles() const;
 		void PrintParticles(std::string model) const;
-		void PrintParameters() const;
 		void TestWiener();
 };
 
@@ -47,9 +46,9 @@ class Solver
 class EMSolver : public Solver
 {
 	public:
-		EMSolver(int N, double yStart, double zStart, double dt, double T);
-		EMSolver(int N, double* yStart, double* zStart, int n, double dt, double T);
-		EMSolver(int N, double* yStart, double* zStart, int ny, int nz, double dt, double T);
+		EMSolver(int Nloc, double yStart, double zStart, double dt, double T);
+		EMSolver(int Nloc, double* yStart, double* zStart, int n, double dt, double T);
+		EMSolver(int Nloc, double* yStart, double* zStart, int ny, int nz, double dt, double T);
 		EMSolver(const Particles2D& particles, double dt, double T);
 		void UpdatePosition();
 		void UpdatePositionAdim();

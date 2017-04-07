@@ -10,30 +10,32 @@
 #include <cassert>
 #include "Particles2D.hpp"
 
-Particles2D::Particles2D(int nParticles, double yStart, double zStart)
+Particles2D::Particles2D(int Nloc, double yStart, double zStart)
 {
 	mTime = 0.;
-	mN = nParticles;
-	mY = new double [nParticles];
-	mZ = new double [nParticles];
+	mN = Nloc;
+	mNloc = Nloc;
+	mY = new double [mN];
+	mZ = new double [mN];
 
-	for (int i=0; i<nParticles; i++)
+	for (int i=0; i<Nloc; i++)
 	{
 		mY[i] = yStart;
 		mZ[i] = zStart;
 	}
 }
 
-Particles2D::Particles2D(int nParticles, double* yStart, double* zStart, int nPos)
+Particles2D::Particles2D(int Nloc, double* yStart, double* zStart, int n)
 {
 	/*
-		nParticles particles at every couple (yStart[i], zStart[i]).
-		nPos is the length of yStart and zStart.
+		Nloc particles at every couple (yStart[i], zStart[i]).
+		n is the length of yStart and zStart.
 	*/
 	mTime = 0.;
-	mN = nParticles;
-	mY = new double [nPos*nParticles];
-	mZ = new double [nPos*nParticles];
+	mN = Nloc*n;
+	mNloc = Nloc;
+	mY = new double [mN];
+	mZ = new double [mN];
 	for (int i=0; i<nPos; i++)
 	{
 		for (int j=0; j<nParticles; j++)
@@ -44,16 +46,17 @@ Particles2D::Particles2D(int nParticles, double* yStart, double* zStart, int nPo
 	}
 }
 
-Particles2D::Particles2D(int nParticles, double* yStart, double* zStart, int ny, int nz)
+Particles2D::Particles2D(int Nloc, double* yStart, double* zStart, int ny, int nz)
 {
 	/*
-		nParticles particles at every couple (yStart[i], zStart[j]).
+		Nloc particles at every couple (yStart[i], zStart[j]).
 		ny is the length of yStart and nz is the length of zStart.
 	*/
 	mTime = 0.;
-	mN = nParticles;
-	mY = new double [ny*nz*nParticles];
-	mZ = new double [ny*nz*nParticles];
+	mN = Nloc*ny*nz;
+	mNloc = Nloc;
+	mY = new double [mN];
+	mZ = new double [mN];
 	for (int i=0; i<ny; i++)
 	{
 		for (int j=0; j<nz; j++)
@@ -70,6 +73,7 @@ Particles2D::Particles2D(int nParticles, double* yStart, double* zStart, int ny,
 Particles2D::Particles2D(const Particles2D& otherParticles)
 {
 	mN = otherParticles.mN;
+	mNloc = otherParticles.mNloc;
 	mTime = otherParticles.mTime;
 	mY = new double[mN];
 	mZ = new double[mN];
@@ -85,49 +89,6 @@ Particles2D::~Particles2D()
 	delete[] mY;
 	delete[] mZ;
 }
-
-double Particles2D::GetY(int ithParticle) const
-{
-	// 0-based indexing
-	assert (ithParticle > -1);
-	assert (ithParticle < mN);
-	return mY[ithParticle];
-}
-
-double Particles2D::GetZ(int ithParticle) const
-{
-	// 0-based indexing
-	assert (ithParticle > -1);
-	assert (ithParticle < mN);
-	return mZ[ithParticle];
-}
-
-double Particles2D::GetN() const
-{
-	return mN;
-}
-
-double& Particles2D::SetY(int ithParticle)
-{
-	// 0-based indexing
-	assert (ithParticle > -1);
-	assert (ithParticle < mN);
-	return mY[ithParticle];
-}
-
-double& Particles2D::SetZ(int ithParticle)
-{
-	// 0-based indexing
-	assert (ithParticle > -1);
-	assert (ithParticle < mN);
-	return mZ[ithParticle];
-}
-
-double& Particles2D::SetTime(double T)
-{
-	return mTime;
-}
-
 
 void Particles2D::Print(std::string model) const
 {

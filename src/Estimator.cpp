@@ -14,7 +14,11 @@ mDimy(dimy), mDimz(dimz), mEstimator(dimy,dimz)
 
 void Estimator::Print(std::string filename) const
 {
-	mEstimator.Print(filename);
+	std::ofstream f = openOutputFile(filename);
+	f.setf(std::ios::scientific); f.precision(10);
+
+	mEstimator.Print(f);
+    f.close();
 }
 
 KernelEstimator::KernelEstimator(int dimy, int dimz, double lambda, std::string kernelFunction):
@@ -81,7 +85,11 @@ mDimy(dimy), mDimz(dimz), mEstimator(dimy*dimz, dimy*dimz)
 
 void GlobalEstimator::Print(std::string filename) const
 {
-	mEstimator.Print(filename);
+	std::ofstream f = openOutputFile(filename);
+	f.setf(std::ios::scientific); f.precision(10);
+
+	mEstimator.Print(f);
+    f.close();
 }
 
 GlobalKernelEstimator::GlobalKernelEstimator(int dimy, int dimz, double lambda, std::string kernelFunction):
@@ -111,7 +119,7 @@ void GlobalKernelEstimator::Estimate(const Particles2D& particles)
 {
 	double dy = 1./mDimy;
 	double dz = 1./mDimz;
-	int N = particles.mN;
+	int Nloc = particles.mNloc;
 	for (int iyStart=0; iyStart<mDimy; iyStart++)
 	{
 		for (int izStart=0; izStart<mDimz; izStart++)
@@ -120,13 +128,13 @@ void GlobalKernelEstimator::Estimate(const Particles2D& particles)
 			{
 				for (int izEnd=0; izEnd<mDimz; izEnd++)
 				{	
-					for (int n=0; n<N; n++)
+					for (int n=0; n<Nloc; n++)
 					{
 						mEstimator(iyStart*mDimz+izStart,iyEnd*mDimz+izEnd) += 
-							mKernel((particles.mY[iyStart*mDimz*N+izStart*N+n]-(iyEnd+.5)*dy)/mLambda,
-							 		(particles.mZ[iyStart*mDimz*N+izStart*N+n]-(iZEnd+.5)*dz)/mLambda);
+							mKernel((particles.mY[iyStart*mDimz*Nloc+izStart*Nloc+n]-(iyEnd+.5)*dy)/mLambda,
+							 		(particles.mZ[iyStart*mDimz*Nloc+izStart*Nloc+n]-(izEnd+.5)*dz)/mLambda);
 					}
-					mEstimator(iyStart*mDimz+izStart,iyEnd*mDimz+izEnd) /= (N*pow(mLambda,2));
+					mEstimator(iyStart*mDimz+izStart,iyEnd*mDimz+izEnd) *= (dy*dz)/(Nloc*pow(mLambda,2));
 				}
 			}
 		}
@@ -140,20 +148,20 @@ GlobalEstimator(dimy,dimz)
 void GlobalBoxEstimator::Estimate(const Particles2D& particles)
 {
 	int iyStart, izStart, iyEnd, izEnd;
-	int N = particles.mN;
+	int Nloc = particles.mNloc;
 	for (iyStart=0; iyStart<mDimy; iyStart++)
 	{
 		for (izStart=0; izStart<mDimz; izStart++)
 		{
-			for (int n=0; n<N; n++)
+			for (int n=0; n<Nloc; n++)
 			{
-				iyEnd = std::min(int(particles.mY[iyStart*mDimz*N+izStart*N+n]*mDimy),mDimy-1);
-				izEnd = std::min(int(particles.mZ[iyStart*mDimz*N+izStart*N+n]*mDimz),mDimz-1);
+				iyEnd = std::min(int(particles.mY[iyStart*mDimz*Nloc+izStart*Nloc+n]*mDimy),mDimy-1);
+				izEnd = std::min(int(particles.mZ[iyStart*mDimz*Nloc+izStart*Nloc+n]*mDimz),mDimz-1);
 				mEstimator(iyStart*mDimz+izStart,iyEnd*mDimz+izEnd) += 1.;
 			}
 		}
 	}
-	mEstimator /= N;
+	mEstimator /= Nloc;
 }
 
 double Gaussian(double y, double z)

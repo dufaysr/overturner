@@ -77,6 +77,18 @@ void Field::Print(std::string filename) const
     }
 }
 
+void Field::Print(std::ofstream& f) const
+{
+    for(int j=0; j<mDim2; j++)
+    {
+        for(int i=0; i<mDim1; i++)
+        {
+            f << mData[i][j] << " ";
+        }
+        f << "\n";
+    }
+}
+
 void Field::Display() const
 {
     for(int j=0; j<mDim2; j++)
@@ -144,22 +156,38 @@ Field& Field::operator=(const Field& f)
     return *this;
 }
 
+Field& Field::operator*=(const double a)
+{
+    *this = *this*a;
+    return *this;
+}
+
 Field& Field::operator/=(const double a)
 {
     *this = *this/a;
     return *this;
 }
 
-Field operator/(const Field& f, const double a)
+Field operator*(const Field& f, const double a)
 {
     Field fout(f);
     for (int i=0; i<f.GetDim1(); i++)
     {
         for (int j=0; j<f.GetDim2(); j++)
         {
-            fout(i,j) /= a;
+            fout(i,j) *= a;
         }
     }
 
     return fout;
+}
+
+Field operator*(const double a, const Field& f)
+{
+    return f*a;
+}
+
+Field operator/(const Field& f, const double a)
+{
+    return f*(1./a);
 }

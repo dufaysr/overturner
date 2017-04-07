@@ -14,6 +14,7 @@
 #include <algorithm>
 #include "Particles2D.hpp"
 #include "Field.hpp"
+#include "Utilities.hpp"
 
 class Estimator
 {
@@ -23,6 +24,7 @@ class Estimator
 
 	public:
 		Estimator(int dimy, int dimz);
+		virtual ~Estimator() {}
 		virtual void Estimate(const Particles2D& particles) =0;
 		void Print(std::string filename) const;
 };
@@ -54,6 +56,7 @@ class GlobalEstimator
 
 	public:
 		GlobalEstimator(int dimy, int dimz);
+		virtual ~GlobalEstimator() {}
 		virtual void Estimate(const Particles2D& particles) =0;
 		void Print(std::string filename) const;
 };

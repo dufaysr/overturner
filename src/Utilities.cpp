@@ -9,99 +9,18 @@
 #include "Utilities.hpp"
 
 
-namespace constants
+namespace parameters
 {
-	// default model constants. Other models can be loaded using an ini file with readIniFile().
-	double Kh = 1e2;
-	double Kv1 = 1e-1;
-	double Kv2 = 5e-5;
-	double Kv3 = 1e-3;
-	double H = 4e3;
-	double L = 12e6;
-	double y0Prime = .9;
-	double y0 = y0Prime*L;
-	double z0Prime = 7./8.;
-	double z0 = z0Prime*H;
-	double Psi = 5;
-	int N = 10;
-	double dt = 3600*24.;
-	double T = 1000*365*dt;
+	double Kh, Kv1, Kv2, Kv3;
+	double H, L;
+	double y0Prime, z0Prime, y0, z0;
+	double Psi;
+    double dt, dtPrime;
+    double T, TPrime;
+	int Nloc;
 }
 
-using namespace constants;
-
-void ReadIniFile(std::string filename)
-{
-	std::ifstream iniFile(filename.c_str(), std::ios::in);
-    if(iniFile)
-    {
-        std::string content, tmp, value;
-        char *pEnd, *pEndtmp;
-        double val, tmpval;
-        while(std::getline(iniFile, content,' '))
-        {
-            std::getline(iniFile,tmp,' ');
-        	std::getline(iniFile, value);
-            val = strtod(value.c_str(), &pEnd);
-            while (pEnd[0])
-            {
-                if (pEnd[0] == '/')
-                    val /= strtod(&(pEnd[1]),&pEndtmp);
-                else if (pEnd[0] == '*')
-                {
-                	tmpval = strtod(&(pEnd[1]),&pEndtmp);
-                	if (tmpval)
-                		val *= tmpval;
-                	else if (strncmp("dt",&(pEnd[1]),2) || strncmp("Dt",&(pEnd[1]),2))
-                	{
-                		val *= dt;
-                		pEndtmp += 2;
-                	}
-                }
-                else
-                {
-                    std::cerr << "Unexpected nonnumeric character in \"" << value << "\" : cannot interpret char \"" << pEnd[0] << "\"." << std::endl;
-                	abort();
-                }
-            	pEnd = pEndtmp;
-            }
-        	if (content == "Kh")
-        	  	Kh = val;
-        	else if (content == "Kv1")
-        		Kv1 = val;
-        	else if (content == "Kv2")
-        		Kv2 = val;
-        	else if (content == "Kv3")
-        		Kv3 = val;
-        	else if (content == "H")
-        		H = val;
-        	else if (content == "L")
-        		L = val;
-        	else if (content == "y0Prime")
-        		y0Prime = val;
-        	else if (content == "z0Prime")
-        		z0Prime = val;
-        	else if (content == "Psi")
-        		Psi = val;
-            else if (content == "dt" || content == "Dt")
-                dt = val;
-            else if (content == "T" || content == "tFinal" || content == "Tfinal")
-                T = val;
-            else if (content == "N" || content == "nParticles")
-                N = int(val);
-        	else
-        		std::cerr << "Unexpected content \"" << content << "\" in ini file. Please provide an appropriate ini file" << std::endl;
-        }
-        y0 = y0Prime*L;
-        z0 = z0Prime*H;
-        iniFile.close();
-    }
-    else
-	{
-		std::cerr << "Unable to open ini file !" << std::endl;
-		abort();
-	}
-}
+using namespace parameters;
 
 double GetPhi(double xsi, double xsi0)
 {
@@ -128,11 +47,7 @@ double GetVPrime(double yPrime, double zPrime)
 {
 	double y = yPrime*L;
 	double z = zPrime*H;
-	int ChiDomain = (y >= 0 && y <= L && z >= 0 && z <= H);
-	return ChiDomain*.25*H*(-GetPhi(y,y0)*GetdPhi(z,z0)
-		+ GetPhi(y,y0)*GetdPhi(H-z,H-z0)
-		+ GetPhi(L-y,L-y0)*GetdPhi(H-z,H-z0)
-		- GetPhi(L-y,L-y0)*GetdPhi(z,z0));
+	return H*GetV(y,z)/Psi;
 }
 
 double GetW(double y, double z)
@@ -148,11 +63,7 @@ double GetWPrime(double yPrime, double zPrime)
 {
 	double y = yPrime*L;
 	double z = zPrime*H;
-	int ChiDomain = (y >= 0 && y <= L && z >= 0 && z <= H);
-	return ChiDomain*.25*L*(GetdPhi(y,y0)*GetPhi(z,z0)
-		+ GetdPhi(y,y0)*GetPhi(H-z,H-z0)
-		- GetdPhi(L-y,L-y0)*GetPhi(H-z,H-z0)
-		- GetdPhi(L-y,L-y0)*GetPhi(z,z0));
+	return L*GetW(y,z)/Psi;
 }
 
 double Kv(double y, double z)
@@ -176,4 +87,160 @@ double PehInv(double yPrime, double zPrime)
 {
 	int ChiDomain = zPrime >= 0 && zPrime <= 1 && yPrime >= 0 && yPrime <= 1;
 	return ChiDomain*Kh*H/(Psi*L);
+}
+
+void ReadIniFile(std::string model)
+{
+    std::string filename = "in/" + model + ".in";
+    std::ifstream iniFile(filename.c_str(), std::ios::in);
+    if(iniFile)
+    {
+        std::string content, tmp, value;
+        char *pEnd, *pEndtmp;
+        double val, tmpval;
+        while(std::getline(iniFile, content,' '))
+        {
+            std::getline(iniFile,tmp,' ');
+            std::getline(iniFile, value);
+            val = strtod(value.c_str(), &pEnd);
+            while (pEnd[0])
+            {
+                if (pEnd[0] == '/')
+                    val /= strtod(&(pEnd[1]),&pEndtmp);
+                else if (pEnd[0] == '*')
+                {
+                    tmpval = strtod(&(pEnd[1]),&pEndtmp);
+                    if (tmpval)
+                        val *= tmpval;
+                    else if (strncmp("dt",&(pEnd[1]),2) || strncmp("Dt",&(pEnd[1]),2))
+                    {
+                        val *= dt;
+                        pEndtmp += 2;
+                    }
+                }
+                else
+                {
+                    std::cerr << "Unexpected nonnumeric character in \"" << value << "\" : cannot interpret char \"" << pEnd[0] << "\"." << std::endl;
+                    abort();
+                }
+                pEnd = pEndtmp;
+            }
+            if (content == "Kh")
+                Kh = val;
+            else if (content == "Kv1")
+                Kv1 = val;
+            else if (content == "Kv2")
+                Kv2 = val;
+            else if (content == "Kv3")
+                Kv3 = val;
+            else if (content == "H")
+                H = val;
+            else if (content == "L")
+                L = val;
+            else if (content == "y0Prime")
+                y0Prime = val;
+            else if (content == "z0Prime")
+                z0Prime = val;
+            else if (content == "Psi")
+                Psi = val;
+            else if (content == "dt" || content == "Dt")
+                dt = val;
+            else if (content == "T" || content == "tFinal" || content == "Tfinal")
+                T = val;
+            else if (content == "Nloc")
+                Nloc = int(val);
+            else{
+                std::cerr << "Unexpected content \"" << content << "\" in ini file. Please provide an appropriate ini file" << std::endl;
+                abort();
+            }
+        }
+        y0 = y0Prime*L;
+        z0 = z0Prime*H;
+        dtPrime = dt*Psi/(L*H);
+        TPrime = T*Psi/(L*H);
+        iniFile.close();
+
+        std::ofstream fInfo("out/" + model + "/info.out", std::ios::out | std::ios::trunc);
+        if (fInfo.is_open())
+        {
+            auto t = std::time(nullptr);
+            auto tm = *std::localtime(&t);
+            fInfo << "File generated on " << std::put_time(&tm, "%d-%m-%Y at %Hh %Mm %Ss") << "\n";
+            fInfo << "Model loaded is " << filename << ".in\n";
+            fInfo << "The values used are :\n";
+            fInfo << "\tKh = " << Kh << "\n"; 
+            fInfo << "\tKv1 = " << Kv1 << "\n"; 
+            fInfo << "\tKv2 = " << Kv2 << "\n"; 
+            fInfo << "\tKv3 = " << Kv3 << "\n"; 
+            fInfo << "\tH = " << H << "\n"; 
+            fInfo << "\tL = " << L << "\n"; 
+            fInfo << "\ty0Prime = " << y0Prime << "\n"; 
+            fInfo << "\ty0 = " << y0 << "\n"; 
+            fInfo << "\tz0Prime = " << z0Prime << "\n"; 
+            fInfo << "\tz0 = " << z0 << "\n"; 
+            fInfo << "\tPsi = " << Psi << "\n"; 
+            fInfo << "\tNloc = " << Nloc << "\n"; 
+            fInfo << "\tdt = " << dt << "\n"; 
+            fInfo << "\tdtPrime = " << dtPrime << "\n"; 
+            fInfo << "\tTPrime = " << TPrime << "\n"; 
+            fInfo.close();
+        }
+        else
+        {
+            std::cerr << "Unable to open file Out/info.out\n";
+            abort();
+        }
+    }
+    else
+    {
+        std::cerr << "Unable to open ini file !" << std::endl;
+        abort();
+    }
+}
+
+std::ofstream openOutputFile(std::string filename)
+{
+    std::ifstream f(filename.c_str());
+    bool already_exist = f.is_open();
+    f.close();
+    if (already_exist)
+    {
+        std::string action;
+        std::cout << "\nFile \"" << filename << "\" already exists." << std::endl;
+        std::cout << "Do you want to overwrite this file (type \"o\") or create a new one (type \"c\") ? ";
+        std::cin >> action;
+        while (action!="o" && action!="c" )
+        {
+            std::cout << "Choice is incorrect. Type \"o\" to overwrite the file or \"c\" to create a new one : ";
+            std::cin >> action;
+        }
+        if(action=="o")
+        {
+            std::ofstream fout(filename.c_str(), std::ios::out | std::ios::trunc);
+            if (fout)
+                return  fout;
+            else
+            {
+                std::cerr << "Did not manage to overwrite the file." << std::endl;
+                abort();
+            }
+        }
+        else
+        {
+            std::string new_output_file;
+            std::cout << "Type the new file name : " << std::endl;
+            std::cin >> new_output_file;
+            return openOutputFile(new_output_file);
+        }
+    }
+    else
+    {
+        std::ofstream fout(filename.c_str(), std::ios::out | std::ios::trunc);
+        if (fout)
+            return fout;
+        else{
+            std::cerr << "Did not manage to open the file." << std::endl;
+            abort();
+        }
+    }   
 }

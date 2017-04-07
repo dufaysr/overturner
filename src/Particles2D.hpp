@@ -24,8 +24,6 @@ struct Particles2D
 	Particles2D(int Nloc, double* yStart, double* zStart, int ny, int nz);
 	Particles2D(const Particles2D& otherParticles);
 	~Particles2D();
-	double& SetTime(double T);
-	void Print(std::string model) const;
 };
 
 #endif

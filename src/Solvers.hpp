@@ -36,7 +36,7 @@ class Solver
 		Particles2D& RunAdim();
 		Particles2D& RunAdim(std::string model, int nPrint = 5);
 		void DisplayParticles() const;
-		void PrintParticles(std::string model) const;
+		void PrintParticles(std::ofstream& fT, std::ofstream& fY, std::ofstream& fZ) const;
 		void TestWiener();
 };
 

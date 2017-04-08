@@ -14,6 +14,7 @@
 #include <algorithm>
 #include "Particles2D.hpp"
 #include "Field.hpp"
+#include "Utilities.hpp"
 
 class Estimator
 {

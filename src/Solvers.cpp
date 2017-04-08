@@ -53,7 +53,13 @@ Particles2D& Solver::Run()
 
 Particles2D& Solver::Run(std::string model, int nPrint)
 {
-	PrintParticles(model);
+	std::ofstream fT = openOutputFile("out/" + model + "/time.out");
+	std::ofstream fY = openOutputFile("out/" + model + "/Y.out");
+	fY.setf(std::ios::scientific); fY.precision(10);
+	std::ofstream fZ = openOutputFile("out/" + model + "/Z.out");
+	fZ.setf(std::ios::scientific); fZ.precision(10);
+
+	PrintParticles(fT, fY, fZ);
 	int i=0;
 	while (i*dt < T)
 	{
@@ -62,8 +68,11 @@ Particles2D& Solver::Run(std::string model, int nPrint)
 			UpdatePosition();
 			i++;
 		}
-		PrintParticles(model); // print particles every 5 time steps
+		PrintParticles(fT,fY,fZ); // print particles every 5 time steps
 	}
+
+	fT.close(); fY.close(); fZ.close();
+
 	return mParticles;
 }
 
@@ -78,7 +87,13 @@ Particles2D& Solver::RunAdim()
 
 Particles2D& Solver::RunAdim(std::string model, int nPrint)
 {
-	PrintParticles(model);
+	std::ofstream fT = openOutputFile("out/" + model + "/time.out");
+	std::ofstream fY = openOutputFile("out/" + model + "/Y.out");
+	fY.setf(std::ios::scientific); fY.precision(10);
+	std::ofstream fZ = openOutputFile("out/" + model + "/Z.out");
+	fZ.setf(std::ios::scientific); fZ.precision(10);
+
+	PrintParticles(fT, fY, fZ);
 	int i=0;
 	while (i*dtPrime < TPrime)
 	{
@@ -87,8 +102,11 @@ Particles2D& Solver::RunAdim(std::string model, int nPrint)
 			UpdatePositionAdim();
 			i++;
 		}
-		PrintParticles(model); // print particles every 5 time steps
+		PrintParticles(fT,fY,fZ); // print particles every 5 time steps
 	}
+
+	fT.close(); fY.close(); fZ.close();
+
 	return mParticles;
 }
 
@@ -100,9 +118,21 @@ void Solver::DisplayParticles() const
 	}
 }
 
-void Solver::PrintParticles(std::string model) const
+void Solver::PrintParticles(std::ofstream& fT, std::ofstream& fY, std::ofstream& fZ) const
 {
-	mParticles.Print(model); 
+	fT << mParticles.mTime << "\n";
+
+    for(int i=0; i<mParticles.mN; i++)
+    {
+    	fY << mParticles.mY[i] << " ";
+  	}
+  	fY << "\n";
+
+  	for(int i=0; i<mParticles.mN; i++)
+    {
+    	fZ << mParticles.mZ[i] << " ";
+  	}
+  	fZ << "\n";
 }
 
 void Solver::TestWiener()

@@ -14,7 +14,11 @@ mDimy(dimy), mDimz(dimz), mEstimator(dimy,dimz)
 
 void Estimator::Print(std::string filename) const
 {
-	mEstimator.Print(filename);
+	std::ofstream f = openOutputFile(filename);
+	f.setf(std::ios::scientific); f.precision(10);
+
+	mEstimator.Print(f);
+    f.close();
 }
 
 KernelEstimator::KernelEstimator(int dimy, int dimz, double lambda, std::string kernelFunction):
@@ -81,7 +85,11 @@ mDimy(dimy), mDimz(dimz), mEstimator(dimy*dimz, dimy*dimz)
 
 void GlobalEstimator::Print(std::string filename) const
 {
-	mEstimator.Print(filename);
+	std::ofstream f = openOutputFile(filename);
+	f.setf(std::ios::scientific); f.precision(10);
+
+	mEstimator.Print(f);
+    f.close();
 }
 
 GlobalKernelEstimator::GlobalKernelEstimator(int dimy, int dimz, double lambda, std::string kernelFunction):
@@ -126,7 +134,7 @@ void GlobalKernelEstimator::Estimate(const Particles2D& particles)
 							mKernel((particles.mY[iyStart*mDimz*Nloc+izStart*Nloc+n]-(iyEnd+.5)*dy)/mLambda,
 							 		(particles.mZ[iyStart*mDimz*Nloc+izStart*Nloc+n]-(izEnd+.5)*dz)/mLambda);
 					}
-					mEstimator(iyStart*mDimz+izStart,iyEnd*mDimz+izEnd) /= (Nloc*pow(mLambda,2));
+					mEstimator(iyStart*mDimz+izStart,iyEnd*mDimz+izEnd) *= (dy*dz)/(Nloc*pow(mLambda,2));
 				}
 			}
 		}

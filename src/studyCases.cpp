@@ -46,7 +46,7 @@ void StudyCaseConcentration(std::string model, std::string estimator, double ySt
 		std::cerr << "Unknown estimator type. Valid estimators are \"epanechnikov\", \"gaussian\" and \"box\"." << std::endl;
 		abort();
 	}
-	estim->Estimate(part);
+	estim->EstimateAdim(part);
 	std::cout << "3/3 : Writing in the files..." << std::endl;
 	estim->Print("out/" + model + "/" + estimator + ".out");
 	delete estim;
@@ -85,7 +85,7 @@ void StudyCaseTransitionProbabilities(std::string model, std::string estimator, 
 		std::cerr << "Unknown estimator type. Valid estimators are \"epanechnikov\", \"gaussian\" and \"box\"." << std::endl;
 		abort();
 	}
-	estim->Estimate(part);
+	estim->EstimateAdim(part);
 	std::cout << "4/4 : Writing in the files..." << std::endl;
 	estim->Print("out/" + model + "/global_" + estimator + ".out");
 	

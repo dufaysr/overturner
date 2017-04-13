@@ -26,6 +26,7 @@ class Estimator
 		Estimator(int dimy, int dimz);
 		virtual ~Estimator() {}
 		virtual void Estimate(const Particles2D& particles) =0;
+		virtual void EstimateAdim(const Particles2D& particles) =0;
 		void Print(std::string filename) const;
 };
 
@@ -39,6 +40,7 @@ class KernelEstimator : public Estimator
 		KernelEstimator(int dimy, int dimz, double lambda, std::string kernelFunction);
 		KernelEstimator(int dimy, int dimz, double lambda, double (*kernelFunction)(double y, double z));
 		void Estimate(const Particles2D& particles);
+		void EstimateAdim(const Particles2D& particles);
 };
 
 class BoxEstimator : public Estimator
@@ -46,6 +48,7 @@ class BoxEstimator : public Estimator
 	public:
 		BoxEstimator(int dimy, int dimz);
 		void Estimate(const Particles2D& particles);
+		void EstimateAdim(const Particles2D& particles);
 };
 
 class GlobalEstimator
@@ -58,6 +61,7 @@ class GlobalEstimator
 		GlobalEstimator(int dimy, int dimz);
 		virtual ~GlobalEstimator() {}
 		virtual void Estimate(const Particles2D& particles) =0;
+		virtual void EstimateAdim(const Particles2D& particles) =0;
 		void Print(std::string filename) const;
 };
 
@@ -71,6 +75,7 @@ class GlobalKernelEstimator : public GlobalEstimator
 		GlobalKernelEstimator(int dimy, int dimz, double lambda, std::string kernelFunction);
 		GlobalKernelEstimator(int dimy, int dimz, double lambda, double (*kernelFunction)(double y, double z));
 		void Estimate(const Particles2D& particles);
+		void EstimateAdim(const Particles2D& particles);
 };
 
 class GlobalBoxEstimator : public GlobalEstimator
@@ -78,6 +83,7 @@ class GlobalBoxEstimator : public GlobalEstimator
 	public:
 		GlobalBoxEstimator(int dimy, int dimz);
 		void Estimate(const Particles2D& particles);
+		void EstimateAdim(const Particles2D& particles);
 };
 
 double Gaussian(double y, double z);

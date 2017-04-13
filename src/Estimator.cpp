@@ -8,6 +8,8 @@
 
 #include "Estimator.hpp"
 
+using namespace parameters;
+
 Estimator::Estimator(int dimy, int dimz):
 mDimy(dimy), mDimz(dimz), mEstimator(dimy,dimz)
 {}
@@ -46,6 +48,24 @@ Estimator(dimy, dimz), mLambda(lambda), mKernel(kernelFunction)
 
 void KernelEstimator::Estimate(const Particles2D& particles)
 {
+	double dy = L/mDimy;
+	double dz = H/mDimz;
+	int N = particles.mN;
+	for (int i=0; i<mDimy; i++)
+	{
+		for (int j=0; j<mDimz; j++)
+		{
+			for (int n=0; n<N; n++)
+			{
+				mEstimator(i,j) += mKernel((particles.mY[n]-(i+.5)*dy)/mLambda, (particles.mZ[n]-(j+.5)*dz)/mLambda);
+			}
+			mEstimator(i,j) /= (N*pow(mLambda,2));
+		}
+	}
+}
+
+void KernelEstimator::EstimateAdim(const Particles2D& particles)
+{
 	double dy = 1./mDimy;
 	double dz = 1./mDimz;
 	int N = particles.mN;
@@ -67,6 +87,21 @@ Estimator(dimy,dimz)
 {}
 
 void BoxEstimator::Estimate(const Particles2D& particles)
+{
+	int i, j;
+	int N = particles.mN;
+	double dy = L/mDimy;
+	double dz = H/mDimz;
+	for (int n=0; n<N; n++)
+	{
+		i = std::min(int(particles.mY[n]/dy),mDimy-1);
+		j = std::min(int(particles.mZ[n]/dz),mDimz-1);
+		mEstimator(i,j) += 1.;
+	}
+	mEstimator /= N;
+}
+
+void BoxEstimator::EstimateAdim(const Particles2D& particles)
 {
 	int i, j;
 	int N = particles.mN;
@@ -117,6 +152,32 @@ GlobalEstimator(dimy, dimz), mLambda(lambda), mKernel(kernelFunction)
 
 void GlobalKernelEstimator::Estimate(const Particles2D& particles)
 {
+	double dy = L/mDimy;
+	double dz = H/mDimz;
+	int Nloc = particles.mNloc;
+	for (int iyStart=0; iyStart<mDimy; iyStart++)
+	{
+		for (int izStart=0; izStart<mDimz; izStart++)
+		{
+			for (int iyEnd=0; iyEnd<mDimy; iyEnd++)
+			{
+				for (int izEnd=0; izEnd<mDimz; izEnd++)
+				{	
+					for (int n=0; n<Nloc; n++)
+					{
+						mEstimator(iyStart*mDimz+izStart,iyEnd*mDimz+izEnd) += 
+							mKernel((particles.mY[iyStart*mDimz*Nloc+izStart*Nloc+n]-(iyEnd+.5)*dy)/mLambda,
+							 		(particles.mZ[iyStart*mDimz*Nloc+izStart*Nloc+n]-(izEnd+.5)*dz)/mLambda);
+					}
+					mEstimator(iyStart*mDimz+izStart,iyEnd*mDimz+izEnd) *= (dy*dz)/(Nloc*pow(mLambda,2));
+				}
+			}
+		}
+	}
+}
+
+void GlobalKernelEstimator::EstimateAdim(const Particles2D& particles)
+{
 	double dy = 1./mDimy;
 	double dz = 1./mDimz;
 	int Nloc = particles.mNloc;
@@ -146,6 +207,27 @@ GlobalEstimator(dimy,dimz)
 {}
 
 void GlobalBoxEstimator::Estimate(const Particles2D& particles)
+{
+	int iyStart, izStart, iyEnd, izEnd;
+	int Nloc = particles.mNloc;
+	double dy = L/mDimy;
+	double dz = H/mDimz;
+	for (iyStart=0; iyStart<mDimy; iyStart++)
+	{
+		for (izStart=0; izStart<mDimz; izStart++)
+		{
+			for (int n=0; n<Nloc; n++)
+			{
+				iyEnd = std::min(int(particles.mY[iyStart*mDimz*Nloc+izStart*Nloc+n]/dy),mDimy-1);
+				izEnd = std::min(int(particles.mZ[iyStart*mDimz*Nloc+izStart*Nloc+n]/dz),mDimz-1);
+				mEstimator(iyStart*mDimz+izStart,iyEnd*mDimz+izEnd) += 1.;
+			}
+		}
+	}
+	mEstimator /= Nloc;
+}
+
+void GlobalBoxEstimator::EstimateAdim(const Particles2D& particles)
 {
 	int iyStart, izStart, iyEnd, izEnd;
 	int Nloc = particles.mNloc;

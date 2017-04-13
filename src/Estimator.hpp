@@ -54,11 +54,11 @@ class BoxEstimator : public Estimator
 class GlobalEstimator
 {
 	protected:
-		int mDimy, mDimz;
+		int mDimy, mDimz, mNbox;
 		Field mEstimator;
 
 	public:
-		GlobalEstimator(int dimy, int dimz);
+		GlobalEstimator(int dimy, int dimz, int Nbox);
 		virtual ~GlobalEstimator() {}
 		virtual void Estimate(const Particles2D& particles) =0;
 		virtual void EstimateAdim(const Particles2D& particles) =0;
@@ -72,8 +72,8 @@ class GlobalKernelEstimator : public GlobalEstimator
 		double (*mKernel)(double y, double z);
 
 	public:
-		GlobalKernelEstimator(int dimy, int dimz, double lambda, std::string kernelFunction);
-		GlobalKernelEstimator(int dimy, int dimz, double lambda, double (*kernelFunction)(double y, double z));
+		GlobalKernelEstimator(int dimy, int dimz, int Nbox, double lambda, std::string kernelFunction);
+		GlobalKernelEstimator(int dimy, int dimz, int Nbox, double lambda, double (*kernelFunction)(double y, double z));
 		void Estimate(const Particles2D& particles);
 		void EstimateAdim(const Particles2D& particles);
 };
@@ -81,7 +81,7 @@ class GlobalKernelEstimator : public GlobalEstimator
 class GlobalBoxEstimator : public GlobalEstimator
 {
 	public:
-		GlobalBoxEstimator(int dimy, int dimz);
+		GlobalBoxEstimator(int dimy, int dimz, int Nbox);
 		void Estimate(const Particles2D& particles);
 		void EstimateAdim(const Particles2D& particles);
 };

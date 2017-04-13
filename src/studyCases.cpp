@@ -57,30 +57,43 @@ void StudyCaseTransitionProbabilities(std::string model, std::string estimator, 
 {
 	std::cout << "\nRunning StudyCaseTransitionProbabilities..." << std::endl;
 	std::cout << "1/4 : Generating the initial conditions..." << std::endl;
-	double *yStart = new double [dimy];
+	int N = nybox*dimy*nzbox*dimz;
+	double *yStart = new double [N];
+	double *zStart = new double [N];
 	double dy = 1./dimy;
-	for (int iy=0; iy<dimy; iy++)
-		yStart[iy] = (iy+.5)*dy;
-
-	double *zStart = new double [dimz];
 	double dz = 1./dimz;
-	for (int iz=0; iz<dimz; iz++)
-		zStart[iz] = (iz+.5)*dz;
+	double dybox = dy/nybox;
+	double dzbox = dz/nzbox;
+
+	for (int iy=0; iy<dimy; iy++)
+	{
+		for (int iz=0; iz<dimz; iz++)
+		{
+			for (int iybox=0; iybox<nybox; iybox++)
+			{
+				for (int izbox=0; izbox<nzbox; izbox++)
+				{
+					yStart[iy*dimz*Nbox+iz*Nbox+iybox*nzbox+izbox] = iy*dy + (iybox+.5)*dybox;
+					zStart[iy*dimz*Nbox+iz*Nbox+iybox*nzbox+izbox] = iz*dz + (izbox+.5)*dzbox;
+				}
+			}
+		}
+	}
 
 	std::cout << "2/4 : Generating trajectories..." << std::endl;
-	BISolver solver(Nloc, yStart, zStart, dimy, dimz);
+	BISolver solver(N, yStart, zStart);
 	Particles2D part = solver.RunAdim();
-	// Particles2D part(Nloc, yStart, zStart, dimy, dimz);
+	// Particles2D part(Nbox, yStart, zStart, dimy, dimz);
 
 	std::cout << "3/4 : Computing the transition probability matrix..." << std::endl;
 	GlobalEstimator *estim;
 	transform(estimator.begin(), estimator.end(), estimator.begin(), ::tolower);
 	if(estimator == "epanechnikov")
-		estim = new GlobalKernelEstimator(dimy,dimz,.1*pow(Nloc,-1./6.),"Epanechnikov");
+		estim = new GlobalKernelEstimator(dimy,dimz,Nbox,.1*pow(Nbox,-1./6.),"Epanechnikov");
 	else if (estimator == "gaussian")
-		estim = new GlobalKernelEstimator(dimy,dimz,.1*pow(Nloc,-1./6.),"Gaussian");
+		estim = new GlobalKernelEstimator(dimy,dimz,Nbox,.1*pow(Nbox,-1./6.),"Gaussian");
 	else if (estimator == "box")
-		estim = new GlobalBoxEstimator(dimy,dimz);
+		estim = new GlobalBoxEstimator(dimy,dimz,Nbox);
 	else{
 		std::cerr << "Unknown estimator type. Valid estimators are \"epanechnikov\", \"gaussian\" and \"box\"." << std::endl;
 		abort();

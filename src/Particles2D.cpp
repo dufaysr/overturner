@@ -10,30 +10,41 @@
 #include <cassert>
 #include "Particles2D.hpp"
 
-Particles2D::Particles2D(int Nloc, double yStart, double zStart)
+using namespace parameters;
+
+Particles2D::Particles2D(int N, double yStart, double zStart):
+mN(N), mTime(0.)
 {
-	mTime = 0.;
-	mN = Nloc;
-	mNloc = Nloc;
 	mY = new double [mN];
 	mZ = new double [mN];
 
-	for (int i=0; i<Nloc; i++)
+	for (int i=0; i<N; i++)
 	{
 		mY[i] = yStart;
 		mZ[i] = zStart;
 	}
 }
 
-Particles2D::Particles2D(int Nloc, double* yStart, double* zStart, int n)
+Particles2D::Particles2D(int N, double* yStart, double* zStart):
+mN(N), mTime(0.)
+{
+	mY = new double [mN];
+	mZ = new double [mN];
+
+	for (int i=0; i<N; i++)
+	{
+		mY[i] = yStart[i];
+		mZ[i] = zStart[i];
+	}
+}
+
+Particles2D::Particles2D(int Nloc, double* yStart, double* zStart, int n):
+mN(Nloc*n), mTime(0.)
 {
 	/*
 		Nloc particles at every couple (yStart[i], zStart[i]).
 		n is the length of yStart and zStart.
 	*/
-	mTime = 0.;
-	mN = Nloc*n;
-	mNloc = Nloc;
 	mY = new double [mN];
 	mZ = new double [mN];
 	for (int i=0; i<n; i++)
@@ -46,15 +57,13 @@ Particles2D::Particles2D(int Nloc, double* yStart, double* zStart, int n)
 	}
 }
 
-Particles2D::Particles2D(int Nloc, double* yStart, double* zStart, int ny, int nz)
+Particles2D::Particles2D(int Nloc, double* yStart, double* zStart, int ny, int nz):
+mN(Nloc*ny*nz), mTime(0.)
 {
 	/*
 		Nloc particles at every couple (yStart[i], zStart[j]).
 		ny is the length of yStart and nz is the length of zStart.
 	*/
-	mTime = 0.;
-	mN = Nloc*ny*nz;
-	mNloc = Nloc;
 	mY = new double [mN];
 	mZ = new double [mN];
 	for (int iy=0; iy<ny; iy++)
@@ -70,11 +79,12 @@ Particles2D::Particles2D(int Nloc, double* yStart, double* zStart, int ny, int n
 	}
 }
 
-Particles2D::Particles2D(const Particles2D& otherParticles)
+Particles2D::Particles2D(const Particles2D& otherParticles):
+mN(otherParticles.mN), mTime(otherParticles.mTime)
 {
-	mN = otherParticles.mN;
-	mNloc = otherParticles.mNloc;
-	mTime = otherParticles.mTime;
+	/*
+		Copy constructor
+	*/
 	mY = new double[mN];
 	mZ = new double[mN];
 	for (int i=0; i<mN; i++)
@@ -86,6 +96,9 @@ Particles2D::Particles2D(const Particles2D& otherParticles)
 
 Particles2D::~Particles2D()
 {
+	/*
+		Destructor
+	*/
 	delete[] mY;
 	delete[] mZ;
 }

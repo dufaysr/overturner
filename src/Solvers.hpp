@@ -25,7 +25,8 @@ class Solver
 		std::normal_distribution<double> wiener;
 
 	public:
-		Solver(int Nloc, double yStart, double zStart);
+		Solver(int N, double yStart, double zStart);
+		Solver(int N, double* yStart, double* zStart);
 		Solver(int Nloc, double* yStart, double* zStart, int n);
 		Solver(int Nloc, double* yStart, double* zStart, int ny, int nz);
 		Solver(const Particles2D& particles);
@@ -44,7 +45,8 @@ class Solver
 class EMSolver : public Solver
 {
 	public:
-		EMSolver(int Nloc, double yStart, double zStart);
+		EMSolver(int N, double yStart, double zStart);
+		EMSolver(int N, double* yStart, double* zStart);
 		EMSolver(int Nloc, double* yStart, double* zStart, int n);
 		EMSolver(int Nloc, double* yStart, double* zStart, int ny, int nz);
 		EMSolver(const Particles2D& particles);
@@ -57,8 +59,9 @@ class BISolver : public Solver
 {
 	public:
 		BISolver(int N, double yStart, double zStart);
-		BISolver(int N, double* yStart, double* zStart, int n);
-		BISolver(int N, double* yStart, double* zStart, int ny, int nz);
+		BISolver(int N, double* yStart, double* zStart);
+		BISolver(int Nloc, double* yStart, double* zStart, int n);
+		BISolver(int Nloc, double* yStart, double* zStart, int ny, int nz);
 		BISolver(const Particles2D& particles);
 		void UpdatePosition();
 		void UpdatePositionAdim();

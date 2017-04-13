@@ -13,10 +13,18 @@
 
 using namespace parameters;
 /*-------------- Base Class Solver -----------------------*/
-Solver::Solver(int Nloc, double yStart, double zStart):
-	mParticles(Nloc,yStart,zStart), 
-	// seed(std::chrono::system_clock::now().time_since_epoch().count()),
-	seed(1),
+Solver::Solver(int N, double yStart, double zStart):
+	mParticles(N,yStart,zStart), 
+	seed(std::chrono::system_clock::now().time_since_epoch().count()),
+	// seed(1),
+	generator(seed),
+	wiener(0.0,1.0)
+{}
+
+Solver::Solver(int N, double* yStart, double* zStart):
+	mParticles(N,yStart,zStart), 
+	seed(std::chrono::system_clock::now().time_since_epoch().count()),
+	// seed(1),
 	generator(seed),
 	wiener(0.0,1.0)
 {}
@@ -164,8 +172,12 @@ void Solver::TestWiener()
 /*----------------- Derived class from Solver : EMSolver -----------------------*/
 /*--- /!\ Does not take the derivative of the diffusivities into account /!\ ---*/
 
-EMSolver::EMSolver(int Nloc, double yStart, double zStart):
-	Solver(Nloc,yStart,zStart)
+EMSolver::EMSolver(int N, double yStart, double zStart):
+	Solver(N,yStart,zStart)
+{}
+
+EMSolver::EMSolver(int N, double* yStart, double* zStart):
+	Solver(N,yStart,zStart)
 {}
 
 EMSolver::EMSolver(int Nloc, double* yStart, double* zStart, int n):
@@ -213,12 +225,16 @@ BISolver::BISolver(int N, double yStart, double zStart):
 	Solver(N,yStart,zStart)
 {}
 
-BISolver::BISolver(int N, double* yStart, double* zStart, int n):
-	Solver(N,yStart,zStart,n)
+BISolver::BISolver(int N, double* yStart, double* zStart):
+	Solver(N,yStart,zStart)
 {}
 
-BISolver::BISolver(int N, double* yStart, double* zStart, int ny, int nz):
-	Solver(N,yStart,zStart,ny,nz)
+BISolver::BISolver(int Nloc, double* yStart, double* zStart, int n):
+	Solver(Nloc,yStart,zStart,n)
+{}
+
+BISolver::BISolver(int Nloc, double* yStart, double* zStart, int ny, int nz):
+	Solver(Nloc,yStart,zStart,ny,nz)
 {}
 
 BISolver::BISolver(const Particles2D& particles):

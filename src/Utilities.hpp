@@ -30,6 +30,9 @@ namespace parameters
 	extern double z0Prime;
 	extern double z0;
 	extern double Psi;
+	extern int nybox;
+	extern int nzbox;
+	extern int Nbox;
 	extern int Nloc;
 	extern double dt;
 	extern double T;

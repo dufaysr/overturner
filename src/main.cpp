@@ -26,9 +26,8 @@ int main(int argc, char *argv[])
 		model = "model"; //default model, if not specified as input argument
 	ReadIniFile(model);
 
-	// StudyCaseTrajectories(model,.5,.9);
-	// StudyCaseConcentration(model, "box",.5, .9, 10, 10);
-	StudyCaseTransitionProbabilities(model, "epanechnikov", 10, 10);
-
+	// StudyCaseTrajectories(model,10,.5*L,.5*(1+z0Prime)*H);
+	// StudyCaseConcentration(model,"box",Nloc,.5, .9, 10, 10);
+	StudyCaseTransitionProbabilities(model, "box", dimy, dimz, true);
 	return 0;
 }

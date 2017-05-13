@@ -24,8 +24,9 @@ class Field
         Field(const Field& otherField);
         Field(int dim1, int dim2);
         ~Field();
-        void Print(std::string filename) const;
+        void Print(std::string filename, bool binary=false) const;
         void Print(std::ofstream& f) const;
+        void PrintBinary(std::ofstream& f) const;
         void Display() const;
         int GetDim1() const;
         int GetDim2() const;

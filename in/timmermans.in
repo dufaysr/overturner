@@ -1,0 +1,16 @@
+Kh = 1e3
+Kv1 = 1e-1
+Kv2 = 1e-4
+Kv3 = 1e-3
+H = 5e3
+L = 15e6
+y0Prime = 13.005/15
+z0Prime = 4055/5e3
+Psi = 2
+Nloc = 2
+nybox = 10
+nzbox = 10
+dimy = 10
+dimz = 10
+dt = 3600
+T = 100*365*3600*24

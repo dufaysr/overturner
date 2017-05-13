@@ -14,12 +14,15 @@ Estimator::Estimator(int dimy, int dimz):
 mDimy(dimy), mDimz(dimz), mEstimator(dimy,dimz)
 {}
 
-void Estimator::Print(std::string filename) const
+void Estimator::Print(std::string filename, bool binary) const
 {
-	std::ofstream f = openOutputFile(filename);
+	std::ofstream f = openOutputFile(filename,binary);
 	f.setf(std::ios::scientific); f.precision(10);
 
-	mEstimator.Print(f);
+	if (binary)
+		mEstimator.PrintBinary(f);
+	else
+		mEstimator.Print(f);
     f.close();
 }
 
@@ -118,12 +121,15 @@ GlobalEstimator::GlobalEstimator(int dimy, int dimz, int Nbox):
 mDimy(dimy), mDimz(dimz), mNbox(Nbox), mEstimator(dimy*dimz, dimy*dimz)
 {} 
 
-void GlobalEstimator::Print(std::string filename) const
+void GlobalEstimator::Print(std::string filename, bool binary) const
 {
-	std::ofstream f = openOutputFile(filename);
+	std::ofstream f = openOutputFile(filename, binary);
 	f.setf(std::ios::scientific); f.precision(10);
 
-	mEstimator.Print(f);
+	if (binary)
+		mEstimator.PrintBinary(f);
+	else
+		mEstimator.Print(f);
     f.close();
 }
 

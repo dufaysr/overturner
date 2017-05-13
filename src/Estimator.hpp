@@ -27,7 +27,7 @@ class Estimator
 		virtual ~Estimator() {}
 		virtual void Estimate(const Particles2D& particles) =0;
 		virtual void EstimateAdim(const Particles2D& particles) =0;
-		void Print(std::string filename) const;
+		void Print(std::string filename, bool binary=false) const;
 };
 
 class KernelEstimator : public Estimator
@@ -62,7 +62,7 @@ class GlobalEstimator
 		virtual ~GlobalEstimator() {}
 		virtual void Estimate(const Particles2D& particles) =0;
 		virtual void EstimateAdim(const Particles2D& particles) =0;
-		void Print(std::string filename) const;
+		void Print(std::string filename, bool binary=false) const;
 };
 
 class GlobalKernelEstimator : public GlobalEstimator

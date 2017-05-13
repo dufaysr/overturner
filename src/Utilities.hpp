@@ -34,6 +34,8 @@ namespace parameters
 	extern int nzbox;
 	extern int Nbox;
 	extern int Nloc;
+	extern int dimy;
+	extern int dimz;
 	extern double dt;
 	extern double T;
 	extern double dtPrime;
@@ -50,6 +52,6 @@ double Kv(double y, double z);
 double PevInv(double yPrime, double zPrime);
 double PehInv(double yPrime, double zPrime);
 void ReadIniFile(std::string model);
-std::ofstream openOutputFile(std::string filename);
+std::ofstream openOutputFile(std::string filename, bool binary=false);
 
 #endif

@@ -263,7 +263,7 @@ void BISolver::UpdatePosition()
 		N1 = sqrt(2*Kh*dt);
 		N2 = sqrt(2*Kv(y+dY,z+dZ)*dt);
 		/* update particles positions using backward-Ito scheme
-		* 2 options for the no-flux BC : ethier stick to the wall or bounce on it.
+		* 2 options for the no-flux BC : either stick to the wall or bounce on it.
 		* Uncomment the one of your choice and comment the other.
 		*/
 		// 1. Stick to the wall

@@ -17,7 +17,7 @@ namespace parameters
 	double Psi;
     double dt, dtPrime;
     double T, TPrime;
-	int nybox, nzbox, Nbox, Nloc;
+	int nybox, nzbox, Nbox, Nloc, dimy, dimz;
 }
 
 using namespace parameters;
@@ -91,15 +91,15 @@ double PehInv(double yPrime, double zPrime)
 
 void ReadIniFile(std::string model)
 {
-    std::string filename = "in/" + model + ".in";
+    std::string filename = "/home/renaud/Documents/EPL/tfe/overturner/in/" + model + ".in";
     std::ifstream iniFile(filename.c_str(), std::ios::in);
-    std::ofstream fInfo("out/" + model + "/info.out", std::ios::out | std::ios::trunc);
+    std::ofstream fInfo("/home/renaud/Documents/EPL/tfe/overturner/out/" + model + "/info.out", std::ios::out | std::ios::trunc);
     if(iniFile && fInfo)
     {
         auto t = std::time(nullptr);
         auto tm = *std::localtime(&t);
         fInfo << "File generated on " << std::put_time(&tm, "%d-%m-%Y at %Hh %Mm %Ss") << "\n";
-        fInfo << "Model loaded is " << filename << ".in\n";
+        fInfo << "Model loaded is " << filename << "\n";
         fInfo << "The values used are :\n";
         std::string content, tmp, value;
         char *pEnd, *pEndtmp;
@@ -200,6 +200,14 @@ void ReadIniFile(std::string model)
                 Nloc = int(val);
                 fInfo << "\tNloc = " << Nloc << "\n";
             }
+            else if (content == "dimy" || content == "Dimy" || content == "ny"){
+                dimy = int(val);
+                fInfo << "\tdimy = " << dimy << "\n";
+            }
+            else if (content == "dimz" || content == "Dimz" || content == "nz"){
+                dimz = int(val);
+                fInfo << "\tdimz = " << dimz << "\n";
+            }
             else{
                 std::cerr << "Unexpected content \"" << content 
                           << "\" in ini file. Please provide an appropriate ini file" << std::endl;
@@ -207,7 +215,7 @@ void ReadIniFile(std::string model)
             }
         }
         
-        if (!bdt || !bT || !bH || !bL || !bPsi)
+        if (bdt && bT && bH && bL && bPsi)
         {
             dtPrime = dt*Psi/(L*H);
             TPrime = T*Psi/(L*H);
@@ -241,7 +249,7 @@ void ReadIniFile(std::string model)
     }
 }
 
-std::ofstream openOutputFile(std::string filename)
+std::ofstream openOutputFile(std::string filename, bool binary)
 {
     std::ifstream f(filename.c_str());
     bool already_exist = f.is_open();
@@ -259,7 +267,12 @@ std::ofstream openOutputFile(std::string filename)
         }
         if(action=="o")
         {
-            std::ofstream fout(filename.c_str(), std::ios::out | std::ios::trunc);
+            std::ofstream fout;
+            if (binary) 
+                fout.open(filename.c_str(), std::ios::out | std::ios::trunc | std::ios::binary);
+            else
+                fout.open(filename.c_str(), std::ios::out | std::ios::trunc);
+
             if (fout)
                 return  fout;
             else
@@ -271,14 +284,20 @@ std::ofstream openOutputFile(std::string filename)
         else
         {
             std::string new_output_file;
-            std::cout << "Type the new file name : " << std::endl;
+            std::cout << "Type the new file name. It will be created in" 
+            "/home/renaud/Documents/EPL/tfe/overturner/ :" << std::endl;
             std::cin >> new_output_file;
-            return openOutputFile(new_output_file);
+            return openOutputFile("/home/renaud/Documents/EPL/tfe/overturner/" + new_output_file, binary);
         }
     }
     else
     {
-        std::ofstream fout(filename.c_str(), std::ios::out | std::ios::trunc);
+        std::ofstream fout;
+        if (binary)
+            fout.open(filename.c_str(), std::ios::out | std::ios::trunc | std::ios::binary);
+        else
+            fout.open(filename.c_str(), std::ios::out | std::ios::trunc);
+
         if (fout)
             return fout;
         else{

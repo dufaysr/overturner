@@ -12,16 +12,19 @@
 #include <iostream>
 #include <fstream>
 #include <cassert>
+#include <algorithm>
+#include "Utilities.hpp"
 
 struct Particles2D
 {
-	int mN, mNloc; // total number of particles, number of particles per initial position
+	int mN;
 	double mTime;
 	double *mY, *mZ;
 
-	Particles2D(int Nloc, double yStart, double zStart);
-	Particles2D(int Nloc, double* yStart, double* zStart, int n); // assume ny = nz = n
-	Particles2D(int Nloc, double* yStart, double* zStart, int ny, int nz);
+	Particles2D(int N, double yStart, double zStart);
+	Particles2D(int N, double* yStart, double* zStart);
+	Particles2D(int Nloc, double* yStart, double* zStart, int n); // unused
+	Particles2D(int Nloc, double* yStart, double* zStart, int ny, int nz); // unused
 	Particles2D(const Particles2D& otherParticles);
 	~Particles2D();
 };

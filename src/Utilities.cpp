@@ -7,7 +7,7 @@
 */
 
 #include "Utilities.hpp"
-
+#include "workingdirectory.hpp"
 
 namespace parameters
 {
@@ -17,7 +17,7 @@ namespace parameters
 	double Psi;
     double dt, dtPrime;
     double T, TPrime;
-	int Nloc;
+	int nybox, nzbox, Nbox, Nloc, dimy, dimz;
 }
 
 using namespace parameters;
@@ -91,13 +91,20 @@ double PehInv(double yPrime, double zPrime)
 
 void ReadIniFile(std::string model)
 {
-    std::string filename = "in/" + model + ".in";
+    std::string filename = wd::root + "in/" + model + ".in";
     std::ifstream iniFile(filename.c_str(), std::ios::in);
-    if(iniFile)
+    std::ofstream fInfo(wd::root + "out/" + model + "/info.out", std::ios::out | std::ios::trunc);
+    if(iniFile && fInfo)
     {
+        auto t = std::time(nullptr);
+        auto tm = *std::localtime(&t);
+        fInfo << "File generated on " << std::put_time(&tm, "%d-%m-%Y at %Hh %Mm %Ss") << "\n";
+        fInfo << "Model loaded is " << filename << "\n";
+        fInfo << "The values used are :\n";
         std::string content, tmp, value;
         char *pEnd, *pEndtmp;
         double val, tmpval;
+        bool bH = false, bL = false, bdt = false, bT = false, bnybox = false, bnzbox = false, bPsi = false;
         while(std::getline(iniFile, content,' '))
         {
             std::getline(iniFile,tmp,' ');
@@ -120,85 +127,129 @@ void ReadIniFile(std::string model)
                 }
                 else
                 {
-                    std::cerr << "Unexpected nonnumeric character in \"" << value << "\" : cannot interpret char \"" << pEnd[0] << "\"." << std::endl;
+                    std::cerr << "Unexpected nonnumeric character in \"" << value 
+                              << "\" : cannot interpret char \"" << pEnd[0] << "\"." << std::endl;
                     abort();
                 }
                 pEnd = pEndtmp;
             }
-            if (content == "Kh")
+            if (content == "Kh"){
                 Kh = val;
-            else if (content == "Kv1")
+                fInfo << "\tKh = " << Kh << "\n"; 
+            }
+            else if (content == "Kv1"){
                 Kv1 = val;
-            else if (content == "Kv2")
+                fInfo << "\tKv1 = " << Kv1 << "\n";
+            }
+            else if (content == "Kv2"){
                 Kv2 = val;
-            else if (content == "Kv3")
+                fInfo << "\tKv2 = " << Kv2 << "\n";
+            }
+            else if (content == "Kv3"){
                 Kv3 = val;
-            else if (content == "H")
+                fInfo << "\tKv3 = " << Kv3 << "\n";
+            }
+            else if (content == "H"){
                 H = val;
-            else if (content == "L")
+                fInfo << "\tH = " << H << "\n";
+                bH = true;
+            }
+            else if (content == "L"){
                 L = val;
-            else if (content == "y0Prime")
+                fInfo << "\tL = " << L << "\n";
+                bL = true;
+            }
+            else if (content == "y0Prime"){
                 y0Prime = val;
-            else if (content == "z0Prime")
+                y0 = y0Prime*L;
+                fInfo << "\ty0Prime = " << y0Prime << "\n";
+                fInfo << "\ty0 = " << y0 << "\n";
+            }
+            else if (content == "z0Prime"){
                 z0Prime = val;
-            else if (content == "Psi")
+                z0 = z0Prime*H;
+                fInfo << "\tz0Prime = " << z0Prime << "\n";
+                fInfo << "\tz0 = " << z0 << "\n";
+            }
+            else if (content == "Psi"){
                 Psi = val;
-            else if (content == "dt" || content == "Dt")
+                fInfo << "\tPsi = " << Psi << "\n";
+                bPsi = true;
+            }
+            else if (content == "dt" || content == "Dt"){
                 dt = val;
-            else if (content == "T" || content == "tFinal" || content == "Tfinal")
+                fInfo << "\tdt = " << dt << "\n";
+                bdt = true;
+            }
+            else if (content == "T" || content == "tFinal" || content == "Tfinal"){
                 T = val;
-            else if (content == "Nloc")
+                fInfo << "\tT = " << T << "\n";
+                bT = true;
+            }
+            else if (content == "nybox"){
+                nybox = int(val);
+                fInfo << "\tnybox = " << nybox << "\n";
+                bnybox = true;
+            }
+            else if (content == "nzbox"){
+                nzbox = int(val);
+                fInfo << "\tnzbox = " << nzbox << "\n";
+                bnzbox = true;
+            }
+            else if (content == "Nloc"){
                 Nloc = int(val);
+                fInfo << "\tNloc = " << Nloc << "\n";
+            }
+            else if (content == "dimy" || content == "Dimy" || content == "ny"){
+                dimy = int(val);
+                fInfo << "\tdimy = " << dimy << "\n";
+            }
+            else if (content == "dimz" || content == "Dimz" || content == "nz"){
+                dimz = int(val);
+                fInfo << "\tdimz = " << dimz << "\n";
+            }
             else{
-                std::cerr << "Unexpected content \"" << content << "\" in ini file. Please provide an appropriate ini file" << std::endl;
+                std::cerr << "Unexpected content \"" << content 
+                          << "\" in ini file. Please provide an appropriate ini file" << std::endl;
                 abort();
             }
         }
-        y0 = y0Prime*L;
-        z0 = z0Prime*H;
-        dtPrime = dt*Psi/(L*H);
-        TPrime = T*Psi/(L*H);
-        iniFile.close();
-
-        std::ofstream fInfo("out/" + model + "/info.out", std::ios::out | std::ios::trunc);
-        if (fInfo.is_open())
+        
+        if (bdt && bT && bH && bL && bPsi)
         {
-            auto t = std::time(nullptr);
-            auto tm = *std::localtime(&t);
-            fInfo << "File generated on " << std::put_time(&tm, "%d-%m-%Y at %Hh %Mm %Ss") << "\n";
-            fInfo << "Model loaded is " << filename << ".in\n";
-            fInfo << "The values used are :\n";
-            fInfo << "\tKh = " << Kh << "\n"; 
-            fInfo << "\tKv1 = " << Kv1 << "\n"; 
-            fInfo << "\tKv2 = " << Kv2 << "\n"; 
-            fInfo << "\tKv3 = " << Kv3 << "\n"; 
-            fInfo << "\tH = " << H << "\n"; 
-            fInfo << "\tL = " << L << "\n"; 
-            fInfo << "\ty0Prime = " << y0Prime << "\n"; 
-            fInfo << "\ty0 = " << y0 << "\n"; 
-            fInfo << "\tz0Prime = " << z0Prime << "\n"; 
-            fInfo << "\tz0 = " << z0 << "\n"; 
-            fInfo << "\tPsi = " << Psi << "\n"; 
-            fInfo << "\tNloc = " << Nloc << "\n"; 
-            fInfo << "\tdt = " << dt << "\n"; 
+            dtPrime = dt*Psi/(L*H);
+            TPrime = T*Psi/(L*H);
             fInfo << "\tdtPrime = " << dtPrime << "\n"; 
-            fInfo << "\tTPrime = " << TPrime << "\n"; 
-            fInfo.close();
+            fInfo << "\tTPrime = " << TPrime << "\n";
         }
         else
         {
-            std::cerr << "Unable to open file Out/info.out\n";
+            std::cerr << "Uncomplete ini file !" << std::endl;
             abort();
         }
+
+        if (bnybox && bnzbox)
+        {
+            Nbox = nybox*nzbox;
+            fInfo << "\tNbox = " << Nbox << "\n";
+        }
+
+        iniFile.close();
+        fInfo.close();    
     }
     else
     {
-        std::cerr << "Unable to open ini file !" << std::endl;
+        if (!iniFile && !fInfo)
+            std::cerr << "Unable to open neither ini file nor out/info.out!" << std::endl;
+        else if (!iniFile)
+            std::cerr << "Unable to open ini file !" << std::endl;
+        else
+            std::cerr << "Unable to open file out/info.out" << std::endl;
         abort();
     }
 }
 
-std::ofstream openOutputFile(std::string filename)
+std::ofstream openOutputFile(std::string filename, bool binary)
 {
     std::ifstream f(filename.c_str());
     bool already_exist = f.is_open();
@@ -216,7 +267,12 @@ std::ofstream openOutputFile(std::string filename)
         }
         if(action=="o")
         {
-            std::ofstream fout(filename.c_str(), std::ios::out | std::ios::trunc);
+            std::ofstream fout;
+            if (binary) 
+                fout.open(filename.c_str(), std::ios::out | std::ios::trunc | std::ios::binary);
+            else
+                fout.open(filename.c_str(), std::ios::out | std::ios::trunc);
+
             if (fout)
                 return  fout;
             else
@@ -228,14 +284,19 @@ std::ofstream openOutputFile(std::string filename)
         else
         {
             std::string new_output_file;
-            std::cout << "Type the new file name : " << std::endl;
+            std::cout << "Type the new file name. It will be created in " << wd::root << " :" << std::endl;
             std::cin >> new_output_file;
-            return openOutputFile(new_output_file);
+            return openOutputFile(wd::root + new_output_file, binary);
         }
     }
     else
     {
-        std::ofstream fout(filename.c_str(), std::ios::out | std::ios::trunc);
+        std::ofstream fout;
+        if (binary)
+            fout.open(filename.c_str(), std::ios::out | std::ios::trunc | std::ios::binary);
+        else
+            fout.open(filename.c_str(), std::ios::out | std::ios::trunc);
+
         if (fout)
             return fout;
         else{

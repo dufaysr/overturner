@@ -53,39 +53,57 @@ Field::~Field()
     delete[] mData;
 }
 
-void Field::Print(std::string filename) const
+void Field::Print(std::string filename, bool binary) const
 {
-    std::ofstream myfile (filename.c_str(), std::ios::out | std::ios::trunc);
-    if (myfile.is_open())
-    {
-        myfile.setf(std::ios::scientific);
-        myfile.precision(10);
-        for(int j=0; j<mDim2; j++)
+    std::ofstream myfile;
+    if (binary){
+        myfile.open(filename.c_str(), std::ios::out | std::ios::trunc | std::ios::binary);
+        for (int i=0; i<mDim1; i++)
         {
-            for(int i=0; i<mDim1; i++)
-            {
-                myfile << mData[i][j] << " ";
-            }
-            myfile << "\n";
-        }
-        myfile.close();
+            myfile.write((char*) &mData[i][0], mDim2*sizeof(double));
+        } 
     }
-    else
-    {
-        std::cerr << "Unable to open file " << filename << "\n";
-        abort();
+    else{  
+        myfile.open(filename.c_str(), std::ios::out | std::ios::trunc);
+        if (myfile.is_open())
+        {
+            myfile.setf(std::ios::scientific);
+            myfile.precision(10);
+            for(int j=0; j<mDim2; j++)
+            {
+                for(int i=0; i<mDim1; i++)
+                {
+                    myfile << mData[i][j] << " ";
+                }
+                myfile << "\n";
+            }
+            myfile.close();
+        }
+        else
+        {
+            std::cerr << "Unable to open file " << filename << "\n";
+            abort();
+        }
     }
 }
 
 void Field::Print(std::ofstream& f) const
 {
-    for(int j=0; j<mDim2; j++)
+    for(int i=0; i<mDim1; i++)
     {
-        for(int i=0; i<mDim1; i++)
+        for(int j=0; j<mDim2; j++)
         {
             f << mData[i][j] << " ";
         }
         f << "\n";
+    }
+}
+
+void Field::PrintBinary(std::ofstream& f) const
+{
+    for(int i=0; i<mDim1; i++)
+    {
+        f.write((char*) &mData[i][0], mDim2*sizeof(double));
     }
 }
 

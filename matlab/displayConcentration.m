@@ -10,4 +10,3 @@ surf(X,Y,C,'FaceColor','texturemap')
 
 int = dx*dy*sum(sum(C))
 end
-

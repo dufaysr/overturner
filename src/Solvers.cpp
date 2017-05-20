@@ -10,13 +10,22 @@
 #include <random>
 #include <iostream>
 #include "Solvers.hpp"
+#include "workingdirectory.hpp"
 
 using namespace parameters;
 /*-------------- Base Class Solver -----------------------*/
-Solver::Solver(int Nloc, double yStart, double zStart):
-	mParticles(Nloc,yStart,zStart), 
-	// seed(std::chrono::system_clock::now().time_since_epoch().count()),
-	seed(1),
+Solver::Solver(int N, double yStart, double zStart):
+	mParticles(N,yStart,zStart), 
+	seed(std::chrono::system_clock::now().time_since_epoch().count()),
+	// seed(1),
+	generator(seed),
+	wiener(0.0,1.0)
+{}
+
+Solver::Solver(int N, double* yStart, double* zStart):
+	mParticles(N,yStart,zStart), 
+	seed(std::chrono::system_clock::now().time_since_epoch().count()),
+	// seed(1),
 	generator(seed),
 	wiener(0.0,1.0)
 {}
@@ -53,10 +62,10 @@ Particles2D& Solver::Run()
 
 Particles2D& Solver::Run(std::string model, int nPrint)
 {
-	std::ofstream fT = openOutputFile("out/" + model + "/time.out");
-	std::ofstream fY = openOutputFile("out/" + model + "/Y.out");
+	std::ofstream fT = openOutputFile(wd::root + "out/" + model + "/time.out");
+	std::ofstream fY = openOutputFile(wd::root + "out/" + model + "/Y.out");
 	fY.setf(std::ios::scientific); fY.precision(10);
-	std::ofstream fZ = openOutputFile("out/" + model + "/Z.out");
+	std::ofstream fZ = openOutputFile(wd::root + "out/" + model + "/Z.out");
 	fZ.setf(std::ios::scientific); fZ.precision(10);
 
 	PrintParticles(fT, fY, fZ);
@@ -87,10 +96,10 @@ Particles2D& Solver::RunAdim()
 
 Particles2D& Solver::RunAdim(std::string model, int nPrint)
 {
-	std::ofstream fT = openOutputFile("out/" + model + "/time.out");
-	std::ofstream fY = openOutputFile("out/" + model + "/Y.out");
+	std::ofstream fT = openOutputFile(wd::root + "out/" + model + "/time.out");
+	std::ofstream fY = openOutputFile(wd::root + "out/" + model + "/Y.out");
 	fY.setf(std::ios::scientific); fY.precision(10);
-	std::ofstream fZ = openOutputFile("out/" + model + "/Z.out");
+	std::ofstream fZ = openOutputFile(wd::root + "out/" + model + "/Z.out");
 	fZ.setf(std::ios::scientific); fZ.precision(10);
 
 	PrintParticles(fT, fY, fZ);
@@ -164,8 +173,12 @@ void Solver::TestWiener()
 /*----------------- Derived class from Solver : EMSolver -----------------------*/
 /*--- /!\ Does not take the derivative of the diffusivities into account /!\ ---*/
 
-EMSolver::EMSolver(int Nloc, double yStart, double zStart):
-	Solver(Nloc,yStart,zStart)
+EMSolver::EMSolver(int N, double yStart, double zStart):
+	Solver(N,yStart,zStart)
+{}
+
+EMSolver::EMSolver(int N, double* yStart, double* zStart):
+	Solver(N,yStart,zStart)
 {}
 
 EMSolver::EMSolver(int Nloc, double* yStart, double* zStart, int n):
@@ -213,12 +226,16 @@ BISolver::BISolver(int N, double yStart, double zStart):
 	Solver(N,yStart,zStart)
 {}
 
-BISolver::BISolver(int N, double* yStart, double* zStart, int n):
-	Solver(N,yStart,zStart,n)
+BISolver::BISolver(int N, double* yStart, double* zStart):
+	Solver(N,yStart,zStart)
 {}
 
-BISolver::BISolver(int N, double* yStart, double* zStart, int ny, int nz):
-	Solver(N,yStart,zStart,ny,nz)
+BISolver::BISolver(int Nloc, double* yStart, double* zStart, int n):
+	Solver(Nloc,yStart,zStart,n)
+{}
+
+BISolver::BISolver(int Nloc, double* yStart, double* zStart, int ny, int nz):
+	Solver(Nloc,yStart,zStart,ny,nz)
 {}
 
 BISolver::BISolver(const Particles2D& particles):
@@ -246,9 +263,18 @@ void BISolver::UpdatePosition()
 		// amplitude of the noises
 		N1 = sqrt(2*Kh*dt);
 		N2 = sqrt(2*Kv(y+dY,z+dZ)*dt);
-		// update particles positions using backward-Ito scheme
-		mParticles.mY[i] = std::min(L, std::max(mParticles.mY[i] + v*dt + N1*R1, 0.));
-		mParticles.mZ[i] = std::min(H, std::max(mParticles.mZ[i] + w*dt + N2*R2, 0.));
+		/* update particles positions using backward-Ito scheme
+		* 2 options for the no-flux BC : either stick to the wall or bounce on it.
+		* Uncomment the one of your choice and comment the other.
+		*/
+		// 1. Stick to the wall
+		// mParticles.mY[i] = std::min(L, std::max(mParticles.mY[i] + v*dt + N1*R1, 0.));
+		// mParticles.mZ[i] = std::min(H, std::max(mParticles.mZ[i] + w*dt + N2*R2, 0.));
+		// 2. Bounce on the wall
+		double ynew = mParticles.mY[i] + v*dt + N1*R1;
+		double znew = mParticles.mZ[i] + w*dt + N2*R2;
+		mParticles.mY[i] = (ynew < 0) ? -ynew : (ynew > L) ? 2*L-ynew : ynew;
+		mParticles.mZ[i] = (znew < 0) ? -znew : (znew > H) ? 2*H-znew : znew;
 	}
 	mParticles.mTime += dt;
 }
@@ -272,9 +298,18 @@ void BISolver::UpdatePositionAdim()
 		// amplitude of the noises
 		N1 = sqrt(2*PehInv(y+dY,z+dZ)*dtPrime);
 		N2 = sqrt(2*PevInv(y+dY,z+dZ)*dtPrime);
-		// update particles positions using backward-Ito scheme
-		mParticles.mY[i] = std::min(1., std::max(mParticles.mY[i] + v*dtPrime + N1*R1, 0.));
-		mParticles.mZ[i] = std::min(1., std::max(mParticles.mZ[i] + w*dtPrime + N2*R2, 0.));
+		/* update particles positions using backward-Ito scheme
+		* 2 options for the no-flux BC : either stick to the wall or bounce on it.
+		* Uncomment the one of your choice and comment the other.
+		*/
+		// 1. Stick to the wall
+		// mParticles.mY[i] = std::min(1., std::max(mParticles.mY[i] + v*dtPrime + N1*R1, 0.));
+		// mParticles.mZ[i] = std::min(1., std::max(mParticles.mZ[i] + w*dtPrime + N2*R2, 0.));
+		// 2. Bounce on the wall
+		double ynew = mParticles.mY[i] + v*dtPrime + N1*R1;
+		double znew = mParticles.mZ[i] + w*dtPrime + N2*R2;
+		mParticles.mY[i] = (ynew < 0) ? -ynew : (ynew > 1.) ? 2.-ynew : ynew;
+		mParticles.mZ[i] = (znew < 0) ? -znew : (znew > 1.) ? 2.-znew : znew;
 	}
 	mParticles.mTime += dtPrime;
 }

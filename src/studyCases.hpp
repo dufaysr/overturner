@@ -13,7 +13,7 @@
 #include "Solvers.hpp"
 #include "Estimator.hpp"
 
-void StudyCaseTrajectories(std::string model, double yStart, double zStart);
-void StudyCaseTrajectoriesAdim(std::string model, double yStart, double zStart);
-void StudyCaseConcentration(std::string model, std::string estimator, double yStart, double zStart, int dimy, int dimz);
-void StudyCaseTransitionProbabilities(std::string model, std::string estimator, int dimy, int dimz);
+void StudyCaseTrajectories(std::string model, int Nloc, double yStart, double zStart);
+void StudyCaseTrajectoriesAdim(std::string model, int Nloc, double yStart, double zStart);
+void StudyCaseConcentration(std::string model, std::string estimator, int Nloc, double yStart, double zStart, int dimy, int dimz);
+void StudyCaseTransitionProbabilities(std::string model, std::string estimator, int dimy, int dimz, bool binary=false);

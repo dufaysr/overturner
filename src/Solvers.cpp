@@ -10,6 +10,7 @@
 #include <random>
 #include <iostream>
 #include "Solvers.hpp"
+#include "workingdirectory.hpp"
 
 using namespace parameters;
 /*-------------- Base Class Solver -----------------------*/
@@ -61,10 +62,10 @@ Particles2D& Solver::Run()
 
 Particles2D& Solver::Run(std::string model, int nPrint)
 {
-	std::ofstream fT = openOutputFile("out/" + model + "/time.out");
-	std::ofstream fY = openOutputFile("out/" + model + "/Y.out");
+	std::ofstream fT = openOutputFile(wd::root + "out/" + model + "/time.out");
+	std::ofstream fY = openOutputFile(wd::root + "out/" + model + "/Y.out");
 	fY.setf(std::ios::scientific); fY.precision(10);
-	std::ofstream fZ = openOutputFile("out/" + model + "/Z.out");
+	std::ofstream fZ = openOutputFile(wd::root + "out/" + model + "/Z.out");
 	fZ.setf(std::ios::scientific); fZ.precision(10);
 
 	PrintParticles(fT, fY, fZ);
@@ -95,10 +96,10 @@ Particles2D& Solver::RunAdim()
 
 Particles2D& Solver::RunAdim(std::string model, int nPrint)
 {
-	std::ofstream fT = openOutputFile("out/" + model + "/time.out");
-	std::ofstream fY = openOutputFile("out/" + model + "/Y.out");
+	std::ofstream fT = openOutputFile(wd::root + "out/" + model + "/time.out");
+	std::ofstream fY = openOutputFile(wd::root + "out/" + model + "/Y.out");
 	fY.setf(std::ios::scientific); fY.precision(10);
-	std::ofstream fZ = openOutputFile("out/" + model + "/Z.out");
+	std::ofstream fZ = openOutputFile(wd::root + "out/" + model + "/Z.out");
 	fZ.setf(std::ios::scientific); fZ.precision(10);
 
 	PrintParticles(fT, fY, fZ);

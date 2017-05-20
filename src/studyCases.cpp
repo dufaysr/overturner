@@ -7,6 +7,7 @@
 */
 
 #include "studyCases.hpp"
+#include "workingdirectory.hpp"
 
 using namespace parameters;
 
@@ -48,7 +49,7 @@ void StudyCaseConcentration(std::string model, std::string estimator, int Nloc, 
 	}
 	estim->EstimateAdim(part);
 	std::cout << "3/3 : Writing in the files..." << std::endl;
-	estim->Print("out/" + model + "/" + estimator + ".out");
+	estim->Print(wd::root + "out/" + model + "/" + estimator + ".out");
 	delete estim;
 	std::cout << "\nStudyCaseConcentration runned successfully." << std::endl;
 }
@@ -101,9 +102,9 @@ void StudyCaseTransitionProbabilities(std::string model, std::string estimator, 
 	std::cout << "4/4 : Writing in the files..." << std::endl;
 	
 	if (binary)
-		estim->Print("out/" + model + "/global_" + estimator + ".bin", binary);
+		estim->Print(wd::root + "out/" + model + "/global_" + estimator + ".bin", binary);
 	else
-		estim->Print("out/" + model + "/global_" + estimator + ".out", binary);
+		estim->Print(wd::root + "out/" + model + "/global_" + estimator + ".out", binary);
 
 	delete[] yStart;
 	delete[] zStart;

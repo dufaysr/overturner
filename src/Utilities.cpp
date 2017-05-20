@@ -7,7 +7,7 @@
 */
 
 #include "Utilities.hpp"
-
+#include "workingdirectory.hpp"
 
 namespace parameters
 {
@@ -91,9 +91,9 @@ double PehInv(double yPrime, double zPrime)
 
 void ReadIniFile(std::string model)
 {
-    std::string filename = "/home/renaud/Documents/EPL/tfe/overturner/in/" + model + ".in";
+    std::string filename = wd::root + "in/" + model + ".in";
     std::ifstream iniFile(filename.c_str(), std::ios::in);
-    std::ofstream fInfo("/home/renaud/Documents/EPL/tfe/overturner/out/" + model + "/info.out", std::ios::out | std::ios::trunc);
+    std::ofstream fInfo(wd::root + "out/" + model + "/info.out", std::ios::out | std::ios::trunc);
     if(iniFile && fInfo)
     {
         auto t = std::time(nullptr);
@@ -284,10 +284,9 @@ std::ofstream openOutputFile(std::string filename, bool binary)
         else
         {
             std::string new_output_file;
-            std::cout << "Type the new file name. It will be created in" 
-            "/home/renaud/Documents/EPL/tfe/overturner/ :" << std::endl;
+            std::cout << "Type the new file name. It will be created in " << wd::root << " :" << std::endl;
             std::cin >> new_output_file;
-            return openOutputFile("/home/renaud/Documents/EPL/tfe/overturner/" + new_output_file, binary);
+            return openOutputFile(wd::root + new_output_file, binary);
         }
     }
     else

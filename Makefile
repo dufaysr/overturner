@@ -29,7 +29,7 @@ $(BINDIR)/$(EXEC): $(OBJ)
 
 $(LIBDIR)/Particles2D.o : $(SRCDIR)/Particles2D.hpp
 $(LIBDIR)/Field.o: $(SRCDIR)/Field.hpp
-$(LIBDIR)/Utilities.o:  $(SRCDIR)/Utilities.hpp
+$(LIBDIR)/Utilities.o:  $(SRCDIR)/Utilities.hpp $(SRCDIR)/workingdirectory.hpp
 $(LIBDIR)/Solvers.o: $(SRCDIR)/Solvers.hpp $(LIBDIR)/Particles2D.o $(LIBDIR)/Utilities.o
 $(LIBDIR)/Estimator.o: $(SRCDIR)/Estimator.hpp $(LIBDIR)/Field.o $(LIBDIR)/Particles2D.o $(LIBDIR)/Utilities.o 
 $(LIBDIR)/studyCases.o: $(SRCDIR)/studyCases.hpp $(LIBDIR)/Solvers.o $(LIBDIR)/Estimator.o

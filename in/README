@@ -1,0 +1,18 @@
+The file must have the following format :
+
+Kh = value of the horizontal diffusivity
+Kv1 = value of the vertical diffusivity in the zone y >= y0
+Kv2 = value of the vertical diffusivity in the zone y < y0, z < z0
+Kv3 = value of the vertical diffusivity in the zone y < y0, z >= z0
+H = Depth of the ocean
+L = Meridional length of the domain
+y0Prime = adimensionnal y0 (= y0/L)
+z0Prime = adimensionnal z0 (= z0/L)
+Psi = parameter Psi
+Nloc = for studyCaseTrajectories/Concentration, useful is you want Nloc particles starting at the same location
+nybox = for studyCaseTransitionProbabilities, nybox x nzbox particles are initially released in each box.
+nzbox = the initial positions of those particles are defined by the nybox x nzbox subgrid.
+dimy = number of boxes in the y-direction (for studyCaseTransitionProbability)
+dimz = number of boxes in the z-direction (for studyCaseTransitionProbability)
+dt = time-step
+T = final time

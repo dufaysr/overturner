@@ -10,7 +10,7 @@ using namespace std;
 int main()
 {
 	double Kh, Kv1, Kv2, Kv3, H, L, y0Prime, z0Prime, Psi, dt, T, tmp;
-	int N;
+	int nybox, nzbox;
 	string filename;
 	cout << "Please enter the name of your ini file (without the extension \".in\") : ";
 	cin >> filename;
@@ -18,13 +18,7 @@ int main()
 	if (fout)
 	{
 		cout << "Now enter successively the values of the specified parameters." << endl;
-		cout << "dt : "; cin >> dt;
-		fout << "dt = " << dt << "\n";
-		cout << "T : "; tmp = getmathline(cin,dt); T = getmathline(cin,dt);
-		fout << "T = " << T << "\n";
-		cout << "N : "; N = getmathline(cin,dt);
-		fout << "N = " << N << "\n";
-		cout << "Kh : "; Kh = getmathline(cin,dt);
+		cout << "Kh : "; tmp = getmathline(cin,dt); Kh = getmathline(cin,dt);
 		fout << "Kh = " << Kh << "\n";
 		cout << "Kv1 : "; Kv1 = getmathline(cin,dt);
 		fout << "Kv1 = " << Kv1 << "\n";
@@ -34,12 +28,22 @@ int main()
 		fout << "Kv3 = " << Kv3 << "\n";
 		cout << "H : "; H = getmathline(cin,dt);
 		fout << "H = " << H << "\n";
+		cout << "L : "; L = getmathline(cin,dt);
+		fout << "L = " << L << "\n";
 		cout << "y0Prime : "; y0Prime = getmathline(cin,dt);
 		fout << "y0Prime = " << y0Prime << "\n";
 		cout << "z0Prime : "; z0Prime = getmathline(cin,dt);
 		fout << "z0Prime = " << z0Prime << "\n";
 		cout << "Psi : "; Psi = getmathline(cin,dt);
 		fout << "Psi = " << Psi << "\n";
+		cout << "nybox : "; nybox = getmathline(cin,dt);
+		fout << "nybox = " << nybox << "\n";
+		cout << "nzbox : "; nzbox = getmathline(cin,dt);
+		fout << "nzbox = " << nzbox << "\n";
+		cout << "dt : "; cin >> dt;
+		fout << "dt = " << dt << "\n";
+		cout << "T : "; tmp = getmathline(cin,dt); T = getmathline(cin,dt);
+		fout << "T = " << T << "\n";
 	}
 	else
 	{

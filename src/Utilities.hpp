@@ -15,6 +15,7 @@
 #include <cstring>
 #include <iomanip>
 #include <ctime>
+#include "workingdirectory.hpp"
 
 namespace parameters
 {
@@ -42,16 +43,7 @@ namespace parameters
 	extern double TPrime;
 }
 
-double GetPhi(double xsi, double xsi0);
-double GetdPhi(double xsi, double xsi0);
-double GetV(double y, double z);
-double GetVPrime(double yPrime, double zPrime);
-double GetW(double y, double z);
-double GetWPrime(double yPrime, double zPrime);
-double Kv(double y, double z);
-double PevInv(double yPrime, double zPrime);
-double PehInv(double yPrime, double zPrime);
-void ReadIniFile(std::string model);
+// void ReadIniFile(std::string model);
 std::ofstream openOutputFile(std::string filename, bool binary=false);
 
 #endif

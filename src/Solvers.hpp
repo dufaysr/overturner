@@ -11,6 +11,7 @@
 
 #include "Particles2D.hpp"
 #include "Utilities.hpp"
+#include "AdvDiffProblem.hpp"
 #include <iostream>
 #include <iomanip>
 #include <algorithm>
@@ -30,12 +31,12 @@ class Solver
 		Solver(int Nloc, double* yStart, double* zStart, int n);
 		Solver(int Nloc, double* yStart, double* zStart, int ny, int nz);
 		Solver(const Particles2D& particles);
-		virtual void UpdatePosition() =0;		// Pure virtual function
-		virtual void UpdatePositionAdim() =0;	// Pure virtual function
-		Particles2D& Run();
-		Particles2D& Run(std::string model, int nPrint = 5);
-		Particles2D& RunAdim();
-		Particles2D& RunAdim(std::string model, int nPrint = 5);
+		virtual void UpdatePosition(const AbstractAdvDiffProblem& prob) =0;		// Pure virtual function
+		virtual void UpdatePositionAdim(const AbstractAdvDiffProblemAdim& prob) =0;	// Pure virtual function
+		Particles2D& Run(const AbstractAdvDiffProblem& prob);
+		Particles2D& Run(const AbstractAdvDiffProblem& prob, std::string model, int nPrint = 5);
+		Particles2D& RunAdim(const AbstractAdvDiffProblemAdim& prob);
+		Particles2D& RunAdim(const AbstractAdvDiffProblemAdim& prob, std::string model, int nPrint = 5);
 		void DisplayParticles() const;
 		void PrintParticles(std::ofstream& fT, std::ofstream& fY, std::ofstream& fZ) const;
 		void TestWiener();
@@ -50,8 +51,8 @@ class EMSolver : public Solver
 		EMSolver(int Nloc, double* yStart, double* zStart, int n);
 		EMSolver(int Nloc, double* yStart, double* zStart, int ny, int nz);
 		EMSolver(const Particles2D& particles);
-		void UpdatePosition();
-		void UpdatePositionAdim();
+		void UpdatePosition(const AbstractAdvDiffProblem& prob);
+		void UpdatePositionAdim(const AbstractAdvDiffProblemAdim& prob);
 };
 
 /*--------------Derived class from Solver : Backward Ito (BI) solver-----------*/
@@ -63,8 +64,8 @@ class BISolver : public Solver
 		BISolver(int Nloc, double* yStart, double* zStart, int n);
 		BISolver(int Nloc, double* yStart, double* zStart, int ny, int nz);
 		BISolver(const Particles2D& particles);
-		void UpdatePosition();
-		void UpdatePositionAdim();
+		void UpdatePosition(const AbstractAdvDiffProblem& prob);
+		void UpdatePositionAdim(const AbstractAdvDiffProblemAdim& prob);
 };
 
 #endif

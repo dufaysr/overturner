@@ -24,10 +24,11 @@ int main(int argc, char *argv[])
 		model = argv[1];
 	else
 		model = "model"; //default model, if not specified as input argument
-	ReadIniFile(model);
+	// ReadIniFile(model);
 
-	// StudyCaseTrajectories(model,10,.5*L,.5*(1+z0Prime)*H);
+	OverturnerProblem prob("model");
+	StudyCaseTrajectories(prob,model,10,.5*prob.getL1(),prob.getH1()-1.);
 	// StudyCaseConcentration(model,"box",Nloc,.5, .9, 10, 10);
-	StudyCaseTransitionProbabilities(model, "box", dimy, dimz, true);
+	// StudyCaseTransitionProbabilities(model, "box", dimy, dimz, true);
 	return 0;
 }

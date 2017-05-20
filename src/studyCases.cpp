@@ -7,32 +7,32 @@
 */
 
 #include "studyCases.hpp"
-#include "workingdirectory.hpp"
 
 using namespace parameters;
 
-void StudyCaseTrajectories(std::string model, int Nloc, double yStart, double zStart)
+void StudyCaseTrajectories(AbstractAdvDiffProblem& prob, std::string model, int Nloc, double yStart, double zStart)
 {
 	std::cout << "\nRunning StudyCaseTrajectories..." << std::endl;
 	BISolver solver(Nloc, yStart, zStart);
-	Particles2D part = solver.Run(model);
+	Particles2D part = solver.Run(prob, model);
 	std::cout << "\nStudyCaseTrajectories runned successfully." << std::endl;
 }
 
-void StudyCaseTrajectoriesAdim(std::string model, int Nloc, double yStart, double zStart)
+void StudyCaseTrajectoriesAdim(AbstractAdvDiffProblemAdim& prob, std::string model, int Nloc, double yStart, double zStart)
 {
 	std::cout << "\nRunning StudyCaseTrajectoriesAdim..." << std::endl;
 	BISolver solver(Nloc, yStart, zStart);
-	Particles2D part = solver.RunAdim(model);
+	Particles2D part = solver.RunAdim(prob, model);
 	std::cout << "\nStudyCaseTrajectoriesAdim runned successfully." << std::endl;
 }
 
-void StudyCaseConcentration(std::string model, std::string estimator, int Nloc, double yStart, double zStart, int dimy, int dimz)
+void StudyCaseConcentration(AbstractAdvDiffProblemAdim &prob, std::string model, std::string estimator,
+							int Nloc, double yStart, double zStart, int dimy, int dimz)
 {
 	std::cout << "\nRunning StudyCaseConcentration..." << std::endl;
 	std::cout << "1/3 : Generating trajectories..." << std::endl;
 	BISolver solver(Nloc, yStart, zStart);
-	Particles2D part = solver.RunAdim();
+	Particles2D part = solver.RunAdim(prob);
 
 	std::cout << "2/3 : Computing the concentrations..." << std::endl;
 	Estimator *estim;
@@ -54,7 +54,8 @@ void StudyCaseConcentration(std::string model, std::string estimator, int Nloc, 
 	std::cout << "\nStudyCaseConcentration runned successfully." << std::endl;
 }
 
-void StudyCaseTransitionProbabilities(std::string model, std::string estimator, int dimy, int dimz, bool binary)
+void StudyCaseTransitionProbabilities(AbstractAdvDiffProblemAdim& prob, std::string model, std::string estimator,
+									  int dimy, int dimz, bool binary)
 {
 	std::cout << "\nRunning StudyCaseTransitionProbabilities..." << std::endl;
 	std::cout << "1/4 : Generating the initial conditions..." << std::endl;
@@ -83,7 +84,7 @@ void StudyCaseTransitionProbabilities(std::string model, std::string estimator, 
 
 	std::cout << "2/4 : Generating trajectories..." << std::endl;
 	BISolver solver(N, yStart, zStart);
-	Particles2D part = solver.RunAdim();
+	Particles2D part = solver.RunAdim(prob);
 
 	std::cout << "3/4 : Computing the transition probability matrix..." << std::endl;
 	GlobalEstimator *estim;

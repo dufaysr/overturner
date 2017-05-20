@@ -1,0 +1,15 @@
+# Kh = 1e3, Kv1 = 1e-1, Kv2 = 5e-5, Kv3 = 1e-3
+# H = 4e3, L = 12e6
+# y0 = .9*L, z0 = 7./8.*H
+# Psi = 4
+# adimensional time = L*H/Psi = 1.2e10
+PehInv = 1./12
+Pev1Inv = 75
+Pev2Inv = 0.0375
+Pev3Inv = 0.75
+z0Prime = 7./8.
+y0Prime = 0.9
+TPrime = 1*3600*365*24/1.2e10
+dtPrime = 3600/1.2e10
+H = 4e3
+L = 12e6

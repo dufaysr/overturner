@@ -13,9 +13,9 @@ function importfileInfo(model, startRow, endRow)
 
 %% Initialize variables.
 filename = ['/home/renaud/Documents/EPL/tfe/overturner/out/' model '/info.out'];
-delimiter = {' = ','\t'};
+delimiter = {' = ',' '};
 if nargin<=2
-    startRow = 4;
+    startRow = 5;
     endRow = inf;
 end
 
@@ -23,7 +23,7 @@ end
 %   column2: text (%s)
 %	column3: double (%f)
 % For more information, see the TEXTSCAN documentation.
-formatSpec = '%*s%s%f%[^\n\r]';
+formatSpec = '%s%f%[^\n\r]';
 
 %% Open the text file.
 fileID = fopen(filename,'r');
@@ -55,4 +55,5 @@ values = dataArray{:, 2};
 
 for i = 1:size(values,1)
     assignin('base',names{i},values(i));
+end
 end

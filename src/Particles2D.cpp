@@ -10,8 +10,6 @@
 #include <cassert>
 #include "Particles2D.hpp"
 
-using namespace parameters;
-
 Particles2D::Particles2D(int N, double yStart, double zStart):
 mN(N), mTime(0.)
 {

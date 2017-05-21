@@ -38,6 +38,7 @@ class AbstractAdvDiffProblem
 		virtual double getKv(double y, double z) const=0;
 		virtual double getV(double y, double z) const=0;
 		virtual double getW(double y, double z) const=0;
+		virtual void printInfo(std::ofstream& f) const=0;
 };
 
 class OverturnerProblem : public AbstractAdvDiffProblem
@@ -57,6 +58,7 @@ class OverturnerProblem : public AbstractAdvDiffProblem
 		double getKv(double y, double z) const;
 		double getV(double y, double z) const;
 		double getW(double y, double z) const;
+		void printInfo(std::ofstream& f) const;
 		void Display() const;
 };
 
@@ -68,14 +70,17 @@ class AbstractAdvDiffProblemAdim
 		// the adimensionnal domain is [0,1] x [0,1]
 		double mTPrime; // Final time of simulation
 		double mdtPrime; // time step of the numerical scheme
+		double mH, mL; // vertical and meridional characteristic lengths (used in VPrime and WPrime)
+
 	public:
-		AbstractAdvDiffProblemAdim(double TPrime, double dtPrime);
+		AbstractAdvDiffProblemAdim(double TPrime, double dtPrime, double H, double L);
 		double getTPrime()  const;
 		double getdtPrime() const;
 		virtual double getPehInv(double y, double z) const=0;
 		virtual double getPevInv(double y, double z) const=0;
 		virtual double getVPrime(double y, double z) const=0;
 		virtual double getWPrime(double y, double z) const=0;
+		virtual void printInfo(std::ofstream& f) const=0;
 };
 
 class OverturnerProblemAdim : public AbstractAdvDiffProblemAdim
@@ -85,7 +90,6 @@ class OverturnerProblemAdim : public AbstractAdvDiffProblemAdim
 		double mz0Prime;
 		double mPehInv;
 		double mPev1Inv, mPev2Inv, mPev3Inv;
-		double mH, mL; // vertical and meridional characteristic lengths (used in VPrime and WPrime)
 	public:
 		OverturnerProblemAdim(double T, double dt); // default case is using C. Timmermans values for the parameters
 		OverturnerProblemAdim(std::string model);
@@ -94,10 +98,12 @@ class OverturnerProblemAdim : public AbstractAdvDiffProblemAdim
 		double getPevInv(double yPrime, double zPrime) const;
 		double getVPrime(double yPrime, double zPrime) const;
 		double getWPrime(double yPrime, double zPrime) const;
+		void printInfo(std::ofstream& f) const;
 		void Display() const;
 };
 
-double getPhi(double xsi, double xsi0);
-double getdPhi(double xsi, double xsi0);
-double parseMathExpr(std::string value, double dt, double H, double L);
+inline double phi(double xsi, double xsi0);
+inline double dphi(double xsi, double xsi0);
+double v(double y, double y0, double z, double z0, double L, double H);
+double w(double y, double y0, double z, double z0, double L, double H);
 #endif

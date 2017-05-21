@@ -67,45 +67,51 @@ OverturnerProblem::OverturnerProblem(std::string model):
         double val;
         while(std::getline(iniFile, content,' '))
         {
-            std::getline(iniFile,tmp,' ');
-            std::getline(iniFile, value);
-            val = parseMathExpr(value, mdt, mH1, mL1);
-            if (content == "Kh"){
-                mKh = val;
-            }
-            else if (content == "Kv1"){
-                mKv1 = val;
-            }
-            else if (content == "Kv2"){
-                mKv2 = val;
-            }
-            else if (content == "Kv3"){
-                mKv3 = val;
-            }
-            else if (content == "H"){
-                mH1 = val;
-            }
-            else if (content == "L"){
-                mL1 = val;
-            }
-            else if (content == "y0"){
-                my0 = val;
-            }
-            else if (content == "z0"){
-                mz0 = val;
-            }
-            else if (content == "Psi"){
-                mPsi = val;
-            }
-            else if (content == "dt" || content == "Dt"){
-                mdt = val;
-            }
-            else if (content == "T" || content == "tFinal" || content == "Tfinal"){
-                mT = val;
-            }
-            else if (content[0] != '#'){ // # is used to comment a line in inifile
-            	std::cout << "INFO : Ignoring content \"" << content 
-            		<< "\" in constructor of OverturnerProblem" << std::endl;
+            if (content[0] == '#')
+                std::getline(iniFile,tmp);
+            else
+            {
+                std::transform(content.begin(), content.end(), content.begin(), ::tolower);
+                std::getline(iniFile,tmp,' ');
+                std::getline(iniFile, value);
+                val = parseMathExpr(value, mdt, mH1, mL1);
+                if (content == "kh"){
+                    mKh = val;
+                }
+                else if (content == "kv1"){
+                    mKv1 = val;
+                }
+                else if (content == "kv2"){
+                    mKv2 = val;
+                }
+                else if (content == "kv3"){
+                    mKv3 = val;
+                }
+                else if (content == "h"){
+                    mH1 = val;
+                }
+                else if (content == "l"){
+                    mL1 = val;
+                }
+                else if (content == "y0"){
+                    my0 = val;
+                }
+                else if (content == "z0"){
+                    mz0 = val;
+                }
+                else if (content == "psi"){
+                    mPsi = val;
+                }
+                else if (content == "dt"){
+                    mdt = val;
+                }
+                else if (content == "t" || content == "tfinal"){
+                    mT = val;
+                }
+                else if (content[0] != '#'){ // # is used to comment a line in inifile
+                	std::cout << "INFO : Ignoring content \"" << content 
+                		<< "\" in constructor of OverturnerProblem" << std::endl;
+                }
             }
         }
         iniFile.close();
@@ -119,7 +125,8 @@ OverturnerProblem::OverturnerProblem(std::string model):
 
 double OverturnerProblem::getKh(double y, double z) const
 {
-	return mKh;
+    int ChiDomain = (y >= mL0 && y <= mL1 && z >= mH0 && z <= mH1);
+	return ChiDomain*mKh;
 }
 	
 double OverturnerProblem::getKv(double y, double z) const
@@ -133,19 +140,30 @@ double OverturnerProblem::getKv(double y, double z) const
 double OverturnerProblem::getV(double y, double z) const
 {
 	int ChiDomain = (y >= mL0 && y <= mL1 && z >= mH0 && z <= mH1);
-	return ChiDomain*.25*mPsi*(-getPhi(y,my0)*getdPhi(z,mz0)
-		+ getPhi(y,my0)*getdPhi(mH1-z,mH1-mz0)
-		+ getPhi(mL1-y,mL1-my0)*getdPhi(mH1-z,mH1-mz0)
-		- getPhi(mL1-y,mL1-my0)*getdPhi(z,mz0));
+	return ChiDomain*mPsi*v(y,my0,z,mz0,mL1,mH1);
 }
 
 double OverturnerProblem::getW(double y, double z) const
 {
 	int ChiDomain = (y >= mL0 && y <= mL1 && z >= mH0 && z <= mH1);
-	return ChiDomain*.25*mPsi*(getdPhi(y,my0)*getPhi(z,mz0)
-		+ getdPhi(y,my0)*getPhi(mH1-z,mH1-mz0)
-		- getdPhi(mL1-y,mL1-my0)*getPhi(mH1-z,mH1-mz0)
-		- getdPhi(mL1-y,mL1-my0)*getPhi(z,mz0));
+	return ChiDomain*mPsi*w(y,my0,z,mz0,mL1,mH1);
+}
+
+void OverturnerProblem::printInfo(std::ofstream& f) const
+{
+    f << "H0 = " << mH0 << "\n";
+    f << "H1 = " << mH1 << "\n";
+    f << "L0 = " << mL0 << "\n";
+    f << "L1 = " << mL1 << "\n";
+    f << "T = " << mT << "\n";
+    f << "dt = " << mdt << "\n";
+    f << "y0 = " << my0 << "\n";
+    f << "z0 = " << mz0 << "\n";
+    f << "Kh = " << mKh << "\n";
+    f << "Kv1 = " << mKv1 << "\n";
+    f << "Kv2 = " << mKv2 << "\n";
+    f << "Kv3 = " << mKv3 << "\n";
+    f << "Psi = " << mPsi << "\n";
 }
 
 void OverturnerProblem::Display() const
@@ -167,9 +185,11 @@ void OverturnerProblem::Display() const
 }
 
 /*    Adimensionnal Advection-Diffusion problem    */
-AbstractAdvDiffProblemAdim::AbstractAdvDiffProblemAdim(double TPrime, double dtPrime):
+AbstractAdvDiffProblemAdim::AbstractAdvDiffProblemAdim(double TPrime, double dtPrime, double H, double L):
 	mTPrime(TPrime),
-	mdtPrime(dtPrime)
+	mdtPrime(dtPrime),
+    mH(H),
+    mL(L)
 {}
 
 double AbstractAdvDiffProblemAdim::getTPrime() const
@@ -186,19 +206,17 @@ double AbstractAdvDiffProblemAdim::getdtPrime() const
 	OverturnerProblem
 */
 OverturnerProblemAdim::OverturnerProblemAdim(double TPrime, double dtPrime):
-	AbstractAdvDiffProblemAdim(TPrime,dtPrime),
+	AbstractAdvDiffProblemAdim(TPrime,dtPrime,5000.,15e6),
 	my0Prime(13./15.),
 	mz0Prime(4050./5000),
 	mPehInv(1./6.), // hence Peh = 6
 	mPev1Inv(150), // hence Pev1 = 6.67e-3
 	mPev2Inv(.15), // hence Pev2 = 6.67
-	mPev3Inv(1.5), // hence Pev3 = 0.667
-	mH(5000),
-	mL(15e6)
+	mPev3Inv(1.5) // hence Pev3 = 0.667
 {}
 
 OverturnerProblemAdim::OverturnerProblemAdim(std::string model):
-	AbstractAdvDiffProblemAdim(0.,0.)
+	AbstractAdvDiffProblemAdim(0.,0.,0.,0.)
 {
 	// Read file
 	std::string filename = wd::root + "in/" + model + ".in";
@@ -264,10 +282,10 @@ OverturnerProblemAdim::OverturnerProblemAdim(std::string model):
 
 OverturnerProblemAdim::OverturnerProblemAdim(OverturnerProblem& prob):
 	AbstractAdvDiffProblemAdim(prob.mT*prob.mPsi/(prob.mH1*prob.mL1),
-		prob.mdt*prob.mPsi/(prob.mH1*prob.mL1))
+		prob.mdt*prob.mPsi/(prob.mH1*prob.mL1),
+        prob.mH1-prob.mH0,
+        prob.mL1-prob.mL0)
 {
-	mH = prob.mH1-prob.mH0;
-	mL = prob.mL1-prob.mL0;
 	my0Prime = prob.my0/mL;
 	mz0Prime = prob.mz0/mH;
 	mPehInv = prob.mKh*mH/(prob.mPsi*mL);
@@ -278,7 +296,8 @@ OverturnerProblemAdim::OverturnerProblemAdim(OverturnerProblem& prob):
 
 double OverturnerProblemAdim::getPehInv(double yPrime, double zPrime) const
 {
-	return mPehInv;
+    int ChiDomain = (yPrime >= 0. && yPrime <= 1. && zPrime >= 0. && zPrime <= 1.);
+	return ChiDomain*mPehInv;
 }
 
 double OverturnerProblemAdim::getPevInv(double yPrime, double zPrime) const
@@ -292,19 +311,27 @@ double OverturnerProblemAdim::getPevInv(double yPrime, double zPrime) const
 double OverturnerProblemAdim::getVPrime(double yPrime, double zPrime) const
 {
 	int ChiDomain = (yPrime >= 0. && yPrime <= 1. && zPrime >= 0. && zPrime <= 1.);
-	return ChiDomain*.25*mH*(-getPhi(yPrime,my0Prime)*getdPhi(zPrime,mz0Prime)
-		+ getPhi(yPrime,my0Prime)*getdPhi(1.-zPrime,1.-mz0Prime)
-		+ getPhi(1.-yPrime,1.-my0Prime)*getdPhi(1.-zPrime,1.-mz0Prime)
-		- getPhi(1.-yPrime,1.-my0Prime)*getdPhi(zPrime,mz0Prime));
+	return ChiDomain*v(yPrime,my0Prime,zPrime,mz0Prime,1.,1.);
 }
 
 double OverturnerProblemAdim::getWPrime(double yPrime, double zPrime) const
 {
 	int ChiDomain = (yPrime >= 0. && yPrime <= 1. && zPrime >= 0. && zPrime <= 1.);
-	return ChiDomain*.25*mL*(getdPhi(yPrime,my0Prime)*getPhi(zPrime,mz0Prime)
-		+ getdPhi(yPrime,my0Prime)*getPhi(1.-zPrime,1.-mz0Prime)
-		- getdPhi(1.-yPrime,1.-my0Prime)*getPhi(1.-zPrime,1.-mz0Prime)
-		- getdPhi(1.-yPrime,1.-my0Prime)*getPhi(zPrime,mz0Prime));
+	return ChiDomain*w(yPrime,my0Prime,zPrime,mz0Prime,1.,1.);
+}
+
+void OverturnerProblemAdim::printInfo(std::ofstream& f) const
+{
+    f << "TPrime = " << mTPrime << "\n";
+    f << "dtPrime = " << mdtPrime << "\n";
+    f << "y0Prime = " << my0Prime << "\n";
+    f << "z0Prime = " << mz0Prime << "\n";
+    f << "PehInv = " << mPehInv << "\n";
+    f << "Pev1Inv = " << mPev1Inv << "\n";
+    f << "Pev2Inv = " << mPev2Inv << "\n";
+    f << "Pev3Inv = " << mPev3Inv << "\n";
+    f << "H = " << mH << "\n";
+    f << "L = " << mL << "\n";
 }
 
 void OverturnerProblemAdim::Display() const
@@ -321,61 +348,43 @@ void OverturnerProblemAdim::Display() const
 }
 
 /* Other utility functions */
-double getPhi(double xsi, double xsi0)
+double phi(double xsi, double xsi0)
 {
-	int Chi = (xsi < xsi0);
-	return Chi*(xsi*(2*xsi0-xsi))/(xsi0*xsi0);
+    return (xsi*(2.*xsi0-xsi))/(xsi0*xsi0);
 }
 
-double getdPhi(double xsi, double xsi0)
+double dphi(double xsi, double xsi0)
 {
-	int Chi = (xsi < xsi0);
-	return Chi*(2*(xsi0-xsi))/(xsi0*xsi0);
+	return (2.*(xsi0-xsi))/(xsi0*xsi0);
 }
 
-double parseMathExpr(std::string value, double dt, double H, double L)
+double v(double y, double y0, double z, double z0, double L, double H)
 {
-    char *pEnd, *pEndtmp;
-    double val, tmpval;
-    val = strtod(value.c_str(), &pEnd);
-    while (pEnd[0])
-    {
-        if (pEnd[0] == '/')
-            val /= strtod(&(pEnd[1]),&pEndtmp);
-        else if (pEnd[0] == '*')
-        {
-            tmpval = strtod(&(pEnd[1]),&pEndtmp);
-            if (tmpval){
-                val *= tmpval;
-            }
-            else if (strncmp("dt",&(pEnd[1]),2) == 0 || strncmp("Dt",&(pEnd[1]),2) == 0)
-            {
-                val *= dt;
-                pEndtmp += 2;
-            }
-            else if (pEnd[1] == 'H')
-            {
-                val *= H;
-                pEndtmp += 1;
-            }
-            else if (pEnd[1] == 'L')
-            {
-                val *= L;
-            	pEndtmp += 1;
-            }
-            else{
-            	std::cerr << "Unexpected nonnumeric character in \"" << value 
-                        << "\" : cannot interpret char \"" << pEnd[-1] << "\"." << std::endl;
-            	abort();
-            }
-        }
-        else
-        {
-            std::cerr << "Unexpected nonnumeric character in \"" << value 
-                        << "\" : cannot interpret char \"" << pEnd[-1] << "\"." << std::endl;
-            abort();
-        }
-        pEnd = pEndtmp;
-    }
-    return val;
+    int by0m = y < y0;
+    int by0 = y == y0;
+    int by0p = y > y0;
+    int bz0m = z < z0;
+    int bz0p = z > z0;
+    return by0m*bz0m*(-phi(y,y0)*dphi(z,z0))
+        +  by0m*bz0p*(phi(y,y0)*dphi(H-z,H-z0))
+        +  by0p*bz0m*(-phi(L-y,L-y0)*dphi(z,z0))
+        +  by0p*bz0p*(phi(L-y,L-y0)*dphi(H-z,H-z0))
+        +  by0*bz0m*(-dphi(z,z0))
+        +  by0*bz0p*(dphi(H-z,H-z0));
+}
+
+double w(double y, double y0, double z, double z0, double L, double H)
+{
+    int by0m = y < y0;
+    int by0p = y > y0;
+    int bz0m = z < z0;
+    int bz0 = z == z0;
+    int bz0p = z > z0;
+
+    return by0m*bz0m*(dphi(y,y0)*phi(z,z0))
+        +  by0m*bz0p*(dphi(y,y0)*phi(H-z,H-z0))
+        +  by0p*bz0m*(-dphi(L-y,L-y0)*phi(z,z0))
+        +  by0p*bz0p*(-phi(L-y,L-y0)*phi(H-z,H-z0))
+        +  by0m*bz0*(dphi(y,y0))
+        +  by0p*bz0*(-dphi(L-y,L-y0));
 }

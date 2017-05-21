@@ -19,11 +19,12 @@
 class Estimator
 {
 	protected:
-		int mDimy, mDimz;
+		int mNboxy, mNboxz;
+		double mH, mL;
 		Field mEstimator;
 
 	public:
-		Estimator(int dimy, int dimz);
+		Estimator(int nboxy, int nboxz, double H, double L);
 		virtual ~Estimator() {}
 		virtual void Estimate(const Particles2D& particles) =0;
 		virtual void EstimateAdim(const Particles2D& particles) =0;
@@ -37,8 +38,8 @@ class KernelEstimator : public Estimator
 		double (*mKernel)(double y, double z);
 
 	public:
-		KernelEstimator(int dimy, int dimz, double lambda, std::string kernelFunction);
-		KernelEstimator(int dimy, int dimz, double lambda, double (*kernelFunction)(double y, double z));
+		KernelEstimator(int nboxy, int nboxz, double H, double L, double lambda, std::string kernelFunction);
+		KernelEstimator(int nboxy, int nboxz, double H, double L, double lambda, double (*kernelFunction)(double y, double z));
 		void Estimate(const Particles2D& particles);
 		void EstimateAdim(const Particles2D& particles);
 };
@@ -46,7 +47,7 @@ class KernelEstimator : public Estimator
 class BoxEstimator : public Estimator
 {
 	public:
-		BoxEstimator(int dimy, int dimz);
+		BoxEstimator(int nboxy, int nboxz, double H, double L);
 		void Estimate(const Particles2D& particles);
 		void EstimateAdim(const Particles2D& particles);
 };
@@ -54,11 +55,12 @@ class BoxEstimator : public Estimator
 class GlobalEstimator
 {
 	protected:
-		int mDimy, mDimz, mNbox;
+		int mNboxy, mNboxz, mNbox;
+		double mH, mL;
 		Field mEstimator;
 
 	public:
-		GlobalEstimator(int dimy, int dimz, int Nbox);
+		GlobalEstimator(int nboxy, int nboxz, double H, double L, int Nbox);
 		virtual ~GlobalEstimator() {}
 		virtual void Estimate(const Particles2D& particles) =0;
 		virtual void EstimateAdim(const Particles2D& particles) =0;
@@ -72,8 +74,8 @@ class GlobalKernelEstimator : public GlobalEstimator
 		double (*mKernel)(double y, double z);
 
 	public:
-		GlobalKernelEstimator(int dimy, int dimz, int Nbox, double lambda, std::string kernelFunction);
-		GlobalKernelEstimator(int dimy, int dimz, int Nbox, double lambda, double (*kernelFunction)(double y, double z));
+		GlobalKernelEstimator(int nboxy, int nboxz, double H, double L, int Nbox, double lambda, std::string kernelFunction);
+		GlobalKernelEstimator(int nboxy, int nboxz, double H, double L, int Nbox, double lambda, double (*kernelFunction)(double y, double z));
 		void Estimate(const Particles2D& particles);
 		void EstimateAdim(const Particles2D& particles);
 };
@@ -81,7 +83,7 @@ class GlobalKernelEstimator : public GlobalEstimator
 class GlobalBoxEstimator : public GlobalEstimator
 {
 	public:
-		GlobalBoxEstimator(int dimy, int dimz, int Nbox);
+		GlobalBoxEstimator(int nboxy, int nboxz, double H, double L, int Nbox);
 		void Estimate(const Particles2D& particles);
 		void EstimateAdim(const Particles2D& particles);
 };

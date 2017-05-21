@@ -12,12 +12,11 @@
 #include "Solvers.hpp"
 #include "workingdirectory.hpp"
 
-using namespace parameters;
 /*-------------- Base Class Solver -----------------------*/
 Solver::Solver(int N, double yStart, double zStart):
 	mParticles(N,yStart,zStart), 
-	seed(std::chrono::system_clock::now().time_since_epoch().count()),
-	// seed(1),
+	// seed(std::chrono::system_clock::now().time_since_epoch().count()),
+	seed(1),
 	generator(seed),
 	wiener(0.0,1.0)
 {}
@@ -53,7 +52,7 @@ Solver::Solver(const Particles2D& particles):
 
 Particles2D& Solver::Run(const AbstractAdvDiffProblem& prob)
 {
-	for (int i=0; i*dt < T; i++)
+	for (int i=0; i*prob.getdt() < prob.getT(); i++)
 	{
 		UpdatePosition(prob);
 	}
@@ -70,7 +69,7 @@ Particles2D& Solver::Run(const AbstractAdvDiffProblem& prob, std::string model, 
 
 	PrintParticles(fT, fY, fZ);
 	int i=0;
-	while (i*dt < T)
+	while (i*prob.getdt() < prob.getT())
 	{
 		for (int j=0; j<nPrint; j++)
 		{
@@ -87,7 +86,7 @@ Particles2D& Solver::Run(const AbstractAdvDiffProblem& prob, std::string model, 
 
 Particles2D& Solver::RunAdim(const AbstractAdvDiffProblemAdim& prob)
 {
-	for (int i=0; i*dtPrime < TPrime; i++)
+	for (int i=0; i*prob.getdtPrime() < prob.getTPrime(); i++)
 	{
 		UpdatePositionAdim(prob);
 	}
@@ -96,15 +95,15 @@ Particles2D& Solver::RunAdim(const AbstractAdvDiffProblemAdim& prob)
 
 Particles2D& Solver::RunAdim(const AbstractAdvDiffProblemAdim& prob, std::string model, int nPrint)
 {
-	std::ofstream fT = openOutputFile(wd::root + "out/" + model + "/time.out");
-	std::ofstream fY = openOutputFile(wd::root + "out/" + model + "/Y.out");
+	std::ofstream fT = openOutputFile(wd::root + "out/" + model + "/tadim.out");
+	std::ofstream fY = openOutputFile(wd::root + "out/" + model + "/Yadim.out");
 	fY.setf(std::ios::scientific); fY.precision(10);
-	std::ofstream fZ = openOutputFile(wd::root + "out/" + model + "/Z.out");
+	std::ofstream fZ = openOutputFile(wd::root + "out/" + model + "/Zadim.out");
 	fZ.setf(std::ios::scientific); fZ.precision(10);
 
 	PrintParticles(fT, fY, fZ);
 	int i=0;
-	while (i*dtPrime < TPrime)
+	while (i*prob.getdtPrime() < prob.getTPrime())
 	{
 		for (int j=0; j<nPrint; j++)
 		{

@@ -8,152 +8,53 @@
 
 #include "Utilities.hpp"
 
-namespace parameters
+double parseMathExpr(std::string value, double dt, double H, double L)
 {
-	double Kh, Kv1, Kv2, Kv3;
-	double H, L;
-	double y0Prime, z0Prime, y0, z0;
-	double Psi;
-    double dt, dtPrime;
-    double T, TPrime;
-	int nybox, nzbox, Nbox, Nloc, dimy, dimz;
+    char *pEnd, *pEndtmp;
+    double val, tmpval;
+    std::transform(value.begin(), value.end(), value.begin(), ::tolower);
+    val = strtod(value.c_str(), &pEnd);
+    while (pEnd[0])
+    {
+        if (pEnd[0] == '/')
+            val /= strtod(&(pEnd[1]),&pEndtmp);
+        else if (pEnd[0] == '*')
+        {
+            tmpval = strtod(&(pEnd[1]),&pEndtmp);
+            if (tmpval){
+                val *= tmpval;
+            }
+            else if (strncmp("dt",&(pEnd[1]),2) == 0)
+            {
+                val *= dt;
+                pEndtmp += 2;
+            }
+            else if (pEnd[1] == 'h')
+            {
+                val *= H;
+                pEndtmp += 1;
+            }
+            else if (pEnd[1] == 'l')
+            {
+                val *= L;
+                pEndtmp += 1;
+            }
+            else{
+                std::cerr << "Unexpected nonnumeric character in \"" << value 
+                        << "\" : cannot interpret char \"" << pEnd[-1] << "\"." << std::endl;
+                abort();
+            }
+        }
+        else
+        {
+            std::cerr << "Unexpected nonnumeric character in \"" << value 
+                        << "\" : cannot interpret char \"" << pEnd[-1] << "\"." << std::endl;
+            abort();
+        }
+        pEnd = pEndtmp;
+    }
+    return val;
 }
-
-// void ReadIniFile(std::string model)
-// {
-//     std::string filename = wd::root + "in/" + model + ".in";
-//     std::ifstream iniFile(filename.c_str(), std::ios::in);
-//     std::ofstream fInfo(wd::root + "out/" + model + "/info.out", std::ios::out | std::ios::trunc);
-//     if(iniFile && fInfo)
-//     {
-//         auto t = std::time(nullptr);
-//         auto tm = *std::localtime(&t);
-//         fInfo << "File generated on " << std::put_time(&tm, "%d-%m-%Y at %Hh %Mm %Ss") << "\n";
-//         fInfo << "Model loaded is " << filename << "\n";
-//         fInfo << "The values used are :\n";
-//         std::string content, tmp, value;
-//         double val;
-//         bool bH = false, bL = false, bdt = false, bT = false, bnybox = false, bnzbox = false, bPsi = false;
-//         while(std::getline(iniFile, content,' '))
-//         {
-//             std::getline(iniFile,tmp,' ');
-//             std::getline(iniFile, value);
-//             val = parseMathExpr(value, mdt);
-//             if (content == "Kh"){
-//                 Kh = val;
-//                 fInfo << "\tKh = " << Kh << "\n"; 
-//             }
-//             else if (content == "Kv1"){
-//                 Kv1 = val;
-//                 fInfo << "\tKv1 = " << Kv1 << "\n";
-//             }
-//             else if (content == "Kv2"){
-//                 Kv2 = val;
-//                 fInfo << "\tKv2 = " << Kv2 << "\n";
-//             }
-//             else if (content == "Kv3"){
-//                 Kv3 = val;
-//                 fInfo << "\tKv3 = " << Kv3 << "\n";
-//             }
-//             else if (content == "H"){
-//                 H = val;
-//                 fInfo << "\tH = " << H << "\n";
-//                 bH = true;
-//             }
-//             else if (content == "L"){
-//                 L = val;
-//                 fInfo << "\tL = " << L << "\n";
-//                 bL = true;
-//             }
-//             else if (content == "y0Prime"){
-//                 y0Prime = val;
-//                 y0 = y0Prime*L;
-//                 fInfo << "\ty0Prime = " << y0Prime << "\n";
-//                 fInfo << "\ty0 = " << y0 << "\n";
-//             }
-//             else if (content == "z0Prime"){
-//                 z0Prime = val;
-//                 z0 = z0Prime*H;
-//                 fInfo << "\tz0Prime = " << z0Prime << "\n";
-//                 fInfo << "\tz0 = " << z0 << "\n";
-//             }
-//             else if (content == "Psi"){
-//                 Psi = val;
-//                 fInfo << "\tPsi = " << Psi << "\n";
-//                 bPsi = true;
-//             }
-//             else if (content == "dt" || content == "Dt"){
-//                 dt = val;
-//                 fInfo << "\tdt = " << dt << "\n";
-//                 bdt = true;
-//             }
-//             else if (content == "T" || content == "tFinal" || content == "Tfinal"){
-//                 T = val;
-//                 fInfo << "\tT = " << T << "\n";
-//                 bT = true;
-//             }
-//             else if (content == "nybox"){
-//                 nybox = int(val);
-//                 fInfo << "\tnybox = " << nybox << "\n";
-//                 bnybox = true;
-//             }
-//             else if (content == "nzbox"){
-//                 nzbox = int(val);
-//                 fInfo << "\tnzbox = " << nzbox << "\n";
-//                 bnzbox = true;
-//             }
-//             else if (content == "Nloc"){
-//                 Nloc = int(val);
-//                 fInfo << "\tNloc = " << Nloc << "\n";
-//             }
-//             else if (content == "dimy" || content == "Dimy" || content == "ny"){
-//                 dimy = int(val);
-//                 fInfo << "\tdimy = " << dimy << "\n";
-//             }
-//             else if (content == "dimz" || content == "Dimz" || content == "nz"){
-//                 dimz = int(val);
-//                 fInfo << "\tdimz = " << dimz << "\n";
-//             }
-//             else{
-//                 std::cerr << "Unexpected content \"" << content 
-//                           << "\" in ini file. Please provide an appropriate ini file" << std::endl;
-//                 abort();
-//             }
-//         }
-        
-//         if (bdt && bT && bH && bL && bPsi)
-//         {
-//             dtPrime = dt*Psi/(L*H);
-//             TPrime = T*Psi/(L*H);
-//             fInfo << "\tdtPrime = " << dtPrime << "\n"; 
-//             fInfo << "\tTPrime = " << TPrime << "\n";
-//         }
-//         else
-//         {
-//             std::cerr << "Uncomplete ini file !" << std::endl;
-//             abort();
-//         }
-
-//         if (bnybox && bnzbox)
-//         {
-//             Nbox = nybox*nzbox;
-//             fInfo << "\tNbox = " << Nbox << "\n";
-//         }
-
-//         iniFile.close();
-//         fInfo.close();    
-//     }
-//     else
-//     {
-//         if (!iniFile && !fInfo)
-//             std::cerr << "Unable to open neither ini file nor out/info.out!" << std::endl;
-//         else if (!iniFile)
-//             std::cerr << "Unable to open ini file !" << std::endl;
-//         else
-//             std::cerr << "Unable to open file out/info.out" << std::endl;
-//         abort();
-//     }
-// }
 
 std::ofstream openOutputFile(std::string filename, bool binary)
 {
@@ -210,4 +111,244 @@ std::ofstream openOutputFile(std::string filename, bool binary)
             abort();
         }
     }   
+}
+
+void show_usage(std::string name)
+{
+    std::cerr << "\nUsage: " << name << " <studycase> <studycase_param>\n"
+              << "\tor " << name << " -h,--help (displays this help message)\n\n"
+              << "<studycase>:\n\n"
+              << "\t-t,--trajectories : generates particles trajectories\n"
+              << "\t <trajectories_param> : \n"
+              << "\t\t-m,--model : model name (there must be a \"model.in\" file).\n"
+              << "\t\t-N,--Nloc : number of trajectories generated.\n"
+              << "\t\t--ystart : initial y position.\n"
+              << "\t\t--zstart : initial z position.\n"
+              << "\t\t(--dim) : optional. By default the trajectoires are simulated\n"
+              << "\t\ton the adimensionnal model. This option ensures that the\n"
+              << "\t\ttrajectories are generated on the dimensionnal model.\n\n"
+              << "\t-c,--concentration : compute the concentration of the tracer.\n"
+              << "\t<concentration_param> : \n"
+              << "\t\t-m,--model : model name (there must be a \"model.in\" file).\n"
+              << "\t\t-N,--Nloc : number of trajectories generated.\n"
+              << "\t\t--nboxy : number of boxes in the y-drection.\n"
+              << "\t\t--nboxz : number of boxes in the z-drection.\n"
+              << "\t\t--ystart : initial y position.\n"
+              << "\t\t--zstart : initial z position.\n\n"
+              << "\t-M,--transition_proba : compute the transition probability matrix M.\n"
+              << "\t<transition_proba_param> :\n"
+              << "\t\t-m,--model : model name (there must be a \"model.in\" file).\n"
+              << "\t\t--nboxy : number of boxes in the y-drection.\n"
+              << "\t\t--nboxz : number of boxes in the z-drection.\n"
+              << "\t\t--nyloc : dimension of the discretization of the\n"
+              << "\t\tindividual boxes along the y-direction.\n"
+              << "\t\t--nzloc : dimension of the discretization of the\n"
+              << "\t\tindividual boxes along the z-direction.\n\n"
+              << std::endl;
+}
+
+int get_args_traj(int argc, char *argv[], std::string& model, int& Nloc, double& yStart, double& zStart, bool& adim)
+{
+    int flag = -4; // the 2 parameters model and Nloc are mandatory
+    for (int i = 2; i < argc; i++)
+    {
+        std::string arg = argv[i];
+        if ((arg == "-h") || (arg == "--help"))
+        {
+            show_usage(argv[0]);
+            return 2;
+        }
+        else if (arg == "--dim")
+        {
+            adim = false;
+        }
+        else if ((arg == "-m") || (arg == "--model")) 
+        {
+            if (i + 1 < argc) 
+            { 
+                model = argv[++i]; 
+                flag++;
+            }
+            else
+            {
+                std::cerr << "--model (-m) parameter requires one string argument." << std::endl;
+                return 1;
+            }
+        }
+        else if ((arg == "-N") || (arg == "--Nloc")) {
+            if (i + 1 < argc)
+            { 
+                Nloc = std::stoi(argv[++i]);
+                flag++;
+            }
+            else
+            {
+                std::cerr << "--Nloc (-N) parameter requires one integer argument." << std::endl;
+                return 1;
+            }  
+        }
+        else if (arg == "--ystart") {
+            if (i + 1 < argc) {
+                yStart = std::stod(argv[++i]);
+                flag++;
+            }
+            else {
+                std::cerr << "--ystart parameter requires one double argument." << std::endl;
+                return 1;
+            }  
+        }
+        else if (arg == "--zstart") {
+            if (i + 1 < argc) {
+                zStart = std::stod(argv[++i]);
+                flag++;
+            }
+            else {
+                std::cerr << "--zstart parameter requires one double argument." << std::endl;
+                return 1;
+            }  
+        }
+    }
+    return flag;
+}
+
+int get_args_conc(int argc, char *argv[], std::string& model, int& Nloc, int& nboxy, int& nboxz, double& yStart, double& zStart)
+{
+    int flag = -6;
+    for (int i = 2; i < argc; i++)
+    {
+        std::string arg = argv[i];
+        if ((arg == "-h") || (arg == "--help"))
+        {
+            show_usage(argv[0]);
+            return 2;
+        }
+        else if ((arg == "-m") || (arg == "--model")) 
+        {
+            if (i + 1 < argc) {
+                model = argv[++i];
+                flag++;
+            }
+            else {
+                std::cerr << "--model (-m) parameter requires one string argument." << std::endl;
+                return 1;
+            }
+        }
+        else if ((arg == "-N") || (arg == "--Nloc")) {
+            if (i + 1 < argc) {
+                Nloc = std::stoi(argv[++i]);
+                flag++;
+            }
+            else {
+                std::cerr << "--Nloc (-N) parameter requires one integer argument." << std::endl;
+                return 1;
+            }  
+        }
+        else if (arg == "--nboxy") {
+            if (i + 1 < argc) {
+                nboxy = std::stoi(argv[++i]);
+                flag++;
+            }
+            else {
+                std::cerr << "--nboxy parameter requires one integer argument." << std::endl;
+                return 1;
+            }  
+        }
+        else if (arg == "--nboxz") {
+            if (i + 1 < argc) {
+                nboxz = std::stoi(argv[++i]);
+                flag++;
+            }
+            else {
+                std::cerr << "--nboxz parameter requires one integer argument." << std::endl;
+                return 1;
+            }  
+        }
+        else if (arg == "--ystart") {
+            if (i + 1 < argc) {
+                yStart = std::stod(argv[++i]);
+                flag++;
+            }
+            else {
+                std::cerr << "--ystart parameter requires one double argument." << std::endl;
+                return 1;
+            }  
+        }
+        else if (arg == "--zstart") {
+            if (i + 1 < argc) {
+                zStart = std::stod(argv[++i]);
+                flag++;
+            }
+            else {
+                std::cerr << "--zstart parameter requires one double argument." << std::endl;
+                return 1;
+            }  
+        }
+    }
+    return flag;
+}
+
+int get_args_tp(int argc, char *argv[], std::string& model, int& nboxy, int& nboxz, int& nyloc, int& nzloc)
+{
+    int flag = -5;
+    for (int i = 2; i < argc; i++)
+    {
+        std::string arg = argv[i];
+        if ((arg == "-h") || (arg == "--help"))
+        {
+            show_usage(argv[0]);
+            return 2;
+        }
+        else if ((arg == "-m") || (arg == "--model")) 
+        {
+            if (i + 1 < argc) {
+                model = argv[++i];
+                flag++;
+            }
+            else {
+                std::cerr << "--model (-m) parameter requires one string argument." << std::endl;
+                return 1;
+            }
+        }
+        else if (arg == "--nboxy") {
+            if (i + 1 < argc) {
+                nboxy = std::stoi(argv[++i]);
+                flag++;
+            }
+            else {
+                std::cerr << "--nboxy parameter requires one integer argument." << std::endl;
+                return 1;
+            }  
+        }
+        else if (arg == "--nboxz") {
+            if (i + 1 < argc) {
+                nboxz = std::stoi(argv[++i]);
+                flag++;
+            }
+            else {
+                std::cerr << "--nboxz parameter requires one integer argument." << std::endl;
+                return 1;
+            }  
+        }
+        else if (arg == "--nyloc") {
+            if (i + 1 < argc) {
+                nyloc = std::stoi(argv[++i]);
+                flag++;
+            }
+            else {
+                std::cerr << "--nyloc parameter requires one integer argument." << std::endl;
+                return 1;
+            }  
+        }
+        else if (arg == "--nzloc") {
+            if (i + 1 < argc) {
+                nzloc = std::stoi(argv[++i]);
+                flag++;
+            }
+            else {
+                std::cerr << "--nzloc parameter requires one integer argument." << std::endl;
+                return 1;
+            }  
+        }
+    }
+    return flag;
 }

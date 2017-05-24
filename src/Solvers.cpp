@@ -15,8 +15,8 @@
 /*-------------- Base Class Solver -----------------------*/
 Solver::Solver(int N, double yStart, double zStart):
 	mParticles(N,yStart,zStart), 
-	// seed(std::chrono::system_clock::now().time_since_epoch().count()),
-	seed(1),
+	seed(std::chrono::system_clock::now().time_since_epoch().count()),
+	// seed(1),
 	generator(seed),
 	wiener(0.0,1.0)
 {}
@@ -59,26 +59,44 @@ Particles2D& Solver::Run(const AbstractAdvDiffProblem& prob)
 	return mParticles;
 }
 
-Particles2D& Solver::Run(const AbstractAdvDiffProblem& prob, std::string model, int nPrint)
+Particles2D& Solver::Run(const AbstractAdvDiffProblem& prob, std::string model, int nPrint, bool printInit, bool binary)
 {
-	std::ofstream fT = openOutputFile(wd::root + "out/" + model + "/time.out");
-	std::ofstream fY = openOutputFile(wd::root + "out/" + model + "/Y.out");
+	std::ofstream fT = openOutputFile(wd::root + "out/" + model + "/time.out",binary);
+	std::ofstream fY = openOutputFile(wd::root + "out/" + model + "/Y.out",binary);
 	fY.setf(std::ios::scientific); fY.precision(10);
-	std::ofstream fZ = openOutputFile(wd::root + "out/" + model + "/Z.out");
+	std::ofstream fZ = openOutputFile(wd::root + "out/" + model + "/Z.out",binary);
 	fZ.setf(std::ios::scientific); fZ.precision(10);
+	
+	if (!binary){
+		if (printInit)
+			PrintParticles(fT, fY, fZ);
 
-	PrintParticles(fT, fY, fZ);
-	int i=0;
-	while (i*prob.getdt() < prob.getT())
-	{
-		for (int j=0; j<nPrint; j++)
+		int i=0;
+		while (i*prob.getdt() < prob.getT())
 		{
-			UpdatePosition(prob);
-			i++;
+			for (int j=0; j<nPrint; j++)
+			{
+				UpdatePosition(prob);
+				i++;
+			}
+			PrintParticles(fT,fY,fZ); // print particles every nPrint time steps
 		}
-		PrintParticles(fT,fY,fZ); // print particles every 5 time steps
 	}
+	else{
+		if (printInit)
+			PrintParticlesBinary(fT, fY, fZ);
 
+		int i=0;
+		while (i*prob.getdt() < prob.getT())
+		{
+			for (int j=0; j<nPrint; j++)
+			{
+				UpdatePosition(prob);
+				i++;
+			}
+			PrintParticlesBinary(fT,fY,fZ); // print particles every nPrint time steps
+		}
+	}
 	fT.close(); fY.close(); fZ.close();
 
 	return mParticles;
@@ -93,26 +111,45 @@ Particles2D& Solver::RunAdim(const AbstractAdvDiffProblemAdim& prob)
 	return mParticles;
 }
 
-Particles2D& Solver::RunAdim(const AbstractAdvDiffProblemAdim& prob, std::string model, int nPrint)
+Particles2D& Solver::RunAdim(const AbstractAdvDiffProblemAdim& prob, std::string model, int nPrint, bool printInit, bool binary)
 {
-	std::ofstream fT = openOutputFile(wd::root + "out/" + model + "/tadim.out");
-	std::ofstream fY = openOutputFile(wd::root + "out/" + model + "/Yadim.out");
+	std::ofstream fT = openOutputFile(wd::root + "out/" + model + "/tadim.out",binary);
+	std::ofstream fY = openOutputFile(wd::root + "out/" + model + "/Yadim.out",binary);
 	fY.setf(std::ios::scientific); fY.precision(10);
-	std::ofstream fZ = openOutputFile(wd::root + "out/" + model + "/Zadim.out");
+	std::ofstream fZ = openOutputFile(wd::root + "out/" + model + "/Zadim.out",binary);
 	fZ.setf(std::ios::scientific); fZ.precision(10);
 
-	PrintParticles(fT, fY, fZ);
-	int i=0;
-	while (i*prob.getdtPrime() < prob.getTPrime())
-	{
-		for (int j=0; j<nPrint; j++)
-		{
-			UpdatePositionAdim(prob);
-			i++;
-		}
-		PrintParticles(fT,fY,fZ); // print particles every 5 time steps
-	}
+	
+	if (!binary){
+		if (printInit)
+			PrintParticlesBinary(fT, fY, fZ);
 
+		int i=0;
+		while (i*prob.getdtPrime() < prob.getTPrime())
+		{
+			for (int j=0; j<nPrint; j++)
+			{
+				UpdatePositionAdim(prob);
+				i++;
+			}
+			PrintParticlesBinary(fT,fY,fZ); // print particles every nPrint time steps
+		}
+	}
+	else{
+		if (printInit)
+			PrintParticlesBinary(fT, fY, fZ);
+
+		int i=0;
+		while (i*prob.getdtPrime() < prob.getTPrime())
+		{
+			for (int j=0; j<nPrint; j++)
+			{
+				UpdatePositionAdim(prob);
+				i++;
+			}
+			PrintParticlesBinary(fT,fY,fZ); // print particles every nPrint time steps
+		}
+	}
 	fT.close(); fY.close(); fZ.close();
 
 	return mParticles;
@@ -130,17 +167,24 @@ void Solver::PrintParticles(std::ofstream& fT, std::ofstream& fY, std::ofstream&
 {
 	fT << mParticles.mTime << "\n";
 
-    for(int i=0; i<mParticles.mN; i++)
-    {
-    	fY << mParticles.mY[i] << " ";
-  	}
-  	fY << "\n";
-
   	for(int i=0; i<mParticles.mN; i++)
-    {
-    	fZ << mParticles.mZ[i] << " ";
-  	}
-  	fZ << "\n";
+  	{
+  		fY << mParticles.mY[i] << " ";
+	}
+	fY << "\n";
+
+	for(int i=0; i<mParticles.mN; i++)
+  	{
+   		fZ << mParticles.mZ[i] << " ";
+	}
+	fZ << "\n";
+}
+
+void Solver::PrintParticlesBinary(std::ofstream& fT, std::ofstream& fY, std::ofstream& fZ) const
+{
+	fT.write((char*) &(mParticles.mTime), sizeof(double));
+	fY.write((char*) &(mParticles.mY), mParticles.mN*sizeof(double));
+	fZ.write((char*) &(mParticles.mZ), mParticles.mN*sizeof(double));
 }
 
 void Solver::TestWiener()

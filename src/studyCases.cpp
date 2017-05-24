@@ -25,7 +25,9 @@ void StudyCaseTrajectories(AbstractAdvDiffProblem& prob, std::string model, int 
     fInfo << "yStart = " << yStart << "\n";
     fInfo << "zStart = " << zStart << "\n";
     fInfo.close();
-	
+    std::cout << "fInfo written succesfully !" << std::endl;
+
+	std::cout << "Generating (and writing) trajectories..." << std::endl;
 	BISolver solver(Nloc, yStart, zStart);
 	Particles2D part = solver.Run(prob, model);
 	std::cout << "\nStudyCaseTrajectories runned successfully." << std::endl;
@@ -54,10 +56,58 @@ void StudyCaseTrajectoriesAdim(AbstractAdvDiffProblemAdim& prob, std::string mod
 	std::cout << "\nStudyCaseTrajectoriesAdim runned successfully." << std::endl;
 }
 
-void StudyCaseConcentration(AbstractAdvDiffProblemAdim &prob, std::string model, std::string estimator,
+void StudyCaseConcentration(AbstractAdvDiffProblem &prob, std::string model, std::string estimator,
 							int Nloc, double yStart, double zStart, int nboxy, int nboxz)
 {
 	std::cout << "\nRunning StudyCaseConcentration..." << std::endl;
+	
+	std::cout << "Writing fInfo..." << std::endl;
+	std::ofstream fInfo = openOutputFile(wd::root + "out/" + model + "/info.out");
+	auto t = std::time(nullptr);
+    auto tm = *std::localtime(&t);
+    fInfo << "File generated on " << std::put_time(&tm, "%d-%m-%Y at %Hh %Mm %Ss") << "\n";
+    fInfo << "studyCaseTrajectories\n";
+    fInfo << "Model loaded is " << wd::root << "in/" << model <<".in" << "\n";
+    fInfo << "The values used are :\n";
+    prob.printInfo(fInfo);
+    fInfo << "Nloc = " << Nloc << "\n";
+    fInfo << "yStart = " << yStart << "\n";
+    fInfo << "zStart = " << zStart << "\n";
+    fInfo << "nboxy = " << nboxy << "\n";
+    fInfo << "nboxz = " << nboxz << "\n";
+    fInfo.close();
+
+	std::cout << "1/3 : Generating trajectories..." << std::endl;
+	BISolver solver(Nloc, yStart, zStart);
+	Particles2D part = solver.Run(prob);
+
+	std::cout << "2/3 : Computing the concentrations..." << std::endl;
+	Estimator *estim;
+	double H = prob.getH1()-prob.getH0();
+	double L = prob.getL1()-prob.getL0();
+	transform(estimator.begin(), estimator.end(), estimator.begin(), ::tolower);
+	if(estimator == "epanechnikov")
+		estim = new KernelEstimator(nboxy,nboxz,H,L,.1*pow(part.mN,-1./6.),"Epanechnikov");
+	else if (estimator == "gaussian")
+		estim = new KernelEstimator(nboxy,nboxz,H,L,.1*pow(part.mN,-1./6.),"Gaussian");
+	else if (estimator == "box")
+		estim = new BoxEstimator(nboxy,nboxz,H,L);
+	else{
+		std::cerr << "Unknown estimator type. Valid estimators are \"epanechnikov\", \"gaussian\" and \"box\"." << std::endl;
+		abort();
+	}
+	estim->Estimate(part);
+	std::cout << "3/3 : Writing in the files..." << std::endl;
+	estim->Print(wd::root + "out/" + model + "/" + estimator + ".out");
+	delete estim;
+	std::cout << "\nStudyCaseConcentration runned successfully." << std::endl;
+}
+
+
+void StudyCaseConcentrationAdim(AbstractAdvDiffProblemAdim &prob, std::string model, std::string estimator,
+							int Nloc, double yStart, double zStart, int nboxy, int nboxz)
+{
+	std::cout << "\nRunning StudyCaseConcentrationAdim..." << std::endl;
 	
 	std::cout << "Writing fInfo..." << std::endl;
 	std::ofstream fInfo = openOutputFile(wd::root + "out/" + model + "/info.out");
@@ -96,7 +146,7 @@ void StudyCaseConcentration(AbstractAdvDiffProblemAdim &prob, std::string model,
 	std::cout << "3/3 : Writing in the files..." << std::endl;
 	estim->Print(wd::root + "out/" + model + "/" + estimator + ".out");
 	delete estim;
-	std::cout << "\nStudyCaseConcentration runned successfully." << std::endl;
+	std::cout << "\nStudyCaseConcentrationAdim runned successfully." << std::endl;
 }
 
 void StudyCaseTransitionProbabilities(AbstractAdvDiffProblemAdim& prob, std::string model, std::string estimator,
@@ -173,4 +223,88 @@ void StudyCaseTransitionProbabilities(AbstractAdvDiffProblemAdim& prob, std::str
 	delete[] zStart;
 	delete estim;
 	std::cout << "\nStudyCaseTransitionProbabilities runned successfully." << std::endl;
+}
+
+void StudyCaseTestProblem()
+{
+	std::cout << "\nRunning StudyCaseTestProblem..." << std::endl;
+		// parameters values from C. Timmermans for overturner model
+	double Psi = 2.;
+	double L = 15e6;
+	double H = 5e3;
+	double Kh = 1e3;
+	double Kv2 = 1e-4;
+	// Values for test problem
+	double T = 365*24*3600;
+	double dt = 3600;
+	double V = Psi/H;
+	double W = Psi/L;
+	double Kyy = Kh;
+	double Kzz = Kv2;
+	double Ly = 10*std::max(V*T, sqrt(Kyy*T));
+	double Lz = 10*std::max(W*T, sqrt(Kzz*T));
+	double y1 = 0., z1 = 0.;
+	int J = 50000;
+	std::string model = "testcase";
+	TestProblem testprob(T,dt,Ly,Lz,Kyy,Kzz,V,W,J);
+	
+	std::cout << "Writing fInfo..." << std::endl;
+	std::ofstream fInfo = openOutputFile(wd::root + "out/" + model + "/info.out");
+	auto t = std::time(nullptr);
+    auto tm = *std::localtime(&t);
+    fInfo << "File generated on " << std::put_time(&tm, "%d-%m-%Y at %Hh %Mm %Ss") << "\n";
+    fInfo << "StudyCaseTestProblem\n";
+    fInfo << "The values used are :\n";
+    testprob.printInfo(fInfo);
+    fInfo << "y1 = " << y1 << "\n";
+    fInfo << "z1 = " << z1 << "\n";
+    fInfo.close();
+    std::cout << "fInfo written succesfully !" << std::endl;
+
+	std::cout << "Generating trajectories..." << std::endl;
+	BISolver solver(J, y1, z1);
+	Particles2D part = solver.Run(testprob, model,testprob.getT()/testprob.getdt(),false,false);
+	std::cout << "\nStudyCaseTestProblem runned successfully." << std::endl;
+}
+
+void StudyCaseTestProblemSemiInf()
+{
+	std::cout << "\nRunning StudyCaseTestProblemSemiInf..." << std::endl;
+		// parameters values from C. Timmermans for overturner model
+	double Psi = 2.;
+	double H = 5e3;
+	double Kh = 1e3;
+	double Kv1 = 1e-1;
+	// Values for test problem
+	double T = 365*24*3600;
+	double dt = 3600;
+	double V = Psi/H;
+	double W = 0.;
+	double Kyy = Kh;
+	double Kzz = Kv1;
+	double Ly = 10*std::max(V*T, sqrt(Kyy*T));
+	double Lz = 10*std::max(W*T, sqrt(Kzz*T));
+	double y1 = 0.;
+	double z1 = H;
+	int J = 20000;
+	std::string model = "testcaseSI";
+	TestProblem testprob(T,dt,Ly,Lz,Kyy,Kzz,V,W,J,"semi-infinite");
+	
+	std::cout << "Writing fInfo..." << std::endl;
+	std::ofstream fInfo = openOutputFile(wd::root + "out/" + model + "/info.out");
+	auto t = std::time(nullptr);
+    auto tm = *std::localtime(&t);
+    fInfo << "File generated on " << std::put_time(&tm, "%d-%m-%Y at %Hh %Mm %Ss") << "\n";
+    fInfo << "StudyCaseTestProblem\n";
+    fInfo << "The values used are :\n";
+    testprob.printInfo(fInfo);
+    fInfo << "y1 = " << y1 << "\n";
+    fInfo << "z1 = " << z1 << "\n";
+    fInfo.close();
+    std::cout << "fInfo written succesfully !" << std::endl;
+
+	std::cout << "Generating trajectories..." << std::endl;
+	BISolver solver(J, y1, z1);
+	Particles2D part = solver.Run(testprob, model,testprob.getT()/testprob.getdt(),false,false);
+	std::cout << "\nStudyCaseTestProblemSemiInf runned successfully." << std::endl;
 }

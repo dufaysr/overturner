@@ -184,6 +184,55 @@ void OverturnerProblem::Display() const
 	cout << "mPsi = " << mPsi << endl;
 }
 
+
+TestProblem::TestProblem(double T, double dt, double Ly, double Lz, double Kyy, double Kzz, double V, double W, int J, std::string domain):
+    AbstractAdvDiffProblem(-Lz, Lz, -Ly, Ly, T, dt),
+    mKyy(Kyy),
+    mKzz(Kzz),
+    mV(V),
+    mW(W),
+    mJ(J)
+{
+    if (domain == "semi-infinite")
+        mH0 = 0.;
+}
+
+double TestProblem::getKh(double x, double y) const
+{
+    return mKyy;
+}
+
+double TestProblem::getKv(double x, double y) const
+{
+    return mKzz;
+}
+
+double TestProblem::getV(double x, double y) const
+{
+    return mV;
+}
+
+double TestProblem::getW(double x, double y) const
+{
+    return mW;
+}
+
+void TestProblem::printInfo(std::ofstream& f) const
+{
+    f << "H0 = " << mH0 << "\n";
+    f << "H1 = " << mH1 << "\n";
+    f << "L0 = " << mL0 << "\n";
+    f << "L1 = " << mL1 << "\n";
+    f << "T = " << mT << "\n";
+    f << "dt = " << mdt << "\n";
+    f << "Kyy = " << mKyy << "\n";
+    f << "Kzz = " << mKzz << "\n";
+    f << "V = " << mV << "\n";
+    f << "W = " << mW << "\n";
+    f << "J = " << mJ << "\n";
+}
+
+
 /*    Adimensionnal Advection-Diffusion problem    */
 AbstractAdvDiffProblemAdim::AbstractAdvDiffProblemAdim(double TPrime, double dtPrime, double H, double L):
 	mTPrime(TPrime),

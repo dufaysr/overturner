@@ -25,9 +25,12 @@
 						show_usage(argv[0]);\
 					}
 
+#define TEST
+
 
 int main(int argc, char *argv[])
 {
+#ifndef TEST
 	if (argc < 2)
 	{
     	show_usage(argv[0]);
@@ -40,28 +43,28 @@ int main(int argc, char *argv[])
   		std::string model;
     	bool adim = true;
     	int Nloc;
-    	double y0, z0;
-  		flag = get_args_traj(argc, argv, model, Nloc, y0, z0, adim);
+    	double yStart, zStart;
+  		flag = get_args_traj(argc, argv, model, Nloc, yStart, zStart, adim);
   		HANDLES_FLAG
 		OverturnerProblem prob(model);
 		if (adim){
 			OverturnerProblemAdim probadim(prob);
-			StudyCaseTrajectoriesAdim(probadim,model,Nloc,y0,z0);
+			StudyCaseTrajectoriesAdim(probadim,model,Nloc,yStart,zStart);
 		}
 		else{
-			StudyCaseTrajectories(prob,model,Nloc,y0,z0);
+			StudyCaseTrajectories(prob,model,Nloc,yStart,zStart);
 		}
 	}
 	else if ((studycase == "-c") || (studycase == "--concentration"))
 	{
 		std::string model;
 		int Nloc, dimy, dimz;
-		double y0, z0;
-		flag = get_args_conc(argc, argv, model, Nloc, dimy, dimz, y0, z0);
+		double yStart, zStart;
+		flag = get_args_conc(argc, argv, model, Nloc, dimy, dimz, yStart, zStart);
 		HANDLES_FLAG
 		OverturnerProblem prob(model);
 		OverturnerProblemAdim probadim(prob);
-		StudyCaseConcentration(probadim,model,"box",Nloc,y0,z0,dimy,dimz);
+		StudyCaseConcentrationAdim(probadim,model,"box",Nloc,yStart,zStart,dimy,dimz);
 	}
 	else if ((studycase == "-M") || (studycase == "--transition_proba"))
 	{
@@ -76,4 +79,8 @@ int main(int argc, char *argv[])
 	else 
 		show_usage(argv[0]);
 	return 0;
+#else
+	// StudyCaseTestProblem();
+	StudyCaseTestProblemSemiInf();
+#endif
 }

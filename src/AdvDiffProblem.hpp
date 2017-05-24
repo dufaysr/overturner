@@ -44,6 +44,7 @@ class AbstractAdvDiffProblem
 class OverturnerProblem : public AbstractAdvDiffProblem
 {
 	friend class OverturnerProblemAdim; // useful in the constructor that builds adim from dim prob
+	friend class TestProblem;
 	private:
 		double my0;
 		double mz0;
@@ -62,6 +63,21 @@ class OverturnerProblem : public AbstractAdvDiffProblem
 		void Display() const;
 };
 
+class TestProblem : public AbstractAdvDiffProblem
+{
+	private:
+		double mKyy, mKzz;
+		double mV, mW;
+		int mJ;
+
+	public:
+		TestProblem(double T, double dt, double Ly, double Lz, double Kyy, double Kzz, double V, double W, int J, std::string domain = "infinite");
+		double getKh(double x, double y) const;
+		double getKv(double x, double y) const;
+		double getV(double x, double y) const;
+		double getW(double x, double y) const;
+		void printInfo(std::ofstream& f) const;
+};
 
 /*    Adimensionnal Advection-Diffusion problem    */
 class AbstractAdvDiffProblemAdim

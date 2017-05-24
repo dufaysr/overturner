@@ -49,7 +49,6 @@ open :
 
 clean:
 	rm -rf $(LIBDIR)/*.o
-	rm -rf out/*
 
 mrproper: clean
 	rm -rf $(BINDIR)/$(EXEC)

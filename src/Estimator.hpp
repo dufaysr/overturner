@@ -13,7 +13,7 @@
 #include <string>
 #include <algorithm>
 #include "Particles2D.hpp"
-#include "Field.hpp"
+#include "Matrix.hpp"
 #include "Utilities.hpp"
 
 class Estimator
@@ -21,7 +21,7 @@ class Estimator
 	protected:
 		int mNboxy, mNboxz;
 		double mH, mL;
-		Field mEstimator;
+		Matrix mEstimator;
 
 	public:
 		Estimator(int nboxy, int nboxz, double H, double L);
@@ -57,7 +57,7 @@ class GlobalEstimator
 	protected:
 		int mNboxy, mNboxz, mNbox;
 		double mH, mL;
-		Field mEstimator;
+		Matrix mEstimator;
 
 	public:
 		GlobalEstimator(int nboxy, int nboxz, double H, double L, int Nbox);

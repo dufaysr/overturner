@@ -1,13 +1,13 @@
 /*
-  Field.hpp
+  Matrix.hpp
   "overturner"
 
   Created by Renaud Dufays on 04/04/17
   Copyright © 2017. All rights reserved.
 */
 
-#ifndef FIELDHEADERDEF
-#define FIELDHEADERDEF
+#ifndef MATRIXHEADERDEF
+#define MATRIXHEADERDEF
 
 #include <cmath>
 #include <cassert>
@@ -15,15 +15,15 @@
 #include <fstream>
 #include <string>
 
-class Field
+class Matrix
 {
     private:
         double ** mData; // entries of matrix
         int mDim1, mDim2; // dimensions
     public:
-        Field(const Field& otherField);
-        Field(int dim1, int dim2);
-        ~Field();
+        Matrix(const Matrix& otherMatrix);
+        Matrix(int dim1, int dim2);
+        ~Matrix();
         void Print(std::string filename, bool binary=false) const;
         void Print(std::ofstream& f) const;
         void PrintBinary(std::ofstream& f) const;
@@ -31,13 +31,13 @@ class Field
         int GetDim1() const;
         int GetDim2() const;
         double& operator()(int i, int j); //0-based indexing
-        Field& operator=(const Field& f);
-        Field& operator*=(const double a);
-        Field& operator/=(const double a);
+        Matrix& operator=(const Matrix& f);
+        Matrix& operator*=(const double a);
+        Matrix& operator/=(const double a);
 };
 
-Field operator*(const Field& f, const double a);
-Field operator*(const double a, const Field& f);
-Field operator/(const Field& f, const double a);
+Matrix operator*(const Matrix& f, const double a);
+Matrix operator*(const double a, const Matrix& f);
+Matrix operator/(const Matrix& f, const double a);
 
 #endif

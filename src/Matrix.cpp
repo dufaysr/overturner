@@ -1,12 +1,12 @@
-#include "Field.hpp"
+#include "Matrix.hpp"
 
 // Overwritten copy constructor
 // Allocate memory for new matrix, and copy
 // entries into this matrix
-Field::Field(const Field& otherField)
+Matrix::Matrix(const Matrix& otherMatrix)
 {
-    mDim1 = otherField.mDim1;
-    mDim2 = otherField.mDim2;
+    mDim1 = otherMatrix.mDim1;
+    mDim2 = otherMatrix.mDim2;
     mData = new double * [mDim1];
     for (int i=0; i<mDim1; i++)
     {
@@ -16,14 +16,14 @@ Field::Field(const Field& otherField)
     {
         for (int j=0; j<mDim2; j++)
         {
-            mData[i][j] = otherField.mData[i][j];
+            mData[i][j] = otherMatrix.mData[i][j];
         }
     }
 }
 // Constructor for matrix of a given length
 // Allocates memory, and initialises entries
 // to zero
-Field::Field(int dim1, int dim2)
+Matrix::Matrix(int dim1, int dim2)
 {
     assert(dim1 > 0);
     assert(dim2 > 0);
@@ -44,7 +44,7 @@ Field::Field(int dim1, int dim2)
 }
 
 // Overwritten destructor to correctly free memory
-Field::~Field()
+Matrix::~Matrix()
 {
     for (int i=0; i<mDim1; i++)
     {
@@ -53,7 +53,7 @@ Field::~Field()
     delete[] mData;
 }
 
-void Field::Print(std::string filename, bool binary) const
+void Matrix::Print(std::string filename, bool binary) const
 {
     std::ofstream myfile;
     if (binary){
@@ -87,7 +87,7 @@ void Field::Print(std::string filename, bool binary) const
     }
 }
 
-void Field::Print(std::ofstream& f) const
+void Matrix::Print(std::ofstream& f) const
 {
     for(int i=0; i<mDim1; i++)
     {
@@ -99,7 +99,7 @@ void Field::Print(std::ofstream& f) const
     }
 }
 
-void Field::PrintBinary(std::ofstream& f) const
+void Matrix::PrintBinary(std::ofstream& f) const
 {
     for(int i=0; i<mDim1; i++)
     {
@@ -107,7 +107,7 @@ void Field::PrintBinary(std::ofstream& f) const
     }
 }
 
-void Field::Display() const
+void Matrix::Display() const
 {
     for(int j=0; j<mDim2; j++)
     {
@@ -121,19 +121,19 @@ void Field::Display() const
 }
 
 // Method to get number of rows of matrix
-int Field::GetDim1() const
+int Matrix::GetDim1() const
 {
     return mDim1;
 }
 // Method to get number of columns of matrix
-int Field::GetDim2() const
+int Matrix::GetDim2() const
 {
     return mDim2;
 }
 // Overloading the round brackets
-// Note that this uses ‘one-based’ indexing,
+// Note that this uses 'zero-based’ indexing,
 // and a check on the validity of the index
-double& Field::operator()(int i, int j)
+double& Matrix::operator()(int i, int j)
 {
     assert(i > -1);
     assert(i < mDim1);
@@ -142,7 +142,7 @@ double& Field::operator()(int i, int j)
     return mData[i][j];
 }
 
-Field& Field::operator=(const Field& f)
+Matrix& Matrix::operator=(const Matrix& f)
 {
     if (this != &f) // self-assignment check
     {
@@ -174,21 +174,21 @@ Field& Field::operator=(const Field& f)
     return *this;
 }
 
-Field& Field::operator*=(const double a)
+Matrix& Matrix::operator*=(const double a)
 {
     *this = *this*a;
     return *this;
 }
 
-Field& Field::operator/=(const double a)
+Matrix& Matrix::operator/=(const double a)
 {
     *this = *this/a;
     return *this;
 }
 
-Field operator*(const Field& f, const double a)
+Matrix operator*(const Matrix& f, const double a)
 {
-    Field fout(f);
+    Matrix fout(f);
     for (int i=0; i<f.GetDim1(); i++)
     {
         for (int j=0; j<f.GetDim2(); j++)
@@ -200,12 +200,12 @@ Field operator*(const Field& f, const double a)
     return fout;
 }
 
-Field operator*(const double a, const Field& f)
+Matrix operator*(const double a, const Matrix& f)
 {
     return f*a;
 }
 
-Field operator/(const Field& f, const double a)
+Matrix operator/(const Matrix& f, const double a)
 {
     return f*(1./a);
 }

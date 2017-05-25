@@ -3,10 +3,10 @@
 // Overwritten copy constructor
 // Allocate memory for new matrix, and copy
 // entries into this matrix
-Matrix::Matrix(const Matrix& otherMatrix)
+Matrix::Matrix(const Matrix& m)
 {
-    mDim1 = otherMatrix.mDim1;
-    mDim2 = otherMatrix.mDim2;
+    mDim1 = m.mDim1;
+    mDim2 = m.mDim2;
     mData = new double * [mDim1];
     for (int i=0; i<mDim1; i++)
     {
@@ -16,7 +16,7 @@ Matrix::Matrix(const Matrix& otherMatrix)
     {
         for (int j=0; j<mDim2; j++)
         {
-            mData[i][j] = otherMatrix.mData[i][j];
+            mData[i][j] = m.mData[i][j];
         }
     }
 }
@@ -130,6 +130,15 @@ int Matrix::GetDim2() const
 {
     return mDim2;
 }
+
+double Matrix::Get(int i, int j) const
+{
+    assert(i > -1);
+    assert(i < mDim1);
+    assert(j > -1);
+    assert(j < mDim2);
+    return mData[i][j];
+}
 // Overloading the round brackets
 // Note that this uses 'zero-based’ indexing,
 // and a check on the validity of the index
@@ -142,11 +151,11 @@ double& Matrix::operator()(int i, int j)
     return mData[i][j];
 }
 
-Matrix& Matrix::operator=(const Matrix& f)
+Matrix& Matrix::operator=(const Matrix& m)
 {
-    if (this != &f) // self-assignment check
+    if (this != &m) // self-assignment check
     {
-        if (f.mDim1 != mDim1 || f.mDim2 != mDim2) 
+        if (m.mDim1 != mDim1 || m.mDim2 != mDim2) 
         { // storage cannot be reused : delete and realloc
             for (int i=0; i<mDim1; i++)
             {
@@ -154,8 +163,8 @@ Matrix& Matrix::operator=(const Matrix& f)
             }
             delete[] mData;
 
-            mDim1 = f.mDim1;
-            mDim2 = f.mDim2;
+            mDim1 = m.mDim1;
+            mDim2 = m.mDim2;
     
             mData = new double * [mDim1];
             for (int i=0; i<mDim1; i++)
@@ -167,10 +176,83 @@ Matrix& Matrix::operator=(const Matrix& f)
         {
             for (int j=0; j<mDim2; j++)
             {
-                mData[i][j] = f.mData[i][j];
+                mData[i][j] = m.mData[i][j];
             }
         }
     }
+    return *this;
+}
+
+// Overloading the unary + operator
+Matrix Matrix::operator+() const
+{
+    Matrix mout(mDim1,mDim2);
+    for (int i=0; i<mDim1; i++){
+        for (int j=0; j<mDim2; j++){
+            mout(i,j) = mData[i][j];
+        }
+    }
+    return mout;
+}
+// Overloading the unary - operator
+Matrix Matrix::operator-() const
+{
+    Matrix mout(mDim1,mDim2);
+    for (int i=0; i<mDim1; i++){
+        for (int j=0; j<mDim2; j++){
+            mout(i,j) = -mData[i][j];
+        }
+    }
+    return mout;
+}
+// Overloading the binary + operator
+Matrix Matrix::operator+(const Matrix& m) const
+{
+    assert(mDim1 == m.mDim1);
+    assert(mDim2 == m.mDim2);
+    Matrix mout(mDim1, mDim2);
+    for (int i=0; i<mDim1; i++){
+        for (int j=0; j<mDim2; j++){
+            mout(i,j) = mData[i][j] + m.mData[i][j];
+        }
+    }
+    return mout;
+}
+// Overloading the binary - operator
+Matrix Matrix::operator-(const Matrix& m) const
+{
+    assert(mDim1 == m.mDim1);
+    assert(mDim2 == m.mDim2);
+    Matrix mout(mDim1, mDim2);
+    for (int i=0; i<mDim1; i++){
+        for (int j=0; j<mDim2; j++){
+            mout(i,j) = mData[i][j] - m.mData[i][j];
+        }
+    }
+    return mout;
+}
+
+Matrix& Matrix::operator+=(const Matrix& m) // binary +=
+{
+    *this = *this + m;
+    return *this;
+}
+
+Matrix& Matrix::operator-=(const Matrix& m) // binary -=
+{
+    *this = *this - m;
+    return *this;
+}
+
+Matrix& Matrix::operator+=(const double a)
+{
+    *this = *this+a;
+    return *this;
+}
+
+Matrix& Matrix::operator-=(const double a)
+{
+    *this = *this-a;
     return *this;
 }
 
@@ -186,26 +268,58 @@ Matrix& Matrix::operator/=(const double a)
     return *this;
 }
 
-Matrix operator*(const Matrix& f, const double a)
+Matrix operator*(const Matrix& m, const double a)
 {
-    Matrix fout(f);
-    for (int i=0; i<f.GetDim1(); i++)
+    Matrix mout(m);
+    for (int i=0; i<m.GetDim1(); i++)
     {
-        for (int j=0; j<f.GetDim2(); j++)
+        for (int j=0; j<m.GetDim2(); j++)
         {
-            fout(i,j) *= a;
+            mout(i,j) *= a;
         }
     }
 
-    return fout;
+    return mout;
 }
 
-Matrix operator*(const double a, const Matrix& f)
+Matrix operator*(const double a, const Matrix& m)
 {
-    return f*a;
+    return m*a;
 }
 
-Matrix operator/(const Matrix& f, const double a)
+Matrix operator/(const Matrix& m, const double a)
 {
-    return f*(1./a);
+    return m*(1./a);
+}
+
+Matrix operator+(const Matrix& m, const double a)
+{
+    Matrix mout(m);
+    for (int i=0; i<m.GetDim1(); i++){
+        for (int j=0; j<m.GetDim2(); j++){
+            mout(i,j) += a;
+        }
+    }
+    return mout;
+}
+
+Matrix operator+(const double a, const Matrix& m)
+{
+    return m+a;
+}
+
+Matrix operator-(const Matrix& m, const double a)
+{
+    return m+(-a);
+}
+
+double Frobenius(const Matrix& m)
+{
+    double F = 0.;
+    for (int i=0; i<m.GetDim1(); i++){
+        for (int j=0; j<m.GetDim2(); j++){
+            F += m.Get(i,j)*m.Get(i,j);
+        }
+    }
+    return sqrt(F);
 }

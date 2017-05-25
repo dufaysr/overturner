@@ -23,6 +23,7 @@
 					if (flag < 0){\
 						std::cerr << "Not enough parameters specified.\n" << std::endl;\
 						show_usage(argv[0]);\
+						return 0;\
 					}
 
 #define TEST
@@ -31,7 +32,7 @@
 int main(int argc, char *argv[])
 {
 #ifndef TEST
-	if (argc < 2)
+	if (argc < 2) // i.e. no argument provided
 	{
     	show_usage(argv[0]);
     	return 1;
@@ -69,18 +70,30 @@ int main(int argc, char *argv[])
 	else if ((studycase == "-M") || (studycase == "--transition_proba"))
 	{
 		std::string model;
-		int nybox, nzbox, dimy, dimz;
-		flag = get_args_tp(argc, argv, model, dimy, dimz, nybox, nzbox);
+		int nyloc, nzloc, nboxy, nboxz;
+		flag = get_args_tp(argc, argv, model, nboxy, nboxz, nyloc, nzloc);
+		std::cout << "model : " << model << "\n";
+		std::cout << "nboxy : " << nboxy << "\n";
+		std::cout << "nboxz : " << nboxz << "\n";
+		std::cout << "nyloc : " << nyloc << "\n";
+		std::cout << "nzloc : " << nzloc << "\n";
 		HANDLES_FLAG
 		OverturnerProblem prob(model);
-		OverturnerProblemAdim probadim(prob);
-		StudyCaseTransitionProbabilities(probadim, model, "box", dimy, dimz, nybox, nzbox, true);
+		const OverturnerProblemAdim probadim(prob);
+		StudyCaseTransitionProbabilities(probadim, model, "box", nboxy, nboxz, nyloc, nzloc, true);
 	}
 	else 
 		show_usage(argv[0]);
 	return 0;
 #else
 	// StudyCaseTestProblem();
-	StudyCaseTestProblemSemiInf();
+	// StudyCaseTestProblemSemiInf();
+	std::string model = "timmermans";
+	OverturnerProblem prob(model);
+	OverturnerProblemAdim probadim(prob);
+	const double epsilon = .1;
+	int nboxy = 20;
+	int nboxz = 20;
+	StudyCaseComputeNloc(probadim,epsilon,nboxy,nboxz);
 #endif
 }

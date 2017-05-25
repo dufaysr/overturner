@@ -115,8 +115,8 @@ void BoxEstimator::EstimateAdim(const Particles2D& particles)
 	mEstimator /= N;
 }
 
-GlobalEstimator::GlobalEstimator(int nboxy, int nboxz, double H, double L, int Nbox):
-mNboxy(nboxy), mNboxz(nboxz), mNbox(Nbox), mH(H), mL(L), mEstimator(nboxy*nboxz, nboxy*nboxz)
+GlobalEstimator::GlobalEstimator(int nboxy, int nboxz, double H, double L, int Nloc):
+mNboxy(nboxy), mNboxz(nboxz), mNloc(Nloc), mH(H), mL(L), mEstimator(nboxy*nboxz, nboxy*nboxz)
 {} 
 
 void GlobalEstimator::Print(std::string filename, bool binary) const
@@ -131,8 +131,8 @@ void GlobalEstimator::Print(std::string filename, bool binary) const
     f.close();
 }
 
-GlobalKernelEstimator::GlobalKernelEstimator(int nboxy, int nboxz, double H, double L, int Nbox, double lambda, std::string kernelFunction):
-GlobalEstimator(nboxy,nboxz,H,L,Nbox), mLambda(lambda)
+GlobalKernelEstimator::GlobalKernelEstimator(int nboxy, int nboxz, double H, double L, int Nloc, double lambda, std::string kernelFunction):
+GlobalEstimator(nboxy,nboxz,H,L,Nloc), mLambda(lambda)
 {
 	transform(kernelFunction.begin(), kernelFunction.end(), kernelFunction.begin(), ::tolower);
 	if (kernelFunction == "gaussian")
@@ -150,8 +150,8 @@ GlobalEstimator(nboxy,nboxz,H,L,Nbox), mLambda(lambda)
 	}
 }
 
-GlobalKernelEstimator::GlobalKernelEstimator(int nboxy, int nboxz, double H, double L, int Nbox, double lambda, double (*kernelFunction)(double y, double z)):
-GlobalEstimator(nboxy, nboxz, H, L, Nbox), mLambda(lambda), mKernel(kernelFunction)
+GlobalKernelEstimator::GlobalKernelEstimator(int nboxy, int nboxz, double H, double L, int Nloc, double lambda, double (*kernelFunction)(double y, double z)):
+GlobalEstimator(nboxy, nboxz, H, L, Nloc), mLambda(lambda), mKernel(kernelFunction)
 {}
 
 void GlobalKernelEstimator::Estimate(const Particles2D& particles)
@@ -167,13 +167,13 @@ void GlobalKernelEstimator::Estimate(const Particles2D& particles)
 			{
 				for (int izEnd=0; izEnd<mNboxz; izEnd++)
 				{	
-					for (int n=0; n<mNbox; n++)
+					for (int n=0; n<mNloc; n++)
 					{
 						mEstimator(iyStart*mNboxz+izStart,iyEnd*mNboxz+izEnd) += 
-							mKernel((particles.mY[iyStart*mNboxz*mNbox+izStart*mNbox+n]-(iyEnd+.5)*dy)/mLambda,
-							 		(particles.mZ[iyStart*mNboxz*mNbox+izStart*mNbox+n]-(izEnd+.5)*dz)/mLambda);
+							mKernel((particles.mY[iyStart*mNboxz*mNloc+izStart*mNloc+n]-(iyEnd+.5)*dy)/mLambda,
+							 		(particles.mZ[iyStart*mNboxz*mNloc+izStart*mNloc+n]-(izEnd+.5)*dz)/mLambda);
 					}
-					mEstimator(iyStart*mNboxz+izStart,iyEnd*mNboxz+izEnd) *= (dy*dz)/(mNbox*pow(mLambda,2));
+					mEstimator(iyStart*mNboxz+izStart,iyEnd*mNboxz+izEnd) *= (dy*dz)/(mNloc*pow(mLambda,2));
 				}
 			}
 		}
@@ -192,41 +192,27 @@ void GlobalKernelEstimator::EstimateAdim(const Particles2D& particles)
 			{
 				for (int izEnd=0; izEnd<mNboxz; izEnd++)
 				{	
-					for (int n=0; n<mNbox; n++)
+					for (int n=0; n<mNloc; n++)
 					{
 						mEstimator(iyStart*mNboxz+izStart,iyEnd*mNboxz+izEnd) += 
-							mKernel((particles.mY[iyStart*mNboxz*mNbox+izStart*mNbox+n]-(iyEnd+.5)*dy)/mLambda,
-							 		(particles.mZ[iyStart*mNboxz*mNbox+izStart*mNbox+n]-(izEnd+.5)*dz)/mLambda);
+							mKernel((particles.mY[iyStart*mNboxz*mNloc+izStart*mNloc+n]-(iyEnd+.5)*dy)/mLambda,
+							 		(particles.mZ[iyStart*mNboxz*mNloc+izStart*mNloc+n]-(izEnd+.5)*dz)/mLambda);
 					}
-					mEstimator(iyStart*mNboxz+izStart,iyEnd*mNboxz+izEnd) *= (dy*dz)/(mNbox*pow(mLambda,2));
+					mEstimator(iyStart*mNboxz+izStart,iyEnd*mNboxz+izEnd) *= (dy*dz)/(mNloc*pow(mLambda,2));
 				}
 			}
 		}
 	}
 }
 
-GlobalBoxEstimator::GlobalBoxEstimator(int nboxy, int nboxz, double H, double L, int Nbox):
-GlobalEstimator(nboxy,nboxz,H,L,Nbox)
+GlobalBoxEstimator::GlobalBoxEstimator(int nboxy, int nboxz, double H, double L, int Nloc):
+GlobalEstimator(nboxy,nboxz,H,L,Nloc)
 {}
 
 void GlobalBoxEstimator::Estimate(const Particles2D& particles)
 {
-	int iyStart, izStart, iyEnd, izEnd;
-	double dy = mL/mNboxy;
-	double dz = mH/mNboxz;
-	for (iyStart=0; iyStart<mNboxy; iyStart++)
-	{
-		for (izStart=0; izStart<mNboxz; izStart++)
-		{
-			for (int n=0; n<mNbox; n++)
-			{
-				iyEnd = std::min(int(particles.mY[iyStart*mNboxz*mNbox+izStart*mNbox+n]/dy),mNboxy-1);
-				izEnd = std::min(int(particles.mZ[iyStart*mNboxz*mNbox+izStart*mNbox+n]/dz),mNboxz-1);
-				mEstimator(iyStart*mNboxz+izStart,iyEnd*mNboxz+izEnd) += 1.;
-			}
-		}
-	}
-	mEstimator /= mNbox;
+	Count(particles);
+	mEstimator /= mNloc;
 }
 
 void GlobalBoxEstimator::EstimateAdim(const Particles2D& particles)
@@ -236,15 +222,35 @@ void GlobalBoxEstimator::EstimateAdim(const Particles2D& particles)
 	{
 		for (izStart=0; izStart<mNboxz; izStart++)
 		{
-			for (int n=0; n<mNbox; n++)
+			for (int n=0; n<mNloc; n++)
 			{
-				iyEnd = std::min(int(particles.mY[iyStart*mNboxz*mNbox+izStart*mNbox+n]*mNboxy),mNboxy-1);
-				izEnd = std::min(int(particles.mZ[iyStart*mNboxz*mNbox+izStart*mNbox+n]*mNboxz),mNboxz-1);
+				iyEnd = std::min(int(particles.mY[iyStart*mNboxz*mNloc+izStart*mNloc+n]*mNboxy),mNboxy-1);
+				izEnd = std::min(int(particles.mZ[iyStart*mNboxz*mNloc+izStart*mNloc+n]*mNboxz),mNboxz-1);
 				mEstimator(iyStart*mNboxz+izStart,iyEnd*mNboxz+izEnd) += 1.;
 			}
 		}
 	}
-	mEstimator /= mNbox;
+	mEstimator /= mNloc;
+}
+
+Matrix GlobalBoxEstimator::Count(const Particles2D& particles)
+{
+	int iyStart, izStart, iyEnd, izEnd;
+	double dy = mL/mNboxy;
+	double dz = mH/mNboxz;
+	for (iyStart=0; iyStart<mNboxy; iyStart++)
+	{
+		for (izStart=0; izStart<mNboxz; izStart++)
+		{
+			for (int n=0; n<mNloc; n++)
+			{
+				iyEnd = std::min(int(particles.mY[iyStart*mNboxz*mNloc+izStart*mNloc+n]/dy),mNboxy-1);
+				izEnd = std::min(int(particles.mZ[iyStart*mNboxz*mNloc+izStart*mNloc+n]/dz),mNboxz-1);
+				mEstimator(iyStart*mNboxz+izStart,iyEnd*mNboxz+izEnd) += 1.;
+			}
+		}
+	}
+	return mEstimator;
 }
 
 double Gaussian(double y, double z)

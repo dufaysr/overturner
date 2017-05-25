@@ -21,12 +21,13 @@ struct Particles2D
 	double mTime;
 	double *mY, *mZ;
 
-	Particles2D(int N, double yStart, double zStart);
+	Particles2D(int N, double yStart=0., double zStart=0.);
 	Particles2D(int N, double* yStart, double* zStart);
 	Particles2D(int Nloc, double* yStart, double* zStart, int n); // unused
 	Particles2D(int Nloc, double* yStart, double* zStart, int ny, int nz); // unused
 	Particles2D(const Particles2D& otherParticles);
 	~Particles2D();
+	Particles2D& operator=(const Particles2D& p2D);
 };
 
 #endif

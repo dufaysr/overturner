@@ -100,3 +100,25 @@ Particles2D::~Particles2D()
 	delete[] mY;
 	delete[] mZ;
 }
+
+Particles2D& Particles2D::operator=(const Particles2D& p2D)
+{
+	if (this != &p2D) // self-assignment check
+    {
+        if (p2D.mN != mN)
+        { // storage cannot be reused : delete and realloc
+            delete[] mY;
+            delete[] mZ;
+            mN = p2D.mN;
+            mY = new double[mN];
+            mZ = new double[mN];
+        }
+        mTime = p2D.mTime;
+        for (int i=0; i<mN; i++)
+        {
+            mY[i] = p2D.mY[i];
+            mZ[i] = p2D.mZ[i];
+        }
+    }
+    return *this;
+}

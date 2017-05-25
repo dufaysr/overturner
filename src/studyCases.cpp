@@ -8,7 +8,7 @@
 
 #include "studyCases.hpp"
 
-void StudyCaseTrajectories(AbstractAdvDiffProblem& prob, std::string model, int Nloc, double yStart, double zStart)
+void StudyCaseTrajectories(const AbstractAdvDiffProblem& prob, std::string model, int Nloc, double yStart, double zStart)
 {
 	std::cout << "\nRunning StudyCaseTrajectories..." << std::endl;
 	
@@ -33,7 +33,7 @@ void StudyCaseTrajectories(AbstractAdvDiffProblem& prob, std::string model, int 
 	std::cout << "\nStudyCaseTrajectories runned successfully." << std::endl;
 }
 
-void StudyCaseTrajectoriesAdim(AbstractAdvDiffProblemAdim& prob, std::string model, int Nloc, double yStart, double zStart)
+void StudyCaseTrajectoriesAdim(const AbstractAdvDiffProblemAdim& prob, std::string model, int Nloc, double yStart, double zStart)
 {
 	std::cout << "\nRunning StudyCaseTrajectoriesAdim..." << std::endl;
 
@@ -56,7 +56,7 @@ void StudyCaseTrajectoriesAdim(AbstractAdvDiffProblemAdim& prob, std::string mod
 	std::cout << "\nStudyCaseTrajectoriesAdim runned successfully." << std::endl;
 }
 
-void StudyCaseConcentration(AbstractAdvDiffProblem &prob, std::string model, std::string estimator,
+void StudyCaseConcentration(const AbstractAdvDiffProblem &prob, std::string model, std::string estimator,
 							int Nloc, double yStart, double zStart, int nboxy, int nboxz)
 {
 	std::cout << "\nRunning StudyCaseConcentration..." << std::endl;
@@ -104,7 +104,7 @@ void StudyCaseConcentration(AbstractAdvDiffProblem &prob, std::string model, std
 }
 
 
-void StudyCaseConcentrationAdim(AbstractAdvDiffProblemAdim &prob, std::string model, std::string estimator,
+void StudyCaseConcentrationAdim(const AbstractAdvDiffProblemAdim &prob, std::string model, std::string estimator,
 							int Nloc, double yStart, double zStart, int nboxy, int nboxz)
 {
 	std::cout << "\nRunning StudyCaseConcentrationAdim..." << std::endl;
@@ -149,7 +149,7 @@ void StudyCaseConcentrationAdim(AbstractAdvDiffProblemAdim &prob, std::string mo
 	std::cout << "\nStudyCaseConcentrationAdim runned successfully." << std::endl;
 }
 
-void StudyCaseTransitionProbabilities(AbstractAdvDiffProblemAdim& prob, std::string model, std::string estimator,
+void StudyCaseTransitionProbabilities(const AbstractAdvDiffProblemAdim& prob, std::string model, std::string estimator,
 									  int nboxy, int nboxz, int nyloc, int nzloc, bool binary)
 {
 	std::cout << "\nRunning StudyCaseTransitionProbabilities..." << std::endl;
@@ -171,7 +171,7 @@ void StudyCaseTransitionProbabilities(AbstractAdvDiffProblemAdim& prob, std::str
 	
 	std::cout << "1/4 : Generating the initial conditions..." << std::endl;
 	int N = nyloc*nboxy*nzloc*nboxz;
-	int Nbox = nyloc*nzloc;
+	int Nloc = nyloc*nzloc;
 	double *yStart = new double [N];
 	double *zStart = new double [N];
 	double dy = 1./nboxy;
@@ -179,16 +179,12 @@ void StudyCaseTransitionProbabilities(AbstractAdvDiffProblemAdim& prob, std::str
 	double dybox = dy/nyloc;
 	double dzbox = dz/nzloc;
 
-	for (int iy=0; iy<nboxy; iy++)
-	{
-		for (int iz=0; iz<nboxz; iz++)
-		{
-			for (int iybox=0; iybox<nyloc; iybox++)
-			{
-				for (int izbox=0; izbox<nzloc; izbox++)
-				{
-					yStart[iy*nboxz*Nbox+iz*Nbox+iybox*nzloc+izbox] = iy*dy + (iybox+.5)*dybox;
-					zStart[iy*nboxz*Nbox+iz*Nbox+iybox*nzloc+izbox] = iz*dz + (izbox+.5)*dzbox;
+	for (int iy=0; iy<nboxy; iy++){
+		for (int iz=0; iz<nboxz; iz++){
+			for (int iybox=0; iybox<nyloc; iybox++){
+				for (int izbox=0; izbox<nzloc; izbox++){
+					yStart[iy*nboxz*Nloc+iz*Nloc+iybox*nzloc+izbox] = iy*dy + (iybox+.5)*dybox;
+					zStart[iy*nboxz*Nloc+iz*Nloc+iybox*nzloc+izbox] = iz*dz + (izbox+.5)*dzbox;
 				}
 			}
 		}
@@ -202,16 +198,17 @@ void StudyCaseTransitionProbabilities(AbstractAdvDiffProblemAdim& prob, std::str
 	GlobalEstimator *estim;
 	transform(estimator.begin(), estimator.end(), estimator.begin(), ::tolower);
 	if(estimator == "epanechnikov")
-		estim = new GlobalKernelEstimator(nboxy,nboxz,1.,1.,Nbox,.1*pow(Nbox,-1./6.),"Epanechnikov");
+		estim = new GlobalKernelEstimator(nboxy,nboxz,1.,1.,Nloc,.1*pow(Nloc,-1./6.),"Epanechnikov");
 	else if (estimator == "gaussian")
-		estim = new GlobalKernelEstimator(nboxy,nboxz,1.,1.,Nbox,.1*pow(Nbox,-1./6.),"Gaussian");
+		estim = new GlobalKernelEstimator(nboxy,nboxz,1.,1.,Nloc,.1*pow(Nloc,-1./6.),"Gaussian");
 	else if (estimator == "box")
-		estim = new GlobalBoxEstimator(nboxy,nboxz,1.,1.,Nbox);
+		estim = new GlobalBoxEstimator(nboxy,nboxz,1.,1.,Nloc);
 	else{
 		std::cerr << "Unknown estimator type. Valid estimators are \"epanechnikov\", \"gaussian\" and \"box\"." << std::endl;
 		abort();
 	}
-	estim->EstimateAdim(part);
+	// estim->EstimateAdim(part); // equivalent
+	estim->Estimate(part);
 	std::cout << "4/4 : Writing in the files..." << std::endl;
 	
 	if (binary)
@@ -307,4 +304,67 @@ void StudyCaseTestProblemSemiInf()
 	BISolver solver(J, y1, z1);
 	Particles2D part = solver.Run(testprob, model,testprob.getT()/testprob.getdt(),false,false);
 	std::cout << "\nStudyCaseTestProblemSemiInf runned successfully." << std::endl;
+}
+
+int StudyCaseComputeNloc(const AbstractAdvDiffProblemAdim& prob, const double epsilon, int nboxy, int nboxz)
+{
+	int nyloc = 32, nzloc = 32; // hence Nloc = 1024 
+	// Store initial positions of the particles in yStart and zStart
+	int Nloc = nyloc*nzloc;
+	int Nbox = nboxy*nboxz;
+	int N = Nloc*Nbox;
+	double *yStart = new double [N];
+	double *zStart = new double [N];
+	double dy = 1./nboxy;
+	double dz = 1./nboxz;
+	double dybox = dy/nyloc;
+	double dzbox = dz/nzloc;
+	for (int iy=0; iy<nboxy; iy++){
+		for (int iz=0; iz<nboxz; iz++){
+			for (int iybox=0; iybox<nyloc; iybox++){
+				for (int izbox=0; izbox<nzloc; izbox++){
+					yStart[iy*nboxz*Nloc+iz*Nloc+iybox*nzloc+izbox] = iy*dy + (iybox+.5)*dybox;
+					zStart[iy*nboxz*Nloc+iz*Nloc+iybox*nzloc+izbox] = iz*dz + (izbox+.5)*dzbox;
+				}
+			}
+		}
+	}
+	// Compute 2 sets of trajectories (the random generator is part of the solver object : we need two solvers in order to generate
+	// two different sets of trajectories)
+	int iter = 0;
+	double F;
+	BISolver *solver1, *solver2;
+	Particles2D part1(N), part2(N);
+	GlobalBoxEstimator *estim1, *estim2;
+	Matrix A1(Nbox,Nbox), A2(Nbox,Nbox);
+	do{
+		iter++;
+
+		solver1 = new BISolver(N, yStart, zStart);
+		solver2 = new BISolver(N, yStart, zStart);
+
+		part1 = solver1->RunAdim(prob);
+		part2 = solver2->RunAdim(prob);
+		delete solver1;
+		delete solver2;
+		// Estimators
+		estim1 = new GlobalBoxEstimator(nboxy,nboxz,1.,1.,Nloc);
+		estim2 = new GlobalBoxEstimator(nboxy,nboxz,1.,1.,Nloc);
+		A1 += estim1->Count(part1);
+		A2 += estim2->Count(part2);
+		delete estim1;
+		delete estim2;
+
+		F = Frobenius((A1-A2)/Nloc);
+		std::cout << "Iteration " << iter << " : Nloc = " << Nloc << ", F = " << F << std::endl;
+		Nloc += Nloc;
+	} while ((F > epsilon) && (Nloc < 5e4));
+
+	std::cout << "StudyCaseComputeNloc terminated after " << iter << " iterations." << std::endl;
+	std::cout << "Nloc = " << Nloc << ", F = " << F << std::endl;
+	if (Nloc >= 5e4){
+		std::cerr << "WARNING : NO CONVERGENCE REACHED. Nloc > NlocMax" << std::endl;
+		return -1;
+	}
+	return Nloc;
 }

@@ -31,6 +31,7 @@ class Solver
 		Solver(int Nloc, double* yStart, double* zStart, int n);
 		Solver(int Nloc, double* yStart, double* zStart, int ny, int nz);
 		Solver(const Particles2D& particles);
+		virtual ~Solver(){};
 		virtual void UpdatePosition(const AbstractAdvDiffProblem& prob) =0;		// Pure virtual function
 		virtual void UpdatePositionAdim(const AbstractAdvDiffProblemAdim& prob) =0;	// Pure virtual function
 		Particles2D& Run(const AbstractAdvDiffProblem& prob);

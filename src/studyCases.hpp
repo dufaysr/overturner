@@ -15,13 +15,14 @@
 #include "AdvDiffProblem.hpp"
 #include "workingdirectory.hpp"
 
-void StudyCaseTrajectories(AbstractAdvDiffProblem& prob, std::string model, int Nloc, double yStart, double zStart);
-void StudyCaseTrajectoriesAdim(AbstractAdvDiffProblemAdim& prob, std::string model, int Nloc, double yStart, double zStart);
-void StudyCaseConcentration(AbstractAdvDiffProblem &prob, std::string model, std::string estimator, int Nloc,
+void StudyCaseTrajectories(const AbstractAdvDiffProblem& prob, std::string model, int Nloc, double yStart, double zStart);
+void StudyCaseTrajectoriesAdim(const AbstractAdvDiffProblemAdim& prob, std::string model, int Nloc, double yStart, double zStart);
+void StudyCaseConcentration(const AbstractAdvDiffProblem &prob, std::string model, std::string estimator, int Nloc,
 							double yStart, double zStart, int nboxy, int nboxz);
-void StudyCaseConcentrationAdim(AbstractAdvDiffProblemAdim &prob, std::string model, std::string estimator, int Nloc,
+void StudyCaseConcentrationAdim(const AbstractAdvDiffProblemAdim &prob, std::string model, std::string estimator, int Nloc,
 							double yStart, double zStart, int nboxy, int nboxz);
-void StudyCaseTransitionProbabilities(AbstractAdvDiffProblemAdim& prob, std::string model, std::string estimator,
+void StudyCaseTransitionProbabilities(const AbstractAdvDiffProblemAdim& prob, std::string model, std::string estimator,
 									  int nboxy, int nboxz, int nyloc, int nzloc, bool binary=false);
 void StudyCaseTestProblem();
 void StudyCaseTestProblemSemiInf();
+int StudyCaseComputeNloc(const AbstractAdvDiffProblemAdim& prob, const double epsilon, int nboxy, int nboxz);

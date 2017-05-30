@@ -1,4 +1,5 @@
 CPP=g++
+# CPP=mpicxx
 
 CPPFLAGS=-Wall -O3
 LDFLAGS=
@@ -34,7 +35,7 @@ $(LIBDIR)/Utilities.o:  $(SRCDIR)/Utilities.hpp $(SRCDIR)/workingdirectory.hpp
 $(LIBDIR)/Solvers.o: $(SRCDIR)/Solvers.hpp $(LIBDIR)/AdvDiffProblem.o $(LIBDIR)/Particles2D.o $(LIBDIR)/Utilities.o
 $(LIBDIR)/Estimator.o: $(SRCDIR)/Estimator.hpp $(LIBDIR)/Matrix.o $(LIBDIR)/Particles2D.o $(LIBDIR)/Utilities.o 
 $(LIBDIR)/studyCases.o: $(SRCDIR)/studyCases.hpp $(LIBDIR)/Solvers.o $(LIBDIR)/Estimator.o
-$(LIBDIR)/main.o:  $(LIBDIR)/studyCases.o
+$(LIBDIR)/main.o:  $(LIBDIR)/studyCases.o $(SRCDIR)/workingdirectory.hpp
 
 
 $(LIBDIR)/%.o: $(SRCDIR)/%.cpp

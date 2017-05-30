@@ -6,6 +6,8 @@
   Copyright © 2017. All rights reserved.
 */
 
+// #define TEST
+
 #include <iostream>
 #include <chrono>
 #include <random>
@@ -25,8 +27,6 @@
 						show_usage(argv[0]);\
 						return 0;\
 					}
-
-#define TEST
 
 
 int main(int argc, char *argv[])
@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
 		OverturnerProblem prob(model);
 		if (adim){
 			OverturnerProblemAdim probadim(prob);
-			StudyCaseTrajectoriesAdim(probadim,model,Nloc,yStart,zStart);
+			StudyCaseTrajectories(probadim,model,Nloc,yStart,zStart);
 		}
 		else{
 			StudyCaseTrajectories(prob,model,Nloc,yStart,zStart);
@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
 		HANDLES_FLAG
 		OverturnerProblem prob(model);
 		OverturnerProblemAdim probadim(prob);
-		StudyCaseConcentrationAdim(probadim,model,"box",Nloc,yStart,zStart,dimy,dimz);
+		StudyCaseConcentration(probadim,model,"box",Nloc,yStart,zStart,dimy,dimz);
 	}
 	else if ((studycase == "-M") || (studycase == "--transition_proba"))
 	{
@@ -90,10 +90,16 @@ int main(int argc, char *argv[])
 	// StudyCaseTestProblemSemiInf();
 	std::string model = "timmermans";
 	OverturnerProblem prob(model);
-	OverturnerProblemAdim probadim(prob);
-	const double epsilon = .1;
-	int nboxy = 20;
-	int nboxz = 20;
-	StudyCaseComputeNloc(probadim,epsilon,nboxy,nboxz);
+	// OverturnerProblemAdim probadim(prob);
+	// const double epsilon = .1;
+	int nboxy = 15;
+	int nboxz = 10;
+	int nlocy = 32, nlocz = 32;
+	// StudyCaseComputeNloc(probadim,epsilon,nboxy,nboxz);
+	// StudyCaseComputeNloc(prob,epsilon,nboxy,nboxz);
+	double year = 365*24*3600;
+	const int nTimes = 11;
+	double Times[nTimes] = {1.*year,10.*year,20.*year,30.*year,40.*year,50.*year,60.*year,70.*year,80.*year,90.*year,100.*year};
+	StudyCaseTransitionProbabilities(prob, model, nboxy, nboxz, nlocy, nlocz, Times, nTimes, true);
 #endif
 }

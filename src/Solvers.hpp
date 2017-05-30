@@ -12,6 +12,7 @@
 #include "Particles2D.hpp"
 #include "Utilities.hpp"
 #include "AdvDiffProblem.hpp"
+#include <random>
 #include <iostream>
 #include <iomanip>
 #include <algorithm>
@@ -34,10 +35,11 @@ class Solver
 		virtual ~Solver(){};
 		virtual void UpdatePosition(const AbstractAdvDiffProblem& prob) =0;		// Pure virtual function
 		virtual void UpdatePositionAdim(const AbstractAdvDiffProblemAdim& prob) =0;	// Pure virtual function
-		Particles2D& Run(const AbstractAdvDiffProblem& prob);
-		Particles2D& Run(const AbstractAdvDiffProblem& prob, std::string model, int nPrint = 5, bool printInit = true, bool binary = false);
-		Particles2D& RunAdim(const AbstractAdvDiffProblemAdim& prob);
-		Particles2D& RunAdim(const AbstractAdvDiffProblemAdim& prob, std::string model, int nPrint = 5, bool printInit = true, bool binary = false);
+		Particles2D Run(const AbstractAdvDiffProblem& prob);
+		Particles2D Run(const AbstractAdvDiffProblem& prob, double Time);
+		Particles2D Run(const AbstractAdvDiffProblem& prob, std::string model, int nPrint = 5, bool printInit = true, bool binary = false);
+		Particles2D RunAdim(const AbstractAdvDiffProblemAdim& prob);
+		Particles2D RunAdim(const AbstractAdvDiffProblemAdim& prob, std::string model, int nPrint = 5, bool printInit = true, bool binary = false);
 		void DisplayParticles() const;
 		void PrintParticles(std::ofstream& fT, std::ofstream& fY, std::ofstream& fZ) const;
 		void PrintParticlesBinary(std::ofstream& fT, std::ofstream& fY, std::ofstream& fZ) const;

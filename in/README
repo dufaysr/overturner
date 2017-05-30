@@ -10,9 +10,9 @@ y0Prime = adimensionnal y0 (= y0/L)
 z0Prime = adimensionnal z0 (= z0/L)
 Psi = parameter Psi
 Nloc = for studyCaseTrajectories/Concentration, useful is you want Nloc particles starting at the same location
-nybox = for studyCaseTransitionProbabilities, nybox x nzbox particles are initially released in each box.
-nzbox = the initial positions of those particles are defined by the nybox x nzbox subgrid.
-dimy = number of boxes in the y-direction (for studyCaseTransitionProbability)
-dimz = number of boxes in the z-direction (for studyCaseTransitionProbability)
+nyloc = for studyCaseTransitionProbabilities, nyloc x nzloc particles are initially released in each box.
+nzloc = the initial positions of those particles are defined by the nybox x nzbox subgrid.
+nboxy = number of boxes in the y-direction (for studyCaseTransitionProbability)
+nboxz = number of boxes in the z-direction (for studyCaseTransitionProbability)
 dt = time-step
 T = final time

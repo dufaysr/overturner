@@ -7,7 +7,6 @@
 */
 
 #include <chrono>
-#include <random>
 #include <iostream>
 #include "Solvers.hpp"
 #include "workingdirectory.hpp"
@@ -50,7 +49,7 @@ Solver::Solver(const Particles2D& particles):
 	wiener(0.0,1.0)
 {}
 
-Particles2D& Solver::Run(const AbstractAdvDiffProblem& prob)
+Particles2D Solver::Run(const AbstractAdvDiffProblem& prob)
 {
 	for (int i=0; i*prob.getdt() < prob.getT(); i++)
 	{
@@ -59,7 +58,17 @@ Particles2D& Solver::Run(const AbstractAdvDiffProblem& prob)
 	return mParticles;
 }
 
-Particles2D& Solver::Run(const AbstractAdvDiffProblem& prob, std::string model, int nPrint, bool printInit, bool binary)
+Particles2D Solver::Run(const AbstractAdvDiffProblem& prob, double Time)
+{
+	double Tend = Time - mParticles.mTime;
+	for (int i=0; i*prob.getdt() < Tend; i++)
+	{
+		UpdatePosition(prob);
+	}
+	return mParticles;
+}
+
+Particles2D Solver::Run(const AbstractAdvDiffProblem& prob, std::string model, int nPrint, bool printInit, bool binary)
 {
 	std::ofstream fT = openOutputFile(wd::root + "out/" + model + "/time.out",binary);
 	std::ofstream fY = openOutputFile(wd::root + "out/" + model + "/Y.out",binary);
@@ -102,7 +111,7 @@ Particles2D& Solver::Run(const AbstractAdvDiffProblem& prob, std::string model, 
 	return mParticles;
 }
 
-Particles2D& Solver::RunAdim(const AbstractAdvDiffProblemAdim& prob)
+Particles2D Solver::RunAdim(const AbstractAdvDiffProblemAdim& prob)
 {
 	for (int i=0; i*prob.getdtPrime() < prob.getTPrime(); i++)
 	{
@@ -111,7 +120,7 @@ Particles2D& Solver::RunAdim(const AbstractAdvDiffProblemAdim& prob)
 	return mParticles;
 }
 
-Particles2D& Solver::RunAdim(const AbstractAdvDiffProblemAdim& prob, std::string model, int nPrint, bool printInit, bool binary)
+Particles2D Solver::RunAdim(const AbstractAdvDiffProblemAdim& prob, std::string model, int nPrint, bool printInit, bool binary)
 {
 	std::ofstream fT = openOutputFile(wd::root + "out/" + model + "/tadim.out",binary);
 	std::ofstream fY = openOutputFile(wd::root + "out/" + model + "/Yadim.out",binary);

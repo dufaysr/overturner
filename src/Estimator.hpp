@@ -29,6 +29,7 @@ class Estimator
 		virtual void Estimate(const Particles2D& particles) =0;
 		virtual void EstimateAdim(const Particles2D& particles) =0;
 		void Print(std::string filename, bool binary=false) const;
+		void Print(std::ofstream& f, bool binary=false) const;
 };
 
 class KernelEstimator : public Estimator
@@ -82,8 +83,11 @@ class GlobalKernelEstimator : public GlobalEstimator
 
 class GlobalBoxEstimator : public GlobalEstimator
 {
+	private:
+		double mH0, mL0;
+
 	public:
-		GlobalBoxEstimator(int nboxy, int nboxz, double H, double L, int Nloc);
+		GlobalBoxEstimator(int nboxy, int nboxz, double H0, double H, double L0, double L, int Nloc);
 		void Estimate(const Particles2D& particles);
 		void EstimateAdim(const Particles2D& particles);
 		Matrix Count(const Particles2D& particles);

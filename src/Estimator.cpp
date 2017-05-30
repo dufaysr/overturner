@@ -24,6 +24,17 @@ void Estimator::Print(std::string filename, bool binary) const
     f.close();
 }
 
+void Estimator::Print(std::ofstream& f, bool binary) const
+{
+	f.setf(std::ios::scientific); f.precision(10);
+
+	if (binary)
+		mEstimator.PrintBinary(f);
+	else
+		mEstimator.Print(f);
+    f.close();
+}
+
 KernelEstimator::KernelEstimator(int nboxy, int nboxz, double H, double L, double lambda, std::string kernelFunction):
 Estimator(nboxy,nboxz,H,L), mLambda(lambda)
 {
@@ -205,8 +216,10 @@ void GlobalKernelEstimator::EstimateAdim(const Particles2D& particles)
 	}
 }
 
-GlobalBoxEstimator::GlobalBoxEstimator(int nboxy, int nboxz, double H, double L, int Nloc):
-GlobalEstimator(nboxy,nboxz,H,L,Nloc)
+GlobalBoxEstimator::GlobalBoxEstimator(int nboxy, int nboxz, double H0, double H, double L0, double L, int Nloc):
+	GlobalEstimator(nboxy,nboxz,H,L,Nloc),
+	mH0(H0), 
+	mL0(L0)
 {}
 
 void GlobalBoxEstimator::Estimate(const Particles2D& particles)
@@ -224,8 +237,8 @@ void GlobalBoxEstimator::EstimateAdim(const Particles2D& particles)
 		{
 			for (int n=0; n<mNloc; n++)
 			{
-				iyEnd = std::min(int(particles.mY[iyStart*mNboxz*mNloc+izStart*mNloc+n]*mNboxy),mNboxy-1);
-				izEnd = std::min(int(particles.mZ[iyStart*mNboxz*mNloc+izStart*mNloc+n]*mNboxz),mNboxz-1);
+				iyEnd = std::min(int((particles.mY[iyStart*mNboxz*mNloc+izStart*mNloc+n]-mL0)*mNboxy),mNboxy-1);
+				izEnd = std::min(int((particles.mZ[iyStart*mNboxz*mNloc+izStart*mNloc+n]-mH0)*mNboxz),mNboxz-1);
 				mEstimator(iyStart*mNboxz+izStart,iyEnd*mNboxz+izEnd) += 1.;
 			}
 		}
@@ -244,8 +257,8 @@ Matrix GlobalBoxEstimator::Count(const Particles2D& particles)
 		{
 			for (int n=0; n<mNloc; n++)
 			{
-				iyEnd = std::min(int(particles.mY[iyStart*mNboxz*mNloc+izStart*mNloc+n]/dy),mNboxy-1);
-				izEnd = std::min(int(particles.mZ[iyStart*mNboxz*mNloc+izStart*mNloc+n]/dz),mNboxz-1);
+				iyEnd = std::min(int((particles.mY[iyStart*mNboxz*mNloc+izStart*mNloc+n]-mL0)/dy),mNboxy-1);
+				izEnd = std::min(int((particles.mZ[iyStart*mNboxz*mNloc+izStart*mNloc+n]-mH0)/dz),mNboxz-1);
 				mEstimator(iyStart*mNboxz+izStart,iyEnd*mNboxz+izEnd) += 1.;
 			}
 		}

@@ -28,6 +28,7 @@ class AbstractAdvDiffProblem
 		double mdt; // time step of the numerical scheme
 	public:
 		AbstractAdvDiffProblem(double H0, double H1, double L0, double L1, double T, double dt);
+		virtual ~AbstractAdvDiffProblem(){};
 		double getH0() const;
 		double getH1() const;
 		double getL0() const;
@@ -90,6 +91,7 @@ class AbstractAdvDiffProblemAdim
 
 	public:
 		AbstractAdvDiffProblemAdim(double TPrime, double dtPrime, double H, double L);
+		virtual ~AbstractAdvDiffProblemAdim(){};
 		double getTPrime()  const;
 		double getdtPrime() const;
 		virtual double getPehInv(double y, double z) const=0;

@@ -1,24 +1,29 @@
 close all;
 % Name of the model
-model = 'model';
+model = 'timmermans';
+% name of the files
+name_info = 'info_globalbox';
+nameM = 'M0';
 % Load transition probability matrix from binary output file
 fprintf('Loading Transition probabilities matrix...\n');
-M = loadMbin(model);
+M = loadMbin(model,nameM);
 % Import model parameters in the workspace
 fprintf('Importing model parameters...\n');
-importfileInfo(model);
+importfileInfo(model,name_info);
 % Compute clustering using stability criterion at Markov time 1, which is
 % equivalent to modularity. We are not interested in the variation of
 % information (hence 'noVI' option) and the graph is directed.
 fprintf('Computing clustering...\n');
-% T = linspace(0,10,101); T(1) = 0.001;
-T = 1;
-[S, N, VI, C] = stability(M,T,'directed','noVI');
+T = linspace(0,10,101); T(1) = 0.001;
+% T = 1;
+[S, N, VI, C] = stability(M,T,'directed','v','plot');
 fprintf('Found %d communities with stability = %f.\n',N,S);
 % Node k corresponds to spatial position iy = k/dimz, iz = mod(k,dimz)
 ind = find(T == 1);
-C = reshape(C(:,ind),dimz,dimy);
+C = reshape(C(:,ind),nboxz,nboxy);
 disp(C);
+L = L1-L0;
+H = H1-H0;
 dy = L/dimy; dz = H/dimz;
 y = linspace(dy/2,L-dy/2,dimy);
 z = linspace(dz/2,H-dz/2,dimz);

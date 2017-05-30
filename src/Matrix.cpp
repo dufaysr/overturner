@@ -144,10 +144,15 @@ double Matrix::Get(int i, int j) const
 // and a check on the validity of the index
 double& Matrix::operator()(int i, int j)
 {
-    assert(i > -1);
-    assert(i < mDim1);
-    assert(j > -1);
-    assert(j < mDim2);
+    // assert(i > -1);
+    // assert(i < mDim1);
+    // assert(j > -1);
+    // assert(j < mDim2);
+    if (i < 0 || i >= mDim1 || j < 0 || j >= mDim2)
+    {
+        std::cerr << "(i,j) = (" << i << ", " << j << ") out of dim. mDim1 = " << mDim1 << ", mDim2 = " << mDim2 << std::endl;
+        abort();
+    }
     return mData[i][j];
 }
 
@@ -157,6 +162,7 @@ Matrix& Matrix::operator=(const Matrix& m)
     {
         if (m.mDim1 != mDim1 || m.mDim2 != mDim2) 
         { // storage cannot be reused : delete and realloc
+            std::cerr << "HEY ! Not supposed to reallocated space for the matrix..." << std::endl;
             for (int i=0; i<mDim1; i++)
             {
                 delete[] mData[i];

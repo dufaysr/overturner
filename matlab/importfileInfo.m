@@ -1,4 +1,4 @@
-function importfileInfo(model, startRow, endRow, report)
+function importfileInfo(model, name, startRow, endRow)
 %IMPORTFILE Import numeric data from a text file as column vectors.
 %   [NAMES,VALUES] = IMPORTFILEINFO(MODEL) Reads data from text file
 %   /home/renaud/Documents/EPL/tfe/overturner/out/MODEL/info.out
@@ -14,19 +14,16 @@ function importfileInfo(model, startRow, endRow, report)
 %% Initialize variables.
 delimiter = {' = ',' '};
 if nargin < 4
-    report = 0;
+    endRow = inf;
     if nargin < 3
-        endRow = inf;
+        startRow = 5;
         if nargin < 2
-            startRow = 5;
+            name = 'info';
         end
     end
 end
-if report
-    filename = ['/home/renaud/Documents/EPL/tfe/overturner/out/' model '/info_report.out'];
-else
-    filename = ['/home/renaud/Documents/EPL/tfe/overturner/out/' model '/info_report.out'];
-end
+
+filename = ['/home/renaud/Documents/EPL/tfe/overturner/out/' model '/' name '.out'];
 
 %% Format for each line of text:
 %   column2: text (%s)

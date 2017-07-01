@@ -7,6 +7,7 @@
 */
 
 // #define TEST
+#define PROBLEM2BOX
 
 #include <iostream>
 #include <chrono>
@@ -28,10 +29,54 @@
 						return 0;\
 					}
 
-
+#if defined(TEST)
 int main(int argc, char *argv[])
 {
-#ifndef TEST
+	// StudyCaseTestProblem();
+	// StudyCaseTestProblemSemiInf();
+	std::string model = "timmermans";
+	OverturnerProblem prob(model);
+	// OverturnerProblemAdim probadim(prob);
+	// const double epsilon = .1;
+	int nboxy = 15;
+	int nboxz = 10;
+	int nlocy = 100, nlocz = 100;
+	// StudyCaseComputeNloc(probadim,epsilon,nboxy,nboxz);
+	// StudyCaseComputeNloc(prob,epsilon,nboxy,nboxz);
+	double year = 365*24*3600;
+	const int nTimes = 11;
+	double Times[nTimes] = {1.*year,10.*year,20.*year,30.*year,40.*year,50.*year,60.*year,70.*year,80.*year,90.*year,100.*year};
+	StudyCaseTransitionProbabilities(prob, model, nboxy, nboxz, nlocy, nlocz, Times, nTimes, true);
+
+	return 0;
+}
+
+#elif defined(PROBLEM2BOX)
+int main(int argc, char *argv[])
+{
+	double dt = 3600;
+	double year = 365*24*3600;
+	double T = 1*year;
+	double alpha = 1; // .9, .5, .1
+	Problem2Box prob(T,dt,alpha);
+
+	int nboxy = 30;
+	int nboxz = 10;
+	int nlocy = 100, nlocz = 100;
+
+	std::string model = "problem2box";
+
+	const int nTimes = 1;
+	double Times[nTimes] = {1.*year};
+
+	StudyCaseTransitionProbabilities(prob, model, nboxy, nboxz, nlocy, nlocz, Times, nTimes, true);
+
+	return 0;
+}
+
+#else
+int main(int argc, char *argv[])
+{
 	if (argc < 2) // i.e. no argument provided
 	{
     	show_usage(argv[0]);
@@ -85,21 +130,5 @@ int main(int argc, char *argv[])
 	else 
 		show_usage(argv[0]);
 	return 0;
-#else
-	// StudyCaseTestProblem();
-	// StudyCaseTestProblemSemiInf();
-	std::string model = "timmermans";
-	OverturnerProblem prob(model);
-	// OverturnerProblemAdim probadim(prob);
-	// const double epsilon = .1;
-	int nboxy = 15;
-	int nboxz = 10;
-	int nlocy = 32, nlocz = 32;
-	// StudyCaseComputeNloc(probadim,epsilon,nboxy,nboxz);
-	// StudyCaseComputeNloc(prob,epsilon,nboxy,nboxz);
-	double year = 365*24*3600;
-	const int nTimes = 11;
-	double Times[nTimes] = {1.*year,10.*year,20.*year,30.*year,40.*year,50.*year,60.*year,70.*year,80.*year,90.*year,100.*year};
-	StudyCaseTransitionProbabilities(prob, model, nboxy, nboxz, nlocy, nlocz, Times, nTimes, true);
-#endif
 }
+#endif

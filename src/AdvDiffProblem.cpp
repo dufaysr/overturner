@@ -184,7 +184,9 @@ void OverturnerProblem::Display() const
 	cout << "mPsi = " << mPsi << endl;
 }
 
-
+/*
+    TestProblem
+*/
 TestProblem::TestProblem(double T, double dt, double Ly, double Lz, double Kyy, double Kzz, double V, double W, int J, std::string domain):
     AbstractAdvDiffProblem(-Lz, Lz, -Ly, Ly, T, dt),
     mKyy(Kyy),
@@ -232,6 +234,55 @@ void TestProblem::printInfo(std::ofstream& f) const
     f << "J = " << mJ << "\n";
 }
 
+
+/*
+   Problem2Box
+*/
+Problem2Box::Problem2Box(double T, double dt, double alpha):
+    AbstractAdvDiffProblem(0.,5e3,-15e6,15e6,T,dt),
+    mHstar(alpha*5e3),
+    my0(13e6),
+    mz0(4000.),
+    mKh(1e4),
+    mPsi(10.)
+{}
+
+double Problem2Box::getKh(double y, double z) const
+{
+    int ChiDomain = (y >= mL0+my0 && y <= mL1-my0 && z >= mHstar && z <= mH1);
+    return ChiDomain*mKh;
+}
+    
+double Problem2Box::getKv(double y, double z) const
+{
+    return 0.;
+}
+
+double Problem2Box::getV(double y, double z) const
+{
+    int ChiDomain = (y >= mL0 && y <= mL1 && z >= mH0 && z <= mH1);
+    return ChiDomain*mPsi*v2box(y,my0,z,mz0,mL1,mH1);
+}
+
+double Problem2Box::getW(double y, double z) const
+{
+    int ChiDomain = (y >= mL0 && y <= mL1 && z >= mH0 && z <= mH1);
+    return ChiDomain*mPsi*w2box(y,my0,z,mz0,mL1,mH1);
+}
+
+void Problem2Box::printInfo(std::ofstream& f) const
+{
+    f << "H0 = " << mH0 << "\n";
+    f << "H1 = " << mH1 << "\n";
+    f << "L0 = " << mL0 << "\n";
+    f << "L1 = " << mL1 << "\n";
+    f << "T = " << mT << "\n";
+    f << "dt = " << mdt << "\n";
+    f << "y0 = " << my0 << "\n";
+    f << "z0 = " << mz0 << "\n";
+    f << "Kh = " << mKh << "\n";
+    f << "Psi = " << mPsi << "\n";
+}
 
 /*    Adimensionnal Advection-Diffusion problem    */
 AbstractAdvDiffProblemAdim::AbstractAdvDiffProblemAdim(double TPrime, double dtPrime, double H, double L):
@@ -436,4 +487,18 @@ double w(double y, double y0, double z, double z0, double L, double H)
         +  by0p*bz0p*(-phi(L-y,L-y0)*phi(H-z,H-z0))
         +  by0m*bz0*(dphi(y,y0))
         +  by0p*bz0*(-dphi(L-y,L-y0));
+}
+
+double v2box(double y, double y0, double z, double z0, double L, double H)
+{
+    int byl = y < 0;
+    int byu = y > 0;
+    return byl*v(y+L,y0,z,z0,L,H) - byu*v(y,L-y0,z,z0,L,H);
+}
+
+double w2box(double y, double y0, double z, double z0, double L, double H)
+{
+    int byl = y < 0;
+    int byu = y > 0;
+    return byl*w(y+L,y0,z,z0,L,H) - byu*w(y,L-y0,z,z0,L,H);
 }

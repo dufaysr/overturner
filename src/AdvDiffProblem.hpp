@@ -80,6 +80,25 @@ class TestProblem : public AbstractAdvDiffProblem
 		void printInfo(std::ofstream& f) const;
 };
 
+class Problem2Box : public AbstractAdvDiffProblem
+{
+	private:
+		double mHstar;
+		double my0;
+		double mz0;
+		double mKhm, mKhp;
+		double mKv;
+		double mPsi;
+
+	public:
+		Problem2Box(double T, double dt, double alpha); // default case is using C. Timmermans values for the parameters
+		double getKh(double y, double z) const;
+		double getKv(double y, double z) const;
+		double getV(double y, double z) const;
+		double getW(double y, double z) const;
+		void printInfo(std::ofstream& f) const;
+};
+
 /*    Adimensionnal Advection-Diffusion problem    */
 class AbstractAdvDiffProblemAdim
 {
@@ -124,4 +143,6 @@ inline double phi(double xsi, double xsi0);
 inline double dphi(double xsi, double xsi0);
 double v(double y, double y0, double z, double z0, double L, double H);
 double w(double y, double y0, double z, double z0, double L, double H);
+double v2box(double y, double y0, double z, double z0, double L, double H);
+double w2box(double y, double y0, double z, double z0, double L, double H);
 #endif

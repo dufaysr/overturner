@@ -9,7 +9,6 @@
 #include <string>
 #include <algorithm>
 #include <ctime>
-#include "mpi.h"
 #include "Particles2D.hpp"
 #include "Utilities.hpp"
 #include "Solvers.hpp"
@@ -29,10 +28,5 @@ void StudyCaseTransitionProbabilities(const AbstractAdvDiffProblem& prob, std::s
 									  int nboxy, int nboxz, int nyloc, int nzloc, bool binary);
 void StudyCaseTransitionProbabilities(const AbstractAdvDiffProblem& prob, std::string model,
 									  int nboxy, int nboxz, int nyloc, int nzloc, double Times[], int nTimes, bool binary);
-void StudyCaseTransitionProbabilitiesMPI(const AbstractAdvDiffProblem& prob, std::string model,
-									  int nboxy, int nboxz, int nyloc, int nzloc, 
-									  double Times[], int nTimes, bool binary);
 void StudyCaseTestProblem();
 void StudyCaseTestProblemSemiInf();
-int StudyCaseComputeNloc(const AbstractAdvDiffProblemAdim& prob, const double epsilon, int nboxy, int nboxz);
-int StudyCaseComputeNloc(const AbstractAdvDiffProblem& prob, const double epsilon, int nboxy, int nboxz);

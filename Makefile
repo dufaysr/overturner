@@ -15,7 +15,7 @@ HEADDIR = src
 LIBDIR = lib
 BINDIR = bin
 
-EXEC=overturner.exe
+EXEC=KvKh2box.exe
 
 SRC= $(wildcard $(SRCDIR)/*.cpp)
 OBJ= $(SRC:$(SRCDIR)/%.cpp=$(LIBDIR)/%.o)

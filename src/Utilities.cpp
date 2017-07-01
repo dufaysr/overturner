@@ -107,7 +107,7 @@ std::ofstream openOutputFile(std::string filename, bool binary)
         if (fout)
             return fout;
         else{
-            std::cerr << "Did not manage to open the file." << std::endl;
+            std::cerr << "Did not manage to open the file. \"" << filename << "\"" << std::endl;
             abort();
         }
     }   

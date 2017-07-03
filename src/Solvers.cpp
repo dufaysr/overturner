@@ -310,16 +310,21 @@ void BISolver::UpdatePosition(const AbstractAdvDiffProblem& prob)
 		// prediction step of the backward-Ito scheme
 		dY = sqrt(2*prob.getKh(y,z)*prob.getdt())*R1;
 		dZ = sqrt(2*prob.getKv(y,z)*prob.getdt())*R2;
+		// No-through BC also applies on the predictions -> boucing on the walls
+		double ypred = y+dY;
+		double zpred = z+dZ;
+		ypred = (ypred < prob.getL0()) ? 2*prob.getL0()-ypred : (ypred > prob.getL1()) ? 2*prob.getL1()-ypred : ypred;
+		zpred = (zpred < prob.getH0()) ? 2*prob.getH0()-zpred : (zpred > prob.getH1()) ? 2*prob.getH1()-zpred : zpred;
 		// amplitude of the noises
-		N1 = sqrt(2*prob.getKh(y+dY,z+dZ)*prob.getdt());
-		N2 = sqrt(2*prob.getKv(y+dY,z+dZ)*prob.getdt());
+		N1 = sqrt(2*prob.getKh(ypred,zpred)*prob.getdt());
+		N2 = sqrt(2*prob.getKv(ypred,zpred)*prob.getdt());
 		/* update particles positions using backward-Ito scheme
 		* 2 options for the no-flux BC : either stick to the wall or bounce on it.
 		* Uncomment the one of your choice and comment the other.
 		*/
 		// 1. Stick to the wall
-		// mParticles.mY[i] = std::min(L, std::max(mParticles.mY[i] + v*dt + N1*R1, 0.));
-		// mParticles.mZ[i] = std::min(H, std::max(mParticles.mZ[i] + w*dt + N2*R2, 0.));
+		// mParticles.mY[i] = std::min(prob.getL1(), std::max(mParticles.mY[i] + v*prob.getdt() + N1*R1, prob.getL0()));
+		// mParticles.mZ[i] = std::min(prob.getH1(), std::max(mParticles.mZ[i] + w*prob.getdt() + N2*R2, prob.getH0()));
 		// 2. Bounce on the wall
 		double ynew = mParticles.mY[i] + v*prob.getdt() + N1*R1;
 		double znew = mParticles.mZ[i] + w*prob.getdt() + N2*R2;

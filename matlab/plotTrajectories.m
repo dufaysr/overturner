@@ -2,8 +2,8 @@
 % Y = load('/home/renaud/Documents/EPL/tfe/overturner/out/model/Y.out');
 % Z = load('/home/renaud/Documents/EPL/tfe/overturner/out/model/Z.out');
 % 
-% Y2 = load('/home/renaud/Documents/EPL/tfe/overturner/out/Y2.out');
-% Z2 = load('/home/renaud/Documents/EPL/tfe/overturner/out/Z2.out');
+% Y = load('/home/renaud/Documents/EPL/tfe/overturner/out/Y.out');
+% Z = load('/home/renaud/Documents/EPL/tfe/overturner/out/Z.out');
 % L = 12e6;
 % H = 4e3;
 
@@ -12,7 +12,7 @@
 L = 15e6;
 H = 5e3;
 
-ind = 5:7;
+for ind = 1:10
 figure
 hold on
 plot(Y(:,ind),Z(:,ind))
@@ -22,6 +22,7 @@ xlim([0 L]);
 ylim([0 H]);
 % xlim([0 1]);
 % ylim([0 1]);
+end
 
 
 % figure

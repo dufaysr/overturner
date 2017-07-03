@@ -49,7 +49,7 @@ double AbstractAdvDiffProblem::getdt() const
 OverturnerProblem::OverturnerProblem(double T, double dt):
 	AbstractAdvDiffProblem(0.,5e3,0.,15e6,T,dt),
 	my0(13e6),
-	mz0(4050.),
+	mz0(4000.),
 	mKh(1e3),
 	mKv1(1e-1), mKv2(1e-4), mKv3(1e-3),
 	mPsi(2.)
@@ -240,7 +240,7 @@ void TestProblem::printInfo(std::ofstream& f) const
 */
 Problem2Box::Problem2Box(double T, double dt, double alpha):
     AbstractAdvDiffProblem(0.,5e3,-15e6,15e6,T,dt),
-    mHstar(alpha*5e3),
+    mzstar(alpha*5e3),
     my0(13e6),
     mz0(4000.),
     mKhm(1e3),
@@ -249,11 +249,36 @@ Problem2Box::Problem2Box(double T, double dt, double alpha):
     mPsi(10.)
 {}
 
+double Problem2Box::getzstar() const
+{
+    return mzstar;
+}
+
+double Problem2Box::gety0() const
+{
+    return my0;
+}
+
+double Problem2Box::gety0m() const
+{
+    return mL0 + my0;
+}
+
+double Problem2Box::gety0p() const
+{
+    return mL1 - my0;
+}
+
+double Problem2Box::getz0() const
+{
+    return mz0;
+}
+
 double Problem2Box::getKh(double y, double z) const
 {
     int ChiDomain = (y >= mL0 && y <= mL1 && z >= mH0 && z <= mH1);
     int ChiInterface = (y >= mL0+my0 && y <= mL1-my0);
-    int ChiMixing = (ChiInterface && z >= mHstar && z <= mH1);
+    int ChiMixing = (ChiInterface && z >= mzstar && z <= mH1);
     int ChiExt =  (ChiDomain && !ChiInterface);
     return ChiExt*mKhm + ChiMixing*mKhp;
 }
@@ -286,6 +311,7 @@ void Problem2Box::printInfo(std::ofstream& f) const
     f << "dt = " << mdt << "\n";
     f << "y0 = " << my0 << "\n";
     f << "z0 = " << mz0 << "\n";
+    f << "zstar = " << mzstar << "\n";
     f << "Khm = " << mKhm << "\n";
     f << "Khp = " << mKhp << "\n";
     f << "Kv = " << mKv << "\n";
@@ -483,16 +509,16 @@ double v(double y, double y0, double z, double z0, double L, double H)
 
 double w(double y, double y0, double z, double z0, double L, double H)
 {
-    int by0m = y < y0;
-    int by0p = y > y0;
-    int bz0m = z < z0;
+    int by0m = y < y0 && y >= 0;
+    int by0p = y > y0 && y <= L;
+    int bz0m = z < z0 && y >= 0;
     int bz0 = z == z0;
-    int bz0p = z > z0;
+    int bz0p = z > z0 && z <= H;
 
     return by0m*bz0m*(dphi(y,y0)*phi(z,z0))
         +  by0m*bz0p*(dphi(y,y0)*phi(H-z,H-z0))
         +  by0p*bz0m*(-dphi(L-y,L-y0)*phi(z,z0))
-        +  by0p*bz0p*(-phi(L-y,L-y0)*phi(H-z,H-z0))
+        +  by0p*bz0p*(-dphi(L-y,L-y0)*phi(H-z,H-z0))
         +  by0m*bz0*(dphi(y,y0))
         +  by0p*bz0*(-dphi(L-y,L-y0));
 }

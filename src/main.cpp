@@ -7,8 +7,8 @@
 */
 
 // #define TEST
-// #define PROBLEM2BOX
-#define KHKV2BOX
+#define PROBLEM2BOX
+// #define KHKV2BOX
 
 #include <iostream>
 #include <chrono>
@@ -55,6 +55,15 @@ int main(int argc, char *argv[])
 #elif defined(PROBLEM2BOX)
 int main(int argc, char *argv[])
 {
+	/* trajectories */
+	// double dt = 3600;
+	// double year = 365*24*3600;
+	// double T = 1000*year;
+	// double alpha = .75;
+	// Problem2Box prob(T,dt,alpha);
+	// StudyCaseTrajectories(prob,"data2box",10,-13e6,4.5e3);
+	
+	/* Transition probability matrices */
 	double dt = 3600;
 	double year = 365*24*3600;
 	double T = 1*year;

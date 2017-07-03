@@ -15,7 +15,7 @@ HEADDIR = src
 LIBDIR = lib
 BINDIR = bin
 
-EXEC=KvKh2box.exe
+EXEC=traj2box.exe
 
 SRC= $(wildcard $(SRCDIR)/*.cpp)
 OBJ= $(SRC:$(SRCDIR)/%.cpp=$(LIBDIR)/%.o)

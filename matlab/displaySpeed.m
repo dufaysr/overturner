@@ -4,15 +4,18 @@ function displaySpeed
 textwidth = 16.06;
 close all;
 
-H = 1;
-L = 1;
-PSI = 1;
+% H = 1;
+% L = 1;
+% PSI = 1;
 
-y0 = 11/12;
-z0 = 3.5/4;
+% y0 = 11/12;
+% z0 = 3.5/4;
 
-ytick = [0 y0 1];
-ztick = [0 z0 1];
+H = 5e3; L = 15e6; PSI = 1;
+y0 = 12e6; z0 = 4e3;
+
+ytick = [0 y0 L];
+ztick = [0 z0 H];
 yticklab = {'0','$$\frac{y_0}{L}$$','1'};
 zticklab = {'0','$$\frac{z_0}{H}$$','1'};
 
@@ -21,6 +24,8 @@ z = linspace(0,1,100);
 [Y,Z] = meshgrid(y,z);
 V = v(Y,Z,y0,z0,PSI,L,H);
 W = w(Y,Z,y0,z0,PSI,L,H);
+
+max(max(W))
 
 figure('units','centimeters','position',[10 10 .5*textwidth .5*textwidth]);
 set(gcf,'PaperPositionMode','auto')

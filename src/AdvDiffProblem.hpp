@@ -83,7 +83,7 @@ class TestProblem : public AbstractAdvDiffProblem
 class Problem2Box : public AbstractAdvDiffProblem
 {
 	private:
-		double mHstar;
+		double mzstar;
 		double my0;
 		double mz0;
 		double mKhm, mKhp;
@@ -92,6 +92,11 @@ class Problem2Box : public AbstractAdvDiffProblem
 
 	public:
 		Problem2Box(double T, double dt, double alpha); // default case is using C. Timmermans values for the parameters
+		double getzstar() const;
+		double gety0() const;
+		double gety0m() const;
+		double gety0p() const;
+		double getz0() const;
 		double getKh(double y, double z) const;
 		double getKv(double y, double z) const;
 		double getV(double y, double z) const;
@@ -139,8 +144,8 @@ class OverturnerProblemAdim : public AbstractAdvDiffProblemAdim
 		void Display() const;
 };
 
-inline double phi(double xsi, double xsi0);
-inline double dphi(double xsi, double xsi0);
+double phi(double xsi, double xsi0);
+double dphi(double xsi, double xsi0);
 double v(double y, double y0, double z, double z0, double L, double H);
 double w(double y, double y0, double z, double z0, double L, double H);
 double v2box(double y, double y0, double z, double z0, double L, double H);

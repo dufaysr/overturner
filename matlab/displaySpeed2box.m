@@ -8,8 +8,10 @@ H = 1;
 L = 1;
 PSI = 1;
 
-y0 = 11/12;
-z0 = 3.5/4;
+% y0 = 11/12;
+% z0 = 3.5/4;
+y0 = 13/15;
+z0 = 4/5;
 
 ytick = [-1 -1+y0 0 1-y0 1];
 ztick = [0 z0 1];
@@ -53,7 +55,7 @@ contour(YL,Z,VL, [6 6]);
 contour(YL,Z,VL, [8 8],'ShowText','on','LabelSpacing',1000);
 contour(YL,Z,VL, [10 12]);
 contour(YL,Z,VL, [14 14],'ShowText','on','LabelSpacing',1000);
-caxis([-20 20])
+caxis([-10 10])
 % colorbar
 xlabel('$$y/L$$');
 ylabel('$$z/H$$');
@@ -77,14 +79,14 @@ contour(Y,Z,W, 0:2,'ShowText','on','LabelSpacing',150);
 % contour(YU,Z,WU,[-10 -10],'ShowText','on','LabelSpacing',85.5);
 % contour(YU,Z,WU,[-4 -4],'ShowText','on','LabelSpacing',130);
 % contour(YU,Z,WU, 0:2,'ShowText','on','LabelSpacing',1000);
-caxis([-20 20])
+caxis([-10 10])
 % colorbar
 xlabel('$$y/L$$');
 ylabel('$$z/H$$');
 
 figure('units','centimeters','position',[10 10 .1*textwidth .5*textwidth]);
 set(gcf,'PaperPositionMode','auto')
-caxis([-20 20])
+caxis([-10 10])
 colorbar
 axis off
 end

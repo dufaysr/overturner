@@ -5,6 +5,8 @@
   Created by Renaud Dufays on 07/04/17
   Copyright © 2017. All rights reserved.
 */
+#ifndef STUDYCASES_HEADER_DEF
+#define STUDYCASES_HEADER_DEF
 
 #include <string>
 #include <algorithm>
@@ -15,18 +17,11 @@
 #include "Estimator.hpp"
 #include "AdvDiffProblem.hpp"
 #include "workingdirectory.hpp"
+#include "Compute.hpp"
 
-void StudyCaseTrajectories(const AbstractAdvDiffProblem& prob, std::string model, int Nloc, double yStart, double zStart);
-void StudyCaseTrajectories(const AbstractAdvDiffProblemAdim& prob, std::string model, int Nloc, double yStart, double zStart);
-void StudyCaseConcentration(const AbstractAdvDiffProblem &prob, std::string model, std::string estimator, int Nloc,
-							double yStart, double zStart, int nboxy, int nboxz);
-void StudyCaseConcentration(const AbstractAdvDiffProblemAdim &prob, std::string model, std::string estimator, int Nloc,
-							double yStart, double zStart, int nboxy, int nboxz);
-void StudyCaseTransitionProbabilities(const AbstractAdvDiffProblemAdim& prob, std::string model, std::string estimator,
-									  int nboxy, int nboxz, int nyloc, int nzloc, bool binary=false);
-void StudyCaseTransitionProbabilities(const AbstractAdvDiffProblem& prob, std::string model, std::string estimator,
-									  int nboxy, int nboxz, int nyloc, int nzloc, bool binary);
-void StudyCaseTransitionProbabilities(const AbstractAdvDiffProblem& prob, std::string model,
-									  int nboxy, int nboxz, int nyloc, int nzloc, double Times[], int nTimes, bool binary);
 void StudyCaseTestProblem();
 void StudyCaseTestProblemSemiInf();
+void StudyCaseProblem2BoxTraj();
+void StudyCaseProblem2BoxTP();
+void StudyCaseOverturnerTPnTimes();
+#endif

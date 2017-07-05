@@ -17,9 +17,17 @@ zstar = alpha*H;
 y0 = 13e6;
 z0 = 4e3;
 
-Y = load('/home/renaud/Documents/EPL/tfe/overturner/out/data2box/Y.out');
-Z = load('/home/renaud/Documents/EPL/tfe/overturner/out/data2box/Z.out');
-t = load('/home/renaud/Documents/EPL/tfe/overturner/out/data2box/time.out');
+% Y = load('/home/renaud/Documents/EPL/tfe/overturner/out/data2box/Y.out');
+% Z = load('/home/renaud/Documents/EPL/tfe/overturner/out/data2box/Z.out');
+% t = load('/home/renaud/Documents/EPL/tfe/overturner/out/data2box/time.out');
+Z = Z(:,10);
+Y = Y(:,10);
+ind1 = Z >=0;
+indy = Y > 0;
+indz = Z < zstar;
+ind2 = indy & indz;
+ind3 = ~ind2 & ind1;
+
 
 y = linspace(-L,L);
 z = linspace(0,H);
@@ -29,9 +37,9 @@ yticklab = {'$-L$','$y^-_0$','0','$y^+_0$','$L$'};
 zticklab = {'0','$z_0$','$H$'};
 
 year = 365*24*3600;
-indT = t <= 200*year;
-indEnd = length(Z(indT,1));
-for ind = 1:10
+indT = ind3 & (t <= 200*year);
+indEnd = length(Z(indT));
+for ind = 1
     figure('units','centimeters','position',[10 10 1.1*textwidth .5*textwidth]);
     set(gcf,'PaperPositionMode','auto')
     set(gcf,'Resize','off')

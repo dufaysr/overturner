@@ -2,7 +2,9 @@ function [A] = loadMbin(model,name)
 if nargin < 2
     name = 'global_box';
 end
-f = fopen(['/home/renaud/Documents/EPL/tfe/overturner/out/' model '/' name '.bin']);
+filename = ['/home/renaud/Documents/EPL/tfe/overturner/out/' model '/' name '.bin'];
+fprintf('Trying to load ''%s''',filename);
+f = fopen(filename);
 
 A = fread(f,'double');
 fclose(f);

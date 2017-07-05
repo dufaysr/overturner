@@ -6,7 +6,7 @@
   Copyright © 2017. All rights reserved.
 */
 
-// #define TEST
+// #define OVERTURNER
 #define PROBLEM2BOX
 // #define KHKV2BOX
 
@@ -30,7 +30,7 @@
 						return 0;\
 					}
 
-#if defined(TEST)
+#if defined(OVERTURNER)
 int main(int argc, char *argv[])
 {
 	// StudyCaseTestProblem();

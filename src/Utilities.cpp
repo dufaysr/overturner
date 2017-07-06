@@ -8,7 +8,7 @@
 
 #include "Utilities.hpp"
 
-double parseMathExpr(std::string value, double dt, double H, double L)
+double parseMathExpr(std::string value, double H, double L)
 {
     char *pEnd, *pEndtmp;
     double val, tmpval;
@@ -23,11 +23,6 @@ double parseMathExpr(std::string value, double dt, double H, double L)
             tmpval = strtod(&(pEnd[1]),&pEndtmp);
             if (tmpval){
                 val *= tmpval;
-            }
-            else if (strncmp("dt",&(pEnd[1]),2) == 0)
-            {
-                val *= dt;
-                pEndtmp += 2;
             }
             else if (pEnd[1] == 'h')
             {

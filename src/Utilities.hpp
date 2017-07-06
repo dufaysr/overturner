@@ -18,7 +18,7 @@
 #include <algorithm>
 #include "workingdirectory.hpp"
 
-double parseMathExpr(std::string value, double dt, double H, double L);
+double parseMathExpr(std::string value, double H, double L);
 // void ReadIniFile(std::string model);
 std::ofstream openOutputFile(std::string filename, bool binary=false);
 void show_usage(std::string name);

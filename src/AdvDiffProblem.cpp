@@ -3,13 +3,11 @@
 /*
 	AbstractAdvDiffProblem
 */
-AbstractAdvDiffProblem::AbstractAdvDiffProblem(double H0, double H1, double L0, double L1, double T, double dt):
+AbstractAdvDiffProblem::AbstractAdvDiffProblem(double H0, double H1, double L0, double L1):
 	mH0(H0),
 	mH1(H1),
 	mL0(L0),
-	mL1(L1),
-	mT(T),
-	mdt(dt)
+	mL1(L1)
 {}
 
 double AbstractAdvDiffProblem::getH0() const
@@ -32,22 +30,23 @@ double AbstractAdvDiffProblem::getL1() const
 	return mL1;
 }
 
-double AbstractAdvDiffProblem::getT() const
+LowerTriMatrix AbstractAdvDiffProblem::getB(double y, double z) const
 {
-	return mT;
-}
+    SymMatrix D = 2*getK(y,z);
+    double B11 = sqrt(D(1,1));
+    double B21 = (B11 == 0) ? 0. : D(1,2)/B11;
+    double B22 = sqrt(D(2,2)-B21*B21);
+    LowerTriMatrix B(B11,B21,B22);
 
-double AbstractAdvDiffProblem::getdt() const
-{
-	return mdt;
+    return B;
 }
 
 /*
 	OverturnerProblem
 */
 // Default case is using the values from C. Timmermans's master thesis
-OverturnerProblem::OverturnerProblem(double T, double dt):
-	AbstractAdvDiffProblem(0.,5e3,0.,15e6,T,dt),
+OverturnerProblem::OverturnerProblem():
+	AbstractAdvDiffProblem(0.,5e3,0.,15e6),
 	my0(13e6),
 	mz0(4000.),
 	mKh(1e3),
@@ -56,7 +55,7 @@ OverturnerProblem::OverturnerProblem(double T, double dt):
 {}
 
 OverturnerProblem::OverturnerProblem(std::string model):
-	AbstractAdvDiffProblem(0.,0.,0.,0.,0.,0.)
+	AbstractAdvDiffProblem(0.,0.,0.,0.)
 {
 	// Read file
 	std::string filename = wd::root + "in/" + model + ".in";
@@ -74,7 +73,7 @@ OverturnerProblem::OverturnerProblem(std::string model):
                 std::transform(content.begin(), content.end(), content.begin(), ::tolower);
                 std::getline(iniFile,tmp,' ');
                 std::getline(iniFile, value);
-                val = parseMathExpr(value, mdt, mH1, mL1);
+                val = parseMathExpr(value, mH1, mL1);
                 if (content == "kh"){
                     mKh = val;
                 }
@@ -102,12 +101,6 @@ OverturnerProblem::OverturnerProblem(std::string model):
                 else if (content == "psi"){
                     mPsi = val;
                 }
-                else if (content == "dt"){
-                    mdt = val;
-                }
-                else if (content == "t" || content == "tfinal"){
-                    mT = val;
-                }
                 else if (content[0] != '#'){ // # is used to comment a line in inifile
                 	std::cout << "INFO : Ignoring content \"" << content 
                 		<< "\" in constructor of OverturnerProblem" << std::endl;
@@ -123,30 +116,29 @@ OverturnerProblem::OverturnerProblem(std::string model):
     }
 }
 
-double OverturnerProblem::getKh(double y, double z) const
+SymMatrix OverturnerProblem::getK(double y, double z) const
 {
     int ChiDomain = (y >= mL0 && y <= mL1 && z >= mH0 && z <= mH1);
-	return ChiDomain*mKh;
+	int ChiZ = (z < mz0);
+    int ChiY = (y < my0);
+    SymMatrix K(ChiDomain*mKh,0,ChiDomain*((1-ChiY)*mKv1 + ChiY*ChiZ*mKv2 + ChiY*(1-ChiZ)*mKv3));
+
+    return K;
 }
 	
-double OverturnerProblem::getKv(double y, double z) const
+LowerTriMatrix OverturnerProblem::getB(double y, double z) const
 {
-	int ChiDomain = (y >= mL0 && y <= mL1 && z >= mH0 && z <= mH1);
-	int ChiZ = (z < mz0);
-	int ChiY = (y < my0);
-	return ChiDomain*((1-ChiY)*mKv1 + ChiY*ChiZ*mKv2 + ChiY*(1-ChiZ)*mKv3);
+    SymMatrix D = 2*getK(y,z);
+    LowerTriMatrix B(sqrt(D(1,1)),0,sqrt(D(2,2)));
+
+    return B;
 }
 
-double OverturnerProblem::getV(double y, double z) const
+Vec2 OverturnerProblem::getU(double y, double z) const
 {
 	int ChiDomain = (y >= mL0 && y <= mL1 && z >= mH0 && z <= mH1);
-	return ChiDomain*mPsi*v(y,my0,z,mz0,mL1,mH1);
-}
-
-double OverturnerProblem::getW(double y, double z) const
-{
-	int ChiDomain = (y >= mL0 && y <= mL1 && z >= mH0 && z <= mH1);
-	return ChiDomain*mPsi*w(y,my0,z,mz0,mL1,mH1);
+    Vec2 U(ChiDomain*mPsi*v(y,my0,z,mz0,mL1,mH1), ChiDomain*mPsi*w(y,my0,z,mz0,mL1,mH1));
+	return U;
 }
 
 void OverturnerProblem::printInfo(std::ofstream& f) const
@@ -155,8 +147,6 @@ void OverturnerProblem::printInfo(std::ofstream& f) const
     f << "H1 = " << mH1 << "\n";
     f << "L0 = " << mL0 << "\n";
     f << "L1 = " << mL1 << "\n";
-    f << "T = " << mT << "\n";
-    f << "dt = " << mdt << "\n";
     f << "y0 = " << my0 << "\n";
     f << "z0 = " << mz0 << "\n";
     f << "Kh = " << mKh << "\n";
@@ -173,8 +163,6 @@ void OverturnerProblem::Display() const
 	cout << "mH1 = " << getH1() << endl;
 	cout << "mL0 = " << getL0() << endl;
 	cout << "mL1 = " << getL1() << endl;
-	cout << "mT = " << getT() << endl;
-	cout << "mdt = " << getdt() << endl;
 	cout << "my0 = " << my0 << endl;
 	cout << "mz0 = " << mz0 << endl;
 	cout << "mKh = " << mKh << endl;
@@ -187,8 +175,8 @@ void OverturnerProblem::Display() const
 /*
     TestProblem
 */
-TestProblem::TestProblem(double T, double dt, double Ly, double Lz, double Kyy, double Kzz, double V, double W, int J, std::string domain):
-    AbstractAdvDiffProblem(-Lz, Lz, -Ly, Ly, T, dt),
+TestProblem::TestProblem(double Ly, double Lz, double Kyy, double Kzz, double V, double W, int J, std::string domain):
+    AbstractAdvDiffProblem(-Lz, Lz, -Ly, Ly),
     mKyy(Kyy),
     mKzz(Kzz),
     mV(V),
@@ -199,24 +187,24 @@ TestProblem::TestProblem(double T, double dt, double Ly, double Lz, double Kyy, 
         mH0 = 0.;
 }
 
-double TestProblem::getKh(double x, double y) const
+SymMatrix TestProblem::getK(double y, double z) const
 {
-    return mKyy;
+    SymMatrix K(mKyy,0,mKzz);
+    return K;
 }
 
-double TestProblem::getKv(double x, double y) const
+LowerTriMatrix TestProblem::getB(double y, double z) const
 {
-    return mKzz;
+    SymMatrix D = 2*getK(y,z);
+    LowerTriMatrix B(sqrt(D(1,1)),0,sqrt(D(2,2)));
+
+    return B;
 }
 
-double TestProblem::getV(double x, double y) const
+Vec2 TestProblem::getU(double x, double y) const
 {
-    return mV;
-}
-
-double TestProblem::getW(double x, double y) const
-{
-    return mW;
+    Vec2 U(mV,mW);
+    return U;
 }
 
 void TestProblem::printInfo(std::ofstream& f) const
@@ -225,8 +213,6 @@ void TestProblem::printInfo(std::ofstream& f) const
     f << "H1 = " << mH1 << "\n";
     f << "L0 = " << mL0 << "\n";
     f << "L1 = " << mL1 << "\n";
-    f << "T = " << mT << "\n";
-    f << "dt = " << mdt << "\n";
     f << "Kyy = " << mKyy << "\n";
     f << "Kzz = " << mKzz << "\n";
     f << "V = " << mV << "\n";
@@ -238,8 +224,8 @@ void TestProblem::printInfo(std::ofstream& f) const
 /*
    Problem2Box
 */
-Problem2Box::Problem2Box(double T, double dt, double alpha):
-    AbstractAdvDiffProblem(0.,5e3,-15e6,15e6,T,dt),
+Problem2Box::Problem2Box(double alpha):
+    AbstractAdvDiffProblem(0.,5e3,-15e6,15e6),
     mzstar(alpha*5e3),
     my0(13e6),
     mz0(4000.),
@@ -274,31 +260,30 @@ double Problem2Box::getz0() const
     return mz0;
 }
 
-double Problem2Box::getKh(double y, double z) const
+SymMatrix Problem2Box::getK(double y, double z) const
 {
     int ChiDomain = (y >= mL0 && y <= mL1 && z >= mH0 && z <= mH1);
     int ChiInterface = (y >= mL0+my0 && y <= mL1-my0);
     int ChiMixing = (ChiInterface && z >= mzstar && z <= mH1);
     int ChiExt =  (ChiDomain && !ChiInterface);
-    return ChiExt*mKhm + ChiMixing*mKhp;
+    SymMatrix K(ChiExt*mKhm + ChiMixing*mKhp,0,ChiDomain*mKv);
+
+    return K;
 }
     
-double Problem2Box::getKv(double y, double z) const
+LowerTriMatrix Problem2Box::getB(double y, double z) const
 {
-    int ChiDomain = (y >= mL0 && y <= mL1 && z >= mH0 && z <= mH1);
-    return ChiDomain*mKv;
+    SymMatrix D = 2*getK(y,z);
+    LowerTriMatrix B(sqrt(D(1,1)),0,sqrt(D(2,2)));
+
+    return B;   
 }
 
-double Problem2Box::getV(double y, double z) const
+Vec2 Problem2Box::getU(double y, double z) const
 {
     int ChiDomain = (y >= mL0 && y <= mL1 && z >= mH0 && z <= mH1);
-    return ChiDomain*mPsi*v2box(y,my0,z,mz0,mL1,mH1);
-}
-
-double Problem2Box::getW(double y, double z) const
-{
-    int ChiDomain = (y >= mL0 && y <= mL1 && z >= mH0 && z <= mH1);
-    return ChiDomain*mPsi*w2box(y,my0,z,mz0,mL1,mH1);
+    Vec2 U(ChiDomain*mPsi*v2box(y,my0,z,mz0,mL1,mH1),ChiDomain*mPsi*w2box(y,my0,z,mz0,mL1,mH1));
+    return U;
 }
 
 void Problem2Box::printInfo(std::ofstream& f) const
@@ -307,8 +292,6 @@ void Problem2Box::printInfo(std::ofstream& f) const
     f << "H1 = " << mH1 << "\n";
     f << "L0 = " << mL0 << "\n";
     f << "L1 = " << mL1 << "\n";
-    f << "T = " << mT << "\n";
-    f << "dt = " << mdt << "\n";
     f << "y0 = " << my0 << "\n";
     f << "z0 = " << mz0 << "\n";
     f << "zstar = " << mzstar << "\n";
@@ -316,169 +299,6 @@ void Problem2Box::printInfo(std::ofstream& f) const
     f << "Khp = " << mKhp << "\n";
     f << "Kv = " << mKv << "\n";
     f << "Psi = " << mPsi << "\n";
-}
-
-/*    Adimensionnal Advection-Diffusion problem    */
-AbstractAdvDiffProblemAdim::AbstractAdvDiffProblemAdim(double TPrime, double dtPrime, double H, double L):
-	mTPrime(TPrime),
-	mdtPrime(dtPrime),
-    mH(H),
-    mL(L)
-{}
-
-double AbstractAdvDiffProblemAdim::getTPrime() const
-{
-	return mTPrime;
-}
-
-double AbstractAdvDiffProblemAdim::getdtPrime() const
-{
-	return mdtPrime;
-}
-
-/*
-	OverturnerProblem
-*/
-OverturnerProblemAdim::OverturnerProblemAdim(double TPrime, double dtPrime):
-	AbstractAdvDiffProblemAdim(TPrime,dtPrime,5000.,15e6),
-	my0Prime(13./15.),
-	mz0Prime(4050./5000),
-	mPehInv(1./6.), // hence Peh = 6
-	mPev1Inv(150), // hence Pev1 = 6.67e-3
-	mPev2Inv(.15), // hence Pev2 = 6.67
-	mPev3Inv(1.5) // hence Pev3 = 0.667
-{}
-
-OverturnerProblemAdim::OverturnerProblemAdim(std::string model):
-	AbstractAdvDiffProblemAdim(0.,0.,0.,0.)
-{
-	// Read file
-	std::string filename = wd::root + "in/" + model + ".in";
-    std::ifstream iniFile(filename.c_str(), std::ios::in);
-    if(iniFile)
-    {
-        std::string content, tmp, value;
-        double val;
-        while(std::getline(iniFile, content,' '))
-        {
-        	if (content[0] == '#')
-        		std::getline(iniFile,tmp);
-        	else
-        	{
-        		std::transform(content.begin(), content.end(), content.begin(), ::tolower);
-            	std::getline(iniFile,tmp,' ');
-            	std::getline(iniFile, value);
-            	val = parseMathExpr(value, mdtPrime, 1., 1.);
-            	if (content == "pehinv"){
-            	    mPehInv = val;
-            	}
-            	else if (content == "pev1inv"){
-            	    mPev1Inv = val;
-            	}
-            	else if (content == "pev2inv"){
-            	    mPev2Inv = val;
-            	}
-            	else if (content == "pev3inv"){
-            	    mPev3Inv = val;
-            	}
-            	else if (content == "z0prime"){
-            	    mz0Prime = val;
-            	}
-            	else if (content == "y0prime"){
-            	    my0Prime = val;
-            	}
-            	else if (content == "tprime"){
-            	    mTPrime = val;
-            	}
-            	else if (content == "dtprime"){
-            	    mdtPrime = val;
-            	}
-            	else if (content == "h"){
-            	    mH = val;
-            	}
-            	else if (content == "l"){
-            	    mL = val;
-            	}
-            	else{ // # is used to comment a line in inifile
-            		std::cout << "INFO : Ignoring content \"" << content 
-            			<< "\" in constructor of OverturnerProblemAdim" << std::endl;
-            	}
-        	}
-        }
-       	iniFile.close();
-    }
-    else
-    {
-        std::cerr << "Unable to open ini file \"" << filename << "\" !" << std::endl;
-        abort();
-    }
-}
-
-OverturnerProblemAdim::OverturnerProblemAdim(OverturnerProblem& prob):
-	AbstractAdvDiffProblemAdim(prob.mT*prob.mPsi/(prob.mH1*prob.mL1),
-		prob.mdt*prob.mPsi/(prob.mH1*prob.mL1),
-        prob.mH1-prob.mH0,
-        prob.mL1-prob.mL0)
-{
-	my0Prime = prob.my0/mL;
-	mz0Prime = prob.mz0/mH;
-	mPehInv = prob.mKh*mH/(prob.mPsi*mL);
-	mPev1Inv = prob.mKv1*mL/(prob.mPsi*mH);
-	mPev2Inv = prob.mKv2*mL/(prob.mPsi*mH);
-	mPev3Inv = prob.mKv3*mL/(prob.mPsi*mH);
-}
-
-double OverturnerProblemAdim::getPehInv(double yPrime, double zPrime) const
-{
-    int ChiDomain = (yPrime >= 0. && yPrime <= 1. && zPrime >= 0. && zPrime <= 1.);
-	return ChiDomain*mPehInv;
-}
-
-double OverturnerProblemAdim::getPevInv(double yPrime, double zPrime) const
-{
-	int ChiDomain = (yPrime >= 0. && yPrime <= 1. && zPrime >= 0. && zPrime <= 1.);
-	int ChiZ = (zPrime < mz0Prime);
-	int ChiY = (yPrime < my0Prime);
-	return ChiDomain*((1-ChiY)*mPev1Inv + ChiY*ChiZ*mPev2Inv + ChiY*(1-ChiZ)*mPev3Inv);
-}
-
-double OverturnerProblemAdim::getVPrime(double yPrime, double zPrime) const
-{
-	int ChiDomain = (yPrime >= 0. && yPrime <= 1. && zPrime >= 0. && zPrime <= 1.);
-	return ChiDomain*v(yPrime,my0Prime,zPrime,mz0Prime,1.,1.);
-}
-
-double OverturnerProblemAdim::getWPrime(double yPrime, double zPrime) const
-{
-	int ChiDomain = (yPrime >= 0. && yPrime <= 1. && zPrime >= 0. && zPrime <= 1.);
-	return ChiDomain*w(yPrime,my0Prime,zPrime,mz0Prime,1.,1.);
-}
-
-void OverturnerProblemAdim::printInfo(std::ofstream& f) const
-{
-    f << "TPrime = " << mTPrime << "\n";
-    f << "dtPrime = " << mdtPrime << "\n";
-    f << "y0Prime = " << my0Prime << "\n";
-    f << "z0Prime = " << mz0Prime << "\n";
-    f << "PehInv = " << mPehInv << "\n";
-    f << "Pev1Inv = " << mPev1Inv << "\n";
-    f << "Pev2Inv = " << mPev2Inv << "\n";
-    f << "Pev3Inv = " << mPev3Inv << "\n";
-    f << "H = " << mH << "\n";
-    f << "L = " << mL << "\n";
-}
-
-void OverturnerProblemAdim::Display() const
-{
-	using namespace std;
-	cout << "mTPrime = " << getTPrime() << endl;
-	cout << "mdtPrime = " << getdtPrime() << endl;
-	cout << "my0Prime = " << my0Prime << endl;
-	cout << "mz0Prime = " << mz0Prime << endl;
-	cout << "mPehInv = " << mPehInv << endl;
-	cout << "mPev1Inv = " << mPev1Inv << endl;
-	cout << "mPev2Inv = " << mPev2Inv << endl;
-	cout << "mPev3Inv = " << mPev3Inv << endl;
 }
 
 /* Other utility functions */

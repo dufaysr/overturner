@@ -27,7 +27,6 @@ class Estimator
 		Estimator(int nboxy, int nboxz, double H, double L);
 		virtual ~Estimator() {}
 		virtual void Estimate(const Particles2D& particles) =0;
-		virtual void EstimateAdim(const Particles2D& particles) =0;
 		void Print(std::string filename, bool binary=false) const;
 		void Print(std::ofstream& f, bool binary=false) const;
 };
@@ -42,7 +41,6 @@ class KernelEstimator : public Estimator
 		KernelEstimator(int nboxy, int nboxz, double H, double L, double lambda, std::string kernelFunction);
 		KernelEstimator(int nboxy, int nboxz, double H, double L, double lambda, double (*kernelFunction)(double y, double z));
 		void Estimate(const Particles2D& particles);
-		void EstimateAdim(const Particles2D& particles);
 };
 
 class BoxEstimator : public Estimator
@@ -50,7 +48,6 @@ class BoxEstimator : public Estimator
 	public:
 		BoxEstimator(int nboxy, int nboxz, double H, double L);
 		void Estimate(const Particles2D& particles);
-		void EstimateAdim(const Particles2D& particles);
 };
 
 class GlobalEstimator
@@ -64,7 +61,6 @@ class GlobalEstimator
 		GlobalEstimator(int nboxy, int nboxz, double H, double L, int Nloc);
 		virtual ~GlobalEstimator() {}
 		virtual void Estimate(const Particles2D& particles) =0;
-		virtual void EstimateAdim(const Particles2D& particles) =0;
 		void Print(std::string filename, bool binary=false) const;
 };
 
@@ -78,7 +74,6 @@ class GlobalKernelEstimator : public GlobalEstimator
 		GlobalKernelEstimator(int nboxy, int nboxz, double H, double L, int Nloc, double lambda, std::string kernelFunction);
 		GlobalKernelEstimator(int nboxy, int nboxz, double H, double L, int Nloc, double lambda, double (*kernelFunction)(double y, double z));
 		void Estimate(const Particles2D& particles);
-		void EstimateAdim(const Particles2D& particles);
 };
 
 class GlobalBoxEstimator : public GlobalEstimator
@@ -89,7 +84,6 @@ class GlobalBoxEstimator : public GlobalEstimator
 	public:
 		GlobalBoxEstimator(int nboxy, int nboxz, double H0, double H, double L0, double L, int Nloc);
 		void Estimate(const Particles2D& particles);
-		void EstimateAdim(const Particles2D& particles);
 		Matrix Count(const Particles2D& particles);
 };
 

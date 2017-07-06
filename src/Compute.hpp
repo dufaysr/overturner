@@ -19,17 +19,12 @@
 #include "AdvDiffProblem.hpp"
 #include "workingdirectory.hpp"
 
-void ComputeTrajectories(const AbstractAdvDiffProblem& prob, std::string model, int Nloc, double yStart, double zStart);
-void ComputeTrajectories(const AbstractAdvDiffProblemAdim& prob, std::string model, int Nloc, double yStart, double zStart);
-void ComputeConcentration(const AbstractAdvDiffProblem &prob, std::string model, std::string estimator, int Nloc,
-							double yStart, double zStart, int nboxy, int nboxz);
-void ComputeConcentration(const AbstractAdvDiffProblemAdim &prob, std::string model, std::string estimator, int Nloc,
-							double yStart, double zStart, int nboxy, int nboxz);
-void ComputeTransitionProbabilities(const AbstractAdvDiffProblemAdim& prob, std::string model, std::string estimator,
-									  int nboxy, int nboxz, int nyloc, int nzloc, bool binary=false);
-void ComputeTransitionProbabilities(const AbstractAdvDiffProblem& prob, std::string model, std::string estimator,
-									  int nboxy, int nboxz, int nyloc, int nzloc, bool binary);
+void ComputeTrajectories(const AbstractAdvDiffProblem& prob, std::string model, double dt, double T,
+						int Nloc, double yStart, double zStart);
+void ComputeConcentration(const AbstractAdvDiffProblem &prob, std::string model, double dt, double T,
+						std::string estimator, int Nloc, double yStart, double zStart, int nboxy, int nboxz);
 void ComputeTransitionProbabilities(const AbstractAdvDiffProblem& prob, std::string model,
-									  int nboxy, int nboxz, int nyloc, int nzloc, double Times[], int nTimes, bool binary);
+									int nboxy, int nboxz, int nyloc, int nzloc, double dt,
+									double Times[], int nTimes, bool binary, std::string estimator = "box");
 
 #endif

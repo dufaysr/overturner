@@ -12,76 +12,40 @@
 #include "workingdirectory.hpp"
 
 /*-------------- Base Class Solver -----------------------*/
-Solver::Solver(int N, double yStart, double zStart):
-	mParticles(N,yStart,zStart), 
-	seed(std::chrono::system_clock::now().time_since_epoch().count()),
-	// seed(1),
-	generator(seed),
-	wiener(0.0,1.0)
-{}
-
-Solver::Solver(int N, double* yStart, double* zStart):
-	mParticles(N,yStart,zStart), 
-	seed(std::chrono::system_clock::now().time_since_epoch().count()),
-	// seed(1),
-	generator(seed),
-	wiener(0.0,1.0)
-{}
-
-Solver::Solver(int Nloc, double* yStart, double* zStart, int n):
-	mParticles(Nloc,yStart,zStart,n), 
-	seed(std::chrono::system_clock::now().time_since_epoch().count()),
-	generator(seed),
-	wiener(0.0,1.0)
-{}
-
-Solver::Solver(int Nloc, double* yStart, double* zStart, int ny, int nz):
-	mParticles(Nloc,yStart,zStart,ny,nz),
-	seed(std::chrono::system_clock::now().time_since_epoch().count()),
-	generator(seed),
-	wiener(0.0,1.0)
-{}
-
-Solver::Solver(const Particles2D& particles):
+Solver::Solver(const Particles2D& particles, double dt):
 	mParticles(particles),
 	seed(std::chrono::system_clock::now().time_since_epoch().count()),
 	generator(seed),
-	wiener(0.0,1.0)
+	wiener(0.0,1.0),
+	mdt(dt)
 {}
-
-Particles2D Solver::Run(const AbstractAdvDiffProblem& prob)
-{
-	for (int i=0; i*prob.getdt() < prob.getT(); i++)
-	{
-		UpdatePosition(prob);
-	}
-	return mParticles;
-}
 
 Particles2D Solver::Run(const AbstractAdvDiffProblem& prob, double Time)
 {
 	double Tend = Time - mParticles.mTime;
-	for (int i=0; i*prob.getdt() < Tend; i++)
+	for (int i=0; i*mdt < Tend; i++)
 	{
 		UpdatePosition(prob);
 	}
 	return mParticles;
 }
 
-Particles2D Solver::Run(const AbstractAdvDiffProblem& prob, std::string model, int nPrint, bool printInit, bool binary)
+Particles2D Solver::Run(const AbstractAdvDiffProblem& prob, double Time,
+				std::string model, int nPrint, bool printInit, bool binary)
 {
 	std::ofstream fT = openOutputFile(wd::root + "out/" + model + "/time.out",binary);
 	std::ofstream fY = openOutputFile(wd::root + "out/" + model + "/Y.out",binary);
 	fY.setf(std::ios::scientific); fY.precision(10);
 	std::ofstream fZ = openOutputFile(wd::root + "out/" + model + "/Z.out",binary);
 	fZ.setf(std::ios::scientific); fZ.precision(10);
-	
+	double Tend = Time - mParticles.mTime;
+
 	if (!binary){
 		if (printInit)
 			PrintParticles(fT, fY, fZ);
 
 		int i=0;
-		while (i*prob.getdt() < prob.getT())
+		while (i*mdt < Tend)
 		{
 			for (int j=0; j<nPrint; j++)
 			{
@@ -96,64 +60,11 @@ Particles2D Solver::Run(const AbstractAdvDiffProblem& prob, std::string model, i
 			PrintParticlesBinary(fT, fY, fZ);
 
 		int i=0;
-		while (i*prob.getdt() < prob.getT())
+		while (i*mdt < Tend)
 		{
 			for (int j=0; j<nPrint; j++)
 			{
 				UpdatePosition(prob);
-				i++;
-			}
-			PrintParticlesBinary(fT,fY,fZ); // print particles every nPrint time steps
-		}
-	}
-	fT.close(); fY.close(); fZ.close();
-
-	return mParticles;
-}
-
-Particles2D Solver::RunAdim(const AbstractAdvDiffProblemAdim& prob)
-{
-	for (int i=0; i*prob.getdtPrime() < prob.getTPrime(); i++)
-	{
-		UpdatePositionAdim(prob);
-	}
-	return mParticles;
-}
-
-Particles2D Solver::RunAdim(const AbstractAdvDiffProblemAdim& prob, std::string model, int nPrint, bool printInit, bool binary)
-{
-	std::ofstream fT = openOutputFile(wd::root + "out/" + model + "/tadim.out",binary);
-	std::ofstream fY = openOutputFile(wd::root + "out/" + model + "/Yadim.out",binary);
-	fY.setf(std::ios::scientific); fY.precision(10);
-	std::ofstream fZ = openOutputFile(wd::root + "out/" + model + "/Zadim.out",binary);
-	fZ.setf(std::ios::scientific); fZ.precision(10);
-
-	
-	if (!binary){
-		if (printInit)
-			PrintParticlesBinary(fT, fY, fZ);
-
-		int i=0;
-		while (i*prob.getdtPrime() < prob.getTPrime())
-		{
-			for (int j=0; j<nPrint; j++)
-			{
-				UpdatePositionAdim(prob);
-				i++;
-			}
-			PrintParticlesBinary(fT,fY,fZ); // print particles every nPrint time steps
-		}
-	}
-	else{
-		if (printInit)
-			PrintParticlesBinary(fT, fY, fZ);
-
-		int i=0;
-		while (i*prob.getdtPrime() < prob.getTPrime())
-		{
-			for (int j=0; j<nPrint; j++)
-			{
-				UpdatePositionAdim(prob);
 				i++;
 			}
 			PrintParticlesBinary(fT,fY,fZ); // print particles every nPrint time steps
@@ -223,148 +134,77 @@ void Solver::TestWiener()
 }
 
 /*----------------- Derived class from Solver : EMSolver -----------------------*/
-/*--- /!\ Does not take the derivative of the diffusivities into account /!\ ---*/
+/*--- /!\ Does not take the derivative of the diffusivities (i.e. the gradient dirft term) into account /!\ ---*/
 
-EMSolver::EMSolver(int N, double yStart, double zStart):
-	Solver(N,yStart,zStart)
-{}
-
-EMSolver::EMSolver(int N, double* yStart, double* zStart):
-	Solver(N,yStart,zStart)
-{}
-
-EMSolver::EMSolver(int Nloc, double* yStart, double* zStart, int n):
-	Solver(Nloc,yStart,zStart,n)
-{}
-
-EMSolver::EMSolver(int Nloc, double* yStart, double* zStart, int ny, int nz):
-	Solver(Nloc,yStart,zStart,ny,nz)
-{}
-
-EMSolver::EMSolver(const Particles2D& particles):
-	Solver(particles)
+EMSolver::EMSolver(const Particles2D& particles, double dt):
+	Solver(particles,dt)
 {}
 
 void EMSolver::UpdatePosition(const AbstractAdvDiffProblem& prob)
 {
 	// construct a trivial random generator engine from a time-based seed:
+	LowerTriMatrix B(0,0,0);
+	Vec2 U(0,0);
+	double sqrt_dt = sqrt(mdt);
+	double R1, R2;
 	for (int i=0; i<mParticles.mN; i++)
 	{
-		mParticles.mY[i] += prob.getV(mParticles.mY[i],mParticles.mZ[i])*prob.getdt()
-							+ sqrt(2*prob.getKh(mParticles.mY[i],mParticles.mZ[i])*prob.getdt())*wiener(generator);
-		mParticles.mZ[i] += prob.getW(mParticles.mY[i],mParticles.mZ[i])*prob.getdt() 
-							+ sqrt(2*prob.getKv(mParticles.mY[i],mParticles.mZ[i])*prob.getdt())*wiener(generator);
-	}
-	mParticles.mTime += prob.getdt();
-}
+		B = prob.getB(mParticles.mY[i],mParticles.mZ[i]);
+		U = prob.getU(mParticles.mY[i],mParticles.mZ[i]);
 
-void EMSolver::UpdatePositionAdim(const AbstractAdvDiffProblemAdim& prob)
-{
-	// construct a trivial random generator engine from a time-based seed:
-	for (int i=0; i<mParticles.mN; i++)
-	{
+		R1 = wiener(generator);
+		R2 = wiener(generator);
 
-		mParticles.mY[i] += prob.getVPrime(mParticles.mY[i],mParticles.mZ[i])*prob.getdtPrime()
-							+ sqrt(2*prob.getPehInv(mParticles.mY[i],mParticles.mZ[i])*prob.getdtPrime())*wiener(generator);
-		mParticles.mZ[i] += prob.getWPrime(mParticles.mY[i],mParticles.mZ[i])*prob.getdtPrime() 
-							+ sqrt(2*prob.getPevInv(mParticles.mY[i],mParticles.mZ[i])*prob.getdtPrime())*wiener(generator);
+		mParticles.mY[i] += U[0]*mdt + B(1,1)*sqrt_dt*R1;
+		mParticles.mZ[i] += U[1]*mdt + B(2,1)*sqrt_dt*R1 + B(2,2)*sqrt_dt*R2;
 	}
-	mParticles.mTime += prob.getdtPrime();
+	mParticles.mTime += mdt;
 }
 
 /*----------- Derived class from Solver : Backward Ito (BI) Solver ------------------*/
 
-BISolver::BISolver(int N, double yStart, double zStart):
-	Solver(N,yStart,zStart)
-{}
-
-BISolver::BISolver(int N, double* yStart, double* zStart):
-	Solver(N,yStart,zStart)
-{}
-
-BISolver::BISolver(int Nloc, double* yStart, double* zStart, int n):
-	Solver(Nloc,yStart,zStart,n)
-{}
-
-BISolver::BISolver(int Nloc, double* yStart, double* zStart, int ny, int nz):
-	Solver(Nloc,yStart,zStart,ny,nz)
-{}
-
-BISolver::BISolver(const Particles2D& particles):
-	Solver(particles)
+BISolver::BISolver(const Particles2D& particles, double dt):
+	Solver(particles, dt)
 {}
 
 void BISolver::UpdatePosition(const AbstractAdvDiffProblem& prob)
 {
-	double N1, N2, R1, R2, dY, dZ, y, z, v, w;
+	LowerTriMatrix B(0,0,0);
+	Vec2 U(0,0);
+	double R1, R2, dY, dZ, y, z, ypred, zpred;
+	double sqrt_dt = sqrt(mdt);
 	for (int i=0; i<mParticles.mN; i++)
 	{
 		// position and speed of particle i at time t
 		y = mParticles.mY[i];
 		z = mParticles.mZ[i];
-		v = prob.getV(y,z);
-		w = prob.getW(y,z);
+		U = prob.getU(y,z);
+		B = prob.getB(y,z);
 		// realisations of the noises
 		R1 = wiener(generator);
 		R2 = wiener(generator);
 		// prediction step of the backward-Ito scheme
-		dY = sqrt(2*prob.getKh(y,z)*prob.getdt())*R1;
-		dZ = sqrt(2*prob.getKv(y,z)*prob.getdt())*R2;
+		dY = B(1,1)*sqrt_dt*R1;
+		dZ = B(2,1)*sqrt_dt*R1 + B(2,2)*sqrt_dt*R2;
 		// No-through BC also applies on the predictions -> boucing on the walls
-		double ypred = y+dY;
-		double zpred = z+dZ;
+		ypred = y+dY;
+		zpred = z+dZ;
 		ypred = (ypred < prob.getL0()) ? 2*prob.getL0()-ypred : (ypred > prob.getL1()) ? 2*prob.getL1()-ypred : ypred;
 		zpred = (zpred < prob.getH0()) ? 2*prob.getH0()-zpred : (zpred > prob.getH1()) ? 2*prob.getH1()-zpred : zpred;
 		// amplitude of the noises
-		N1 = sqrt(2*prob.getKh(ypred,zpred)*prob.getdt());
-		N2 = sqrt(2*prob.getKv(ypred,zpred)*prob.getdt());
+		B = prob.getB(ypred,zpred);
 		/* update particles positions using backward-Ito scheme
 		* 2 options for the no-flux BC : either stick to the wall or bounce on it.
 		* Uncomment the one of your choice and comment the other.
 		*/
 		// 1. Stick to the wall
-		// mParticles.mY[i] = std::min(prob.getL1(), std::max(mParticles.mY[i] + v*prob.getdt() + N1*R1, prob.getL0()));
-		// mParticles.mZ[i] = std::min(prob.getH1(), std::max(mParticles.mZ[i] + w*prob.getdt() + N2*R2, prob.getH0()));
+		// mParticles.mY[i] = std::min(prob.getL1(), std::max(mParticles.mY[i] + v*mdt + B(1,1)*sqrt_dt*R1, prob.getL0()));
+		// mParticles.mZ[i] = std::min(prob.getH1(), std::max(mParticles.mZ[i] + w*mdt + B(2,1)*sqrt_dt*R1 + B(2,2)*sqrt_dt*R2, prob.getH0()));
 		// 2. Bounce on the wall
-		double ynew = mParticles.mY[i] + v*prob.getdt() + N1*R1;
-		double znew = mParticles.mZ[i] + w*prob.getdt() + N2*R2;
-		mParticles.mY[i] = (ynew < prob.getL0()) ? 2*prob.getL0()-ynew : (ynew > prob.getL1()) ? 2*prob.getL1()-ynew : ynew;
-		mParticles.mZ[i] = (znew < prob.getH0()) ? 2*prob.getH0()-znew : (znew > prob.getH1()) ? 2*prob.getH1()-znew : znew;
+		ypred = mParticles.mY[i] + U[0]*mdt + B(1,1)*sqrt_dt*R1;
+		zpred = mParticles.mZ[i] + U[1]*mdt + B(2,1)*sqrt_dt*R1 + B(2,2)*sqrt_dt*R2;
+		mParticles.mY[i] = (ypred < prob.getL0()) ? 2*prob.getL0()-ypred : (ypred > prob.getL1()) ? 2*prob.getL1()-ypred : ypred;
+		mParticles.mZ[i] = (zpred < prob.getH0()) ? 2*prob.getH0()-zpred : (zpred > prob.getH1()) ? 2*prob.getH1()-zpred : zpred;
 	}
-	mParticles.mTime += prob.getdt();
-}
-
-void BISolver::UpdatePositionAdim(const AbstractAdvDiffProblemAdim& prob)
-{
-	double N1, N2, R1, R2, dY, dZ, y, z, v, w;
-	for (int i=0; i<mParticles.mN; i++)
-	{
-		// position and speed of particle i at time t
-		y = mParticles.mY[i];
-		z = mParticles.mZ[i];
-		v = prob.getVPrime(y,z);
-		w = prob.getWPrime(y,z);
-		// realisations of the noises
-		R1 = wiener(generator);
-		R2 = wiener(generator);
-		// prediction step of the backward-Ito scheme
-		dY = sqrt(2*prob.getPehInv(y,z)*prob.getdtPrime())*R1;
-		dZ = sqrt(2*prob.getPevInv(y,z)*prob.getdtPrime())*R2;
-		// amplitude of the noises
-		N1 = sqrt(2*prob.getPehInv(y+dY,z+dZ)*prob.getdtPrime());
-		N2 = sqrt(2*prob.getPevInv(y+dY,z+dZ)*prob.getdtPrime());
-		/* update particles positions using backward-Ito scheme
-		* 2 options for the no-flux BC : either stick to the wall or bounce on it.
-		* Uncomment the one of your choice and comment the other.
-		*/
-		// 1. Stick to the wall
-		// mParticles.mY[i] = std::min(1., std::max(mParticles.mY[i] + v*dtPrime + N1*R1, 0.));
-		// mParticles.mZ[i] = std::min(1., std::max(mParticles.mZ[i] + w*dtPrime + N2*R2, 0.));
-		// 2. Bounce on the wall
-		double ynew = mParticles.mY[i] + v*prob.getdtPrime() + N1*R1;
-		double znew = mParticles.mZ[i] + w*prob.getdtPrime() + N2*R2;
-		mParticles.mY[i] = (ynew < 0) ? -ynew : (ynew > 1.) ? 2.-ynew : ynew;
-		mParticles.mZ[i] = (znew < 0) ? -znew : (znew > 1.) ? 2.-znew : znew;
-	}
-	mParticles.mTime += prob.getdtPrime();
+	mParticles.mTime += mdt;
 }

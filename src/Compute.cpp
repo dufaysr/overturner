@@ -8,17 +8,16 @@
 
 #include "Compute.hpp"
 
-void ComputeTrajectories(const AbstractAdvDiffProblem& prob, std::string model, double dt, double T, int Nloc, double yStart, double zStart)
+void ComputeTrajectories(const AbstractAdvDiffProblem& prob, std::string outputdir, double dt, double T, int Nloc, double yStart, double zStart)
 {
 	std::cout << "\nRunning ComputeTrajectories..." << std::endl;
 	
 	std::cout << "Writing fInfo..." << std::endl;
-	std::ofstream fInfo = openOutputFile(wd::root + "out/" + model + "/info.out");
+	std::ofstream fInfo = openOutputFile(wd::root + "out/" + outputdir + "/info.out");
 	auto t = std::time(nullptr);
     auto tm = *std::localtime(&t);
     fInfo << "File generated on " << std::put_time(&tm, "%d-%m-%Y at %Hh %Mm %Ss") << "\n";
     fInfo << "ComputeTrajectories\n";
-    fInfo << "Model loaded is " << wd::root << "in/" << model <<".in" << "\n";
     fInfo << "The values used are :\n";
     prob.printInfo(fInfo);
     fInfo << "Nloc = " << Nloc << "\n";
@@ -30,22 +29,21 @@ void ComputeTrajectories(const AbstractAdvDiffProblem& prob, std::string model, 
 	std::cout << "Generating (and writing) trajectories..." << std::endl;
 	Particles2D part(Nloc, yStart, zStart);
 	BISolver solver(part,dt);
-	part = solver.Run(prob, T, model);
+	part = solver.Run(prob, T, outputdir);
 	std::cout << "\nComputeTrajectories runned successfully." << std::endl;
 }
 
-void ComputeConcentration(const AbstractAdvDiffProblem &prob, std::string model, double dt, double T,
+void ComputeConcentration(const AbstractAdvDiffProblem &prob, std::string outputdir, double dt, double T,
 						std::string estimator, int Nloc, double yStart, double zStart, int nboxy, int nboxz)
 {
 	std::cout << "\nRunning ComputeConcentration..." << std::endl;
 	
 	std::cout << "Writing fInfo..." << std::endl;
-	std::ofstream fInfo = openOutputFile(wd::root + "out/" + model + "/info.out");
+	std::ofstream fInfo = openOutputFile(wd::root + "out/" + outputdir + "/info.out");
 	auto t = std::time(nullptr);
     auto tm = *std::localtime(&t);
     fInfo << "File generated on " << std::put_time(&tm, "%d-%m-%Y at %Hh %Mm %Ss") << "\n";
     fInfo << "ComputeTrajectories\n";
-    fInfo << "Model loaded is " << wd::root << "in/" << model <<".in" << "\n";
     fInfo << "The values used are :\n";
     prob.printInfo(fInfo);
     fInfo << "Nloc = " << Nloc << "\n";
@@ -77,19 +75,19 @@ void ComputeConcentration(const AbstractAdvDiffProblem &prob, std::string model,
 	}
 	estim->Estimate(part);
 	std::cout << "3/3 : Writing in the files..." << std::endl;
-	estim->Print(wd::root + "out/" + model + "/" + estimator + ".out");
+	estim->Print(wd::root + "out/" + outputdir + "/" + estimator + ".out");
 	delete estim;
 	std::cout << "\nComputeConcentration runned successfully." << std::endl;
 }
 
-void ComputeTransitionProbabilities(const AbstractAdvDiffProblem& prob, std::string model,
+void ComputeTransitionProbabilities(const AbstractAdvDiffProblem& prob, std::string outputdir,
 									  int nboxy, int nboxz, int nyloc, int nzloc, double dt, 
 									  double Times[], int nTimes, bool binary, std::string estimator)
 {
 	std::cout << "\nRunning ComputeTransitionProbabilities..." << std::endl;
 	
 	std::cout << "Writing fInfo..." << std::endl;
-	std::ofstream fInfo = openOutputFile(wd::root + "out/" + model + "/info.out");
+	std::ofstream fInfo = openOutputFile(wd::root + "out/" + outputdir + "/info.out");
 	auto tt = std::time(nullptr);
     auto tm = *std::localtime(&tt);
     fInfo << "File generated on " << std::put_time(&tm, "%d-%m-%Y at %Hh %Mm %Ss") << "\n";
@@ -128,14 +126,14 @@ void ComputeTransitionProbabilities(const AbstractAdvDiffProblem& prob, std::str
 	Particles2D part(N,yStart,zStart);
 	delete[] yStart; delete[] zStart;
 	// Estimator
-    GlobalEstimator *estim;
+    TPMatrixEstimator *estim;
 	transform(estimator.begin(), estimator.end(), estimator.begin(), ::tolower);
 	if (estimator == "box")
-		estim = new GlobalBoxEstimator(nboxy,nboxz,prob.getH0(),H,prob.getL0(),L,Nloc);
+		estim = new TPMatrixBoxEstimator(nboxy,nboxz,prob.getH0(),H,prob.getL0(),L,Nloc);
 	else if(estimator == "epanechnikov")
-		estim = new GlobalKernelEstimator(nboxy,nboxz,H,L,Nloc,.1*pow(Nloc,-1./6.),"Epanechnikov");
+		estim = new TPMatrixKernelEstimator(nboxy,nboxz,H,L,Nloc,.1*pow(Nloc,-1./6.),"Epanechnikov");
 	else if (estimator == "gaussian")
-		estim = new GlobalKernelEstimator(nboxy,nboxz,H,L,Nloc,.1*pow(Nloc,-1./6.),"Gaussian");
+		estim = new TPMatrixKernelEstimator(nboxy,nboxz,H,L,Nloc,.1*pow(Nloc,-1./6.),"Gaussian");
 	else{
 		std::cerr << "Unknown estimator type. Valid estimators are \"epanechnikov\", \"gaussian\" and \"box\"." << std::endl;
 		abort();
@@ -169,7 +167,7 @@ void ComputeTransitionProbabilities(const AbstractAdvDiffProblem& prob, std::str
 
 		std::cout << "3/3 : Writing in the files..." << std::endl;
 		t = clock();
-		estim->Print(wd::root + "out/" + model + "/M" + std::to_string(i) +  ".bin", binary);
+		estim->Print(wd::root + "out/" + outputdir + "/M" + std::to_string(i) +  ".bin", binary);
 		tot_seconds = double(clock()-t)/(double)CLOCKS_PER_SEC;
 		minutes = floor(tot_seconds/60);
 		std::cout << "Finished in " << minutes << " min " << tot_seconds - minutes*60 << " seconds." << std::endl;

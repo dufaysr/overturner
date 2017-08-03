@@ -41,6 +41,14 @@ LowerTriMatrix AbstractAdvDiffProblem::getB(double y, double z) const
     return B;
 }
 
+void AbstractAdvDiffProblem::printInfo(std::ofstream& f) const
+{
+    f << "H0 = " << mH0 << "\n";
+    f << "H1 = " << mH1 << "\n";
+    f << "L0 = " << mL0 << "\n";
+    f << "L1 = " << mL1 << "\n";
+}
+
 /*
 	OverturnerProblem
 */

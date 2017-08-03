@@ -31,12 +31,12 @@ Particles2D Solver::Run(const AbstractAdvDiffProblem& prob, double Time)
 }
 
 Particles2D Solver::Run(const AbstractAdvDiffProblem& prob, double Time,
-				std::string model, int nPrint, bool printInit, bool binary)
+				std::string outputdir, int nPrint, bool printInit, bool binary)
 {
-	std::ofstream fT = openOutputFile(wd::root + "out/" + model + "/time.out",binary);
-	std::ofstream fY = openOutputFile(wd::root + "out/" + model + "/Y.out",binary);
+	std::ofstream fT = openOutputFile(wd::root + "out/" + outputdir + "/time.out",binary);
+	std::ofstream fY = openOutputFile(wd::root + "out/" + outputdir + "/Y.out",binary);
 	fY.setf(std::ios::scientific); fY.precision(10);
-	std::ofstream fZ = openOutputFile(wd::root + "out/" + model + "/Z.out",binary);
+	std::ofstream fZ = openOutputFile(wd::root + "out/" + outputdir + "/Z.out",binary);
 	fZ.setf(std::ios::scientific); fZ.precision(10);
 	double Tend = Time - mParticles.mTime;
 
@@ -143,8 +143,8 @@ EMSolver::EMSolver(const Particles2D& particles, double dt):
 void EMSolver::UpdatePosition(const AbstractAdvDiffProblem& prob)
 {
 	// construct a trivial random generator engine from a time-based seed:
-	LowerTriMatrix B(0,0,0);
-	Vec2 U(0,0);
+	LowerTriMatrix B;
+	Vec2 U;
 	double sqrt_dt = sqrt(mdt);
 	double R1, R2;
 	for (int i=0; i<mParticles.mN; i++)
@@ -155,8 +155,8 @@ void EMSolver::UpdatePosition(const AbstractAdvDiffProblem& prob)
 		R1 = wiener(generator);
 		R2 = wiener(generator);
 
-		mParticles.mY[i] += U[0]*mdt + B(1,1)*sqrt_dt*R1;
-		mParticles.mZ[i] += U[1]*mdt + B(2,1)*sqrt_dt*R1 + B(2,2)*sqrt_dt*R2;
+		mParticles.mY[i] += U(1)*mdt + B(1,1)*sqrt_dt*R1;
+		mParticles.mZ[i] += U(2)*mdt + B(2,1)*sqrt_dt*R1 + B(2,2)*sqrt_dt*R2;
 	}
 	mParticles.mTime += mdt;
 }
@@ -169,8 +169,8 @@ BISolver::BISolver(const Particles2D& particles, double dt):
 
 void BISolver::UpdatePosition(const AbstractAdvDiffProblem& prob)
 {
-	LowerTriMatrix B(0,0,0);
-	Vec2 U(0,0);
+	LowerTriMatrix B;
+	Vec2 U;
 	double R1, R2, dY, dZ, y, z, ypred, zpred;
 	double sqrt_dt = sqrt(mdt);
 	for (int i=0; i<mParticles.mN; i++)
@@ -201,8 +201,8 @@ void BISolver::UpdatePosition(const AbstractAdvDiffProblem& prob)
 		// mParticles.mY[i] = std::min(prob.getL1(), std::max(mParticles.mY[i] + v*mdt + B(1,1)*sqrt_dt*R1, prob.getL0()));
 		// mParticles.mZ[i] = std::min(prob.getH1(), std::max(mParticles.mZ[i] + w*mdt + B(2,1)*sqrt_dt*R1 + B(2,2)*sqrt_dt*R2, prob.getH0()));
 		// 2. Bounce on the wall
-		ypred = mParticles.mY[i] + U[0]*mdt + B(1,1)*sqrt_dt*R1;
-		zpred = mParticles.mZ[i] + U[1]*mdt + B(2,1)*sqrt_dt*R1 + B(2,2)*sqrt_dt*R2;
+		ypred = mParticles.mY[i] + U(1)*mdt + B(1,1)*sqrt_dt*R1;
+		zpred = mParticles.mZ[i] + U(2)*mdt + B(2,1)*sqrt_dt*R1 + B(2,2)*sqrt_dt*R2;
 		mParticles.mY[i] = (ypred < prob.getL0()) ? 2*prob.getL0()-ypred : (ypred > prob.getL1()) ? 2*prob.getL1()-ypred : ypred;
 		mParticles.mZ[i] = (zpred < prob.getH0()) ? 2*prob.getH0()-zpred : (zpred > prob.getH1()) ? 2*prob.getH1()-zpred : zpred;
 	}

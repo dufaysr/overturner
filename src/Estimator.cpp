@@ -95,11 +95,11 @@ void BoxEstimator::Estimate(const Particles2D& particles)
 	mEstimator /= N;
 }
 
-GlobalEstimator::GlobalEstimator(int nboxy, int nboxz, double H, double L, int Nloc):
+TPMatrixEstimator::TPMatrixEstimator(int nboxy, int nboxz, double H, double L, int Nloc):
 mNboxy(nboxy), mNboxz(nboxz), mNloc(Nloc), mH(H), mL(L), mEstimator(nboxy*nboxz, nboxy*nboxz)
 {} 
 
-void GlobalEstimator::Print(std::string filename, bool binary) const
+void TPMatrixEstimator::Print(std::string filename, bool binary) const
 {
 	std::ofstream f = openOutputFile(filename, binary);
 	f.setf(std::ios::scientific); f.precision(10);
@@ -111,8 +111,8 @@ void GlobalEstimator::Print(std::string filename, bool binary) const
     f.close();
 }
 
-GlobalKernelEstimator::GlobalKernelEstimator(int nboxy, int nboxz, double H, double L, int Nloc, double lambda, std::string kernelFunction):
-GlobalEstimator(nboxy,nboxz,H,L,Nloc), mLambda(lambda)
+TPMatrixKernelEstimator::TPMatrixKernelEstimator(int nboxy, int nboxz, double H, double L, int Nloc, double lambda, std::string kernelFunction):
+TPMatrixEstimator(nboxy,nboxz,H,L,Nloc), mLambda(lambda)
 {
 	transform(kernelFunction.begin(), kernelFunction.end(), kernelFunction.begin(), ::tolower);
 	if (kernelFunction == "gaussian")
@@ -130,11 +130,11 @@ GlobalEstimator(nboxy,nboxz,H,L,Nloc), mLambda(lambda)
 	}
 }
 
-GlobalKernelEstimator::GlobalKernelEstimator(int nboxy, int nboxz, double H, double L, int Nloc, double lambda, double (*kernelFunction)(double y, double z)):
-GlobalEstimator(nboxy, nboxz, H, L, Nloc), mLambda(lambda), mKernel(kernelFunction)
+TPMatrixKernelEstimator::TPMatrixKernelEstimator(int nboxy, int nboxz, double H, double L, int Nloc, double lambda, double (*kernelFunction)(double y, double z)):
+TPMatrixEstimator(nboxy, nboxz, H, L, Nloc), mLambda(lambda), mKernel(kernelFunction)
 {}
 
-void GlobalKernelEstimator::Estimate(const Particles2D& particles)
+void TPMatrixKernelEstimator::Estimate(const Particles2D& particles)
 {
 	double dy = mL/mNboxy;
 	double dz = mH/mNboxz;
@@ -160,19 +160,19 @@ void GlobalKernelEstimator::Estimate(const Particles2D& particles)
 	}
 }
 
-GlobalBoxEstimator::GlobalBoxEstimator(int nboxy, int nboxz, double H0, double H, double L0, double L, int Nloc):
-	GlobalEstimator(nboxy,nboxz,H,L,Nloc),
+TPMatrixBoxEstimator::TPMatrixBoxEstimator(int nboxy, int nboxz, double H0, double H, double L0, double L, int Nloc):
+	TPMatrixEstimator(nboxy,nboxz,H,L,Nloc),
 	mH0(H0), 
 	mL0(L0)
 {}
 
-void GlobalBoxEstimator::Estimate(const Particles2D& particles)
+void TPMatrixBoxEstimator::Estimate(const Particles2D& particles)
 {
 	Count(particles);
 	mEstimator /= mNloc;
 }
 
-Matrix GlobalBoxEstimator::Count(const Particles2D& particles)
+Matrix TPMatrixBoxEstimator::Count(const Particles2D& particles)
 {
 	int iyStart, izStart, iyEnd, izEnd;
 	double dy = mL/mNboxy;

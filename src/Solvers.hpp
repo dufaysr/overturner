@@ -33,7 +33,7 @@ class Solver
 		virtual void UpdatePosition(const AbstractAdvDiffProblem& prob) =0;		// Pure virtual function
 		Particles2D Run(const AbstractAdvDiffProblem& prob, double Time);
 		Particles2D Run(const AbstractAdvDiffProblem& prob, double Time,
-						std::string model, int nPrint = 5, bool printInit = true, bool binary = false);
+						std::string outputdir, int nPrint = 5, bool printInit = true, bool binary = false);
 		void DisplayParticles() const;
 		void PrintParticles(std::ofstream& fT, std::ofstream& fY, std::ofstream& fZ) const;
 		void PrintParticlesBinary(std::ofstream& fT, std::ofstream& fY, std::ofstream& fZ) const;

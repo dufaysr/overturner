@@ -1,6 +1,13 @@
 #include "Structures.hpp"
 
 /* LOWERTRIMATRIX */
+LowerTriMatrix::LowerTriMatrix()
+{
+	x[0] = 0.;
+	x[1] = 0.;
+	x[2] = 0.;
+}
+
 LowerTriMatrix::LowerTriMatrix(double a, double b, double c)
 {
 	x[0] = a;
@@ -23,6 +30,14 @@ LowerTriMatrix& LowerTriMatrix::operator=(const LowerTriMatrix& ltm)
 }
 
 /* SYMMATRIX */
+SymMatrix::SymMatrix()
+{
+	x[0] = 0.;
+	x[1] = 0.;
+	x[2] = 0.;
+}
+
+
 SymMatrix::SymMatrix(double a, double b, double c)
 {
 	x[0] = a;
@@ -51,10 +66,21 @@ SymMatrix operator*(double a, SymMatrix sm)
 
 
 /* VEC2 */
+Vec2::Vec2()
+{
+	x[0] = 0.;
+	x[1] = 0.;
+}
+
 Vec2::Vec2(double a, double b)
 {
 	x[0] = a;
 	x[1] = b;
+}
+
+double& Vec2::operator()(int i)
+{
+	return x[i-1];
 }
 
 double& Vec2::operator[](int i)

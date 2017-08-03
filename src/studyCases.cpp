@@ -28,11 +28,11 @@ void StudyCaseTestProblem()
 	double Lz = 10*std::max(W*T, sqrt(Kzz*T));
 	double y1 = 0., z1 = 0.;
 	int J = 50000;
-	std::string model = "testcase";
+	std::string outputdir = "testcase";
 	TestProblem testprob(Ly,Lz,Kyy,Kzz,V,W,J);
 	
 	std::cout << "Writing fInfo..." << std::endl;
-	std::ofstream fInfo = openOutputFile(wd::root + "out/" + model + "/info.out");
+	std::ofstream fInfo = openOutputFile(wd::root + "out/" + outputdir + "/info.out");
 	auto t = std::time(nullptr);
     auto tm = *std::localtime(&t);
     fInfo << "File generated on " << std::put_time(&tm, "%d-%m-%Y at %Hh %Mm %Ss") << "\n";
@@ -47,7 +47,7 @@ void StudyCaseTestProblem()
 	std::cout << "Generating trajectories..." << std::endl;
 	Particles2D part(J,y1,z1);
 	BISolver solver(part,dt);
-	part = solver.Run(testprob,T,model,T/dt,false,false);
+	part = solver.Run(testprob,T,outputdir,T/dt,false,false);
 	std::cout << "\nStudyCaseTestProblem runned successfully." << std::endl;
 }
 
@@ -71,11 +71,11 @@ void StudyCaseTestProblemSemiInf()
 	double y1 = 0.;
 	double z1 = H;
 	int J = 20000;
-	std::string model = "testcaseSI";
+	std::string outputdir = "testcaseSI";
 	TestProblem testprob(Ly,Lz,Kyy,Kzz,V,W,J,"semi-infinite");
 	
 	std::cout << "Writing fInfo..." << std::endl;
-	std::ofstream fInfo = openOutputFile(wd::root + "out/" + model + "/info.out");
+	std::ofstream fInfo = openOutputFile(wd::root + "out/" + outputdir + "/info.out");
 	auto t = std::time(nullptr);
     auto tm = *std::localtime(&t);
     fInfo << "File generated on " << std::put_time(&tm, "%d-%m-%Y at %Hh %Mm %Ss") << "\n";
@@ -90,7 +90,7 @@ void StudyCaseTestProblemSemiInf()
 	std::cout << "Generating trajectories..." << std::endl;
 	Particles2D part(J,y1,z1);
 	BISolver solver(part,dt);
-	part = solver.Run(testprob,T,model,T/dt,false,false);
+	part = solver.Run(testprob,T,outputdir,T/dt,false,false);
 	std::cout << "\nStudyCaseTestProblemSemiInf runned successfully." << std::endl;
 }
 
@@ -110,21 +110,22 @@ void StudyCaseProblem2BoxTP()
 	/* Transition probability matrices */
 	double dt = 3600;
 	double year = 365*24*3600;
-	double alpha[4] = {0,.5,.9,1};
-	int nameindex[4] = {0,5,9,1};
+	const int nalpha = 1;
+	double alpha[nalpha] = {.75};
+	int nameindex[nalpha] = {75};
 
-	int nboxy = 30;
-	int nboxz = 10;
+	int nboxy = 2;
+	int nboxz = 1;
 	int nlocy = 100, nlocz = 100;
 
-	std::string model;
-	const int nTimes = 1;
-	double Times[nTimes] = {1.*year};
+	std::string outputdir;
+	const int nTimes = 10;
+	double Times[nTimes] = {10.*year,20*year,30*year,40*year,50*year,60*year,70*year,80*year,90*year,100*year};
 
-	for (int i=0; i<4; i++){
+	for (int i=0; i<nalpha; i++){
 		Problem2Box prob(alpha[i]);
-		model = "problem2box_a" + std::to_string(nameindex[i]);
-		ComputeTransitionProbabilities(prob, model, nboxy, nboxz, nlocy, nlocz, dt, Times, nTimes, true);
+		outputdir = "problem2box_a" + std::to_string(nameindex[i]);
+		ComputeTransitionProbabilities(prob, outputdir, nboxy, nboxz, nlocy, nlocz, dt, Times, nTimes, true);
 	}	
 }
 
@@ -137,9 +138,10 @@ void StudyCaseOverturnerTPnTimes()
 	int nboxy = 15;
 	int nboxz = 10;
 	int nlocy = 100, nlocz = 100;
+	std::string outputdir = model;
 
 	double year = 365*24*3600;
 	const int nTimes = 11;
 	double Times[nTimes] = {1.*year,10.*year,20.*year,30.*year,40.*year,50.*year,60.*year,70.*year,80.*year,90.*year,100.*year};
-	ComputeTransitionProbabilities(prob, model, nboxy, nboxz, nlocy, nlocz, dt, Times, nTimes, true);	
+	ComputeTransitionProbabilities(prob, outputdir, nboxy, nboxz, nlocy, nlocz, dt, Times, nTimes, true);	
 }

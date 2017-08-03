@@ -1,6 +1,6 @@
 /*
   Particles2D.hpp
-  "overturner"
+  "sde2D"
 
   Created by Renaud Dufays on 20/05/17.
   Copyright © 2017. All rights reserved.
@@ -29,14 +29,14 @@ class AbstractAdvDiffProblem
 	public:
 		AbstractAdvDiffProblem(double H0, double H1, double L0, double L1);
 		virtual ~AbstractAdvDiffProblem(){};
-		double getH0() const;
-		double getH1() const;
-		double getL0() const;
-		double getL1() const;
-		virtual SymMatrix getK(double y, double z) const=0;
-		virtual LowerTriMatrix getB(double y, double z) const;
-		virtual Vec2 getU(double y, double z) const=0;
-		virtual void printInfo(std::ofstream& f) const=0;
+		double getH0() const; // bottom boundary
+		double getH1() const; // top boundary 
+		double getL0() const; // left boundary
+		double getL1() const; // right boundary
+		virtual SymMatrix getK(double y, double z) const=0; // diffusivity tensor
+		virtual LowerTriMatrix getB(double y, double z) const; // 2K = BB'
+		virtual Vec2 getU(double y, double z) const=0; // velocity vector
+		virtual void printInfo(std::ofstream& f) const;
 };
 
 class OverturnerProblem : public AbstractAdvDiffProblem

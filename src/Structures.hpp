@@ -10,6 +10,7 @@ class LowerTriMatrix
   		// Matrix = | x[0]  0   |
   		// 			| x[1] x[2] |
 	public:
+      LowerTriMatrix();
   		LowerTriMatrix(double a, double b, double c);
   		double& operator()(int i, int j);
   		LowerTriMatrix& operator=(const LowerTriMatrix& ltm);
@@ -23,6 +24,7 @@ class SymMatrix
   		// 			| x[1] x[2] |
  
 	public:
+      SymMatrix();
   		SymMatrix(double a, double b, double c);
   		double& operator()(int i, int j);
   		SymMatrix& operator=(const SymMatrix& sm);
@@ -35,7 +37,9 @@ class Vec2
 	private:
 		double x[2];
 	public:
+    Vec2();
 		Vec2(double a, double b);
+    double& operator()(int i);
 		double& operator[](int i);
 		Vec2& operator=(const Vec2& v2);
 };

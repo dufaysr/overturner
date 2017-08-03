@@ -23,7 +23,7 @@ if nargin < 4
     end
 end
 
-filename = ['/home/renaud/Documents/EPL/tfe/overturner/out/' model '/' name '.out'];
+filename = ['/home/renaud/Documents/EPL/tfe/code/out/' model '/' name '.out'];
 
 %% Format for each line of text:
 %   column2: text (%s)

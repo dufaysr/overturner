@@ -50,7 +50,7 @@ class BoxEstimator : public Estimator
 		void Estimate(const Particles2D& particles);
 };
 
-class GlobalEstimator
+class TPMatrixEstimator
 {
 	protected:
 		int mNboxy, mNboxz, mNloc;
@@ -58,31 +58,31 @@ class GlobalEstimator
 		Matrix mEstimator;
 
 	public:
-		GlobalEstimator(int nboxy, int nboxz, double H, double L, int Nloc);
-		virtual ~GlobalEstimator() {}
+		TPMatrixEstimator(int nboxy, int nboxz, double H, double L, int Nloc);
+		virtual ~TPMatrixEstimator() {}
 		virtual void Estimate(const Particles2D& particles) =0;
 		void Print(std::string filename, bool binary=false) const;
 };
 
-class GlobalKernelEstimator : public GlobalEstimator
+class TPMatrixKernelEstimator : public TPMatrixEstimator
 {
 	private:
 		double mLambda;
 		double (*mKernel)(double y, double z);
 
 	public:
-		GlobalKernelEstimator(int nboxy, int nboxz, double H, double L, int Nloc, double lambda, std::string kernelFunction);
-		GlobalKernelEstimator(int nboxy, int nboxz, double H, double L, int Nloc, double lambda, double (*kernelFunction)(double y, double z));
+		TPMatrixKernelEstimator(int nboxy, int nboxz, double H, double L, int Nloc, double lambda, std::string kernelFunction);
+		TPMatrixKernelEstimator(int nboxy, int nboxz, double H, double L, int Nloc, double lambda, double (*kernelFunction)(double y, double z));
 		void Estimate(const Particles2D& particles);
 };
 
-class GlobalBoxEstimator : public GlobalEstimator
+class TPMatrixBoxEstimator : public TPMatrixEstimator
 {
 	private:
 		double mH0, mL0;
 
 	public:
-		GlobalBoxEstimator(int nboxy, int nboxz, double H0, double H, double L0, double L, int Nloc);
+		TPMatrixBoxEstimator(int nboxy, int nboxz, double H0, double H, double L0, double L, int Nloc);
 		void Estimate(const Particles2D& particles);
 		Matrix Count(const Particles2D& particles);
 };

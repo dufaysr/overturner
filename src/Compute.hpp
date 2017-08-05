@@ -21,8 +21,8 @@
 
 void ComputeTrajectories(const AbstractAdvDiffProblem& prob, std::string outputdir, double dt, double T,
 						int Nloc, double yStart, double zStart);
-void ComputeConcentration(const AbstractAdvDiffProblem &prob, std::string outputdir, double dt, double T,
-						std::string estimator, int Nloc, double yStart, double zStart, int nboxy, int nboxz);
+void ComputeConcentration(const AbstractAdvDiffProblem &prob, std::string outputdir, double dt, double Times[],
+						int nTimes, Particles2D& part, int nboxy, int nboxz, bool binary, std::string estimator = "box");
 void ComputeTransitionProbabilities(const AbstractAdvDiffProblem& prob, std::string outputdir,
 									int nboxy, int nboxz, int nyloc, int nzloc, double dt,
 									double Times[], int nTimes, bool binary, std::string estimator = "box");

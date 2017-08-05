@@ -126,7 +126,47 @@ void StudyCaseProblem2BoxTP()
 		Problem2Box prob(alpha[i]);
 		outputdir = "problem2box_a" + std::to_string(nameindex[i]);
 		ComputeTransitionProbabilities(prob, outputdir, nboxy, nboxz, nlocy, nlocz, dt, Times, nTimes, true);
-	}	
+	}
+}
+
+void StudyCaseP2BConcentration2Comp()
+{
+	double dt = 3600;
+	double year = 365*24*3600;
+	double alpha = .75;
+
+	int nboxy = 2;
+	int nboxz = 1;
+
+	int nyloc = 200;
+	int nzloc = 100;
+	int Nloc = nyloc*nzloc;
+
+	Problem2Box p2b(alpha);
+	double L = p2b.getL1()-p2b.getL0();
+	double H = p2b.getH1()-p2b.getH0();
+	double dyloc = L/(nboxy*nyloc);
+	double dzloc = H/(nboxz*nzloc);
+	double *ystart = new double [Nloc];
+	double *zstart = new double [Nloc];
+	for (int iy=0; iy<nyloc; iy++){
+		for (int iz=0; iz<nzloc; iz++){
+			ystart[iy*nzloc+iz] = p2b.getL0() + iy*dyloc;
+			zstart[iy*nzloc+iz] = p2b.getH0() + iz*dzloc;
+		}
+	}
+	Particles2D part(Nloc,ystart,zstart);
+	delete ystart;
+	delete zstart;
+	std::string outputdir = "p2b_a75_2comp";
+
+	const int nTimes = 1001;
+	double *Times = new double [nTimes];
+	for (int i=0; i<nTimes; i++)
+		Times[i] = i*year;
+
+	ComputeConcentration(p2b, outputdir, dt, Times, nTimes, part, nboxy, nboxz, true);
+	delete Times;
 }
 
 void StudyCaseOverturnerTPnTimes()

@@ -33,49 +33,80 @@ void ComputeTrajectories(const AbstractAdvDiffProblem& prob, std::string outputd
 	std::cout << "\nComputeTrajectories runned successfully." << std::endl;
 }
 
-void ComputeConcentration(const AbstractAdvDiffProblem &prob, std::string outputdir, double dt, double T,
-						std::string estimator, int Nloc, double yStart, double zStart, int nboxy, int nboxz)
+void ComputeConcentration(const AbstractAdvDiffProblem &prob, std::string outputdir, double dt, double Times[],
+						int nTimes, Particles2D& part, int nboxy, int nboxz, bool binary, std::string estimator)
 {
 	std::cout << "\nRunning ComputeConcentration..." << std::endl;
 	
 	std::cout << "Writing fInfo..." << std::endl;
 	std::ofstream fInfo = openOutputFile(wd::root + "out/" + outputdir + "/info.out");
-	auto t = std::time(nullptr);
-    auto tm = *std::localtime(&t);
+	auto tt = std::time(nullptr);
+    auto tm = *std::localtime(&tt);
     fInfo << "File generated on " << std::put_time(&tm, "%d-%m-%Y at %Hh %Mm %Ss") << "\n";
     fInfo << "ComputeTrajectories\n";
     fInfo << "The values used are :\n";
     prob.printInfo(fInfo);
-    fInfo << "Nloc = " << Nloc << "\n";
-    fInfo << "yStart = " << yStart << "\n";
-    fInfo << "zStart = " << zStart << "\n";
     fInfo << "nboxy = " << nboxy << "\n";
     fInfo << "nboxz = " << nboxz << "\n";
     fInfo.close();
 
-	std::cout << "1/3 : Generating trajectories..." << std::endl;
-	Particles2D part(Nloc, yStart, zStart);
-	BISolver solver(part,dt);
-	part = solver.Run(prob,T);
-
-	std::cout << "2/3 : Computing the concentrations..." << std::endl;
+	// Estimator
 	Estimator *estim;
 	double H = prob.getH1()-prob.getH0();
 	double L = prob.getL1()-prob.getL0();
 	transform(estimator.begin(), estimator.end(), estimator.begin(), ::tolower);
-	if(estimator == "epanechnikov")
+	if (estimator == "box")
+		estim = new BoxEstimator(nboxy,nboxz,prob.getH0(),H,prob.getL0(),L);
+	else if(estimator == "epanechnikov")
 		estim = new KernelEstimator(nboxy,nboxz,H,L,.1*pow(part.mN,-1./6.),"Epanechnikov");
 	else if (estimator == "gaussian")
 		estim = new KernelEstimator(nboxy,nboxz,H,L,.1*pow(part.mN,-1./6.),"Gaussian");
-	else if (estimator == "box")
-		estim = new BoxEstimator(nboxy,nboxz,H,L);
 	else{
 		std::cerr << "Unknown estimator type. Valid estimators are \"epanechnikov\", \"gaussian\" and \"box\"." << std::endl;
 		abort();
 	}
-	estim->Estimate(part);
-	std::cout << "3/3 : Writing in the files..." << std::endl;
-	estim->Print(wd::root + "out/" + outputdir + "/" + estimator + ".out");
+	// Solver
+	BISolver *solver;
+	// timing
+	clock_t tstart,t; // timing
+	double tot_seconds, minutes; // timing
+
+	const double year = 3600*24*365;
+	int Tyear;
+
+	for (int i=0; i<nTimes; i++)
+	{
+		Tyear = (int) (Times[i]/year);
+		std::cout << "--------------------ITERATION " << i+1 << "/" << nTimes << ": T = " << Tyear << " year(s)--------------------" << std::endl;
+		tstart = clock();
+
+		std::cout << "1/3 : Generating trajectories..." << std::endl;
+		t = clock();
+		solver = new BISolver(part,dt);
+		part = solver->Run(prob,Times[i]);
+		delete solver;
+		tot_seconds = double(clock()-t)/(double)CLOCKS_PER_SEC;
+		minutes = floor(tot_seconds/60);
+		std::cout << "Finished in " << minutes << " min " << tot_seconds - minutes*60 << " seconds." << std::endl;
+
+		std::cout << "2/3 : Computing estimator..." << std::endl;
+		t = clock();
+		estim->Estimate(part);
+		tot_seconds = double(clock()-t)/(double)CLOCKS_PER_SEC;
+		minutes = floor(tot_seconds/60);
+		std::cout << "Finished in " << minutes << " min " << tot_seconds - minutes*60 << " seconds." << std::endl;
+
+		std::cout << "3/3 : Writing in the files..." << std::endl;
+		t = clock();
+		estim->Print(wd::root + "out/" + outputdir + "/C" + estimator + std::to_string(Tyear) + ".out",binary);
+		tot_seconds = double(clock()-t)/(double)CLOCKS_PER_SEC;
+		minutes = floor(tot_seconds/60);
+		std::cout << "Finished in " << minutes << " min " << tot_seconds - minutes*60 << " seconds." << std::endl;
+
+		tot_seconds = double(clock()-tstart)/(double)CLOCKS_PER_SEC;
+		minutes = floor(tot_seconds/60);
+		std::cout << "Complete iteration took " << minutes << " min " << tot_seconds - minutes*60 << " seconds." << std::endl;
+	}
 	delete estim;
 	std::cout << "\nComputeConcentration runned successfully." << std::endl;
 }
@@ -144,9 +175,13 @@ void ComputeTransitionProbabilities(const AbstractAdvDiffProblem& prob, std::str
 	clock_t tstart,t; // timing
 	double tot_seconds, minutes; // timing
 
+	const double year = 3600*24*365;
+	int Tyear;
+
 	for(int i=0; i<nTimes; i++)
 	{
-		std::cout << "--------------------ITERATION " << i+1 << "/" << nTimes << ": T = " << Times[i] <<"--------------------" << std::endl;
+		Tyear = (int) (Times[i]/year);
+		std::cout << "--------------------ITERATION " << i+1 << "/" << nTimes << ": T = " << Tyear <<"--------------------" << std::endl;
 		tstart = clock();
 
 		std::cout << "1/3 : Generating trajectories..." << std::endl;
@@ -167,7 +202,7 @@ void ComputeTransitionProbabilities(const AbstractAdvDiffProblem& prob, std::str
 
 		std::cout << "3/3 : Writing in the files..." << std::endl;
 		t = clock();
-		estim->Print(wd::root + "out/" + outputdir + "/M" + std::to_string(i) +  ".bin", binary);
+		estim->Print(wd::root + "out/" + outputdir + "/M" + std::to_string(Tyear) +  ".bin", binary);
 		tot_seconds = double(clock()-t)/(double)CLOCKS_PER_SEC;
 		minutes = floor(tot_seconds/60);
 		std::cout << "Finished in " << minutes << " min " << tot_seconds - minutes*60 << " seconds." << std::endl;

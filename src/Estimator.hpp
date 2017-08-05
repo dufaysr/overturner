@@ -45,8 +45,11 @@ class KernelEstimator : public Estimator
 
 class BoxEstimator : public Estimator
 {
+	private:
+		double mH0, mL0;
+
 	public:
-		BoxEstimator(int nboxy, int nboxz, double H, double L);
+		BoxEstimator(int nboxy, int nboxz, double H0, double H, double L0, double L);
 		void Estimate(const Particles2D& particles);
 };
 

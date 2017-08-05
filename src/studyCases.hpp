@@ -23,5 +23,6 @@ void StudyCaseTestProblem();
 void StudyCaseTestProblemSemiInf();
 void StudyCaseProblem2BoxTraj();
 void StudyCaseProblem2BoxTP();
+void StudyCaseP2BConcentration2Comp();
 void StudyCaseOverturnerTPnTimes();
 #endif

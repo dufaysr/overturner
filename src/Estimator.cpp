@@ -76,8 +76,10 @@ void KernelEstimator::Estimate(const Particles2D& particles)
 	}
 }
 
-BoxEstimator::BoxEstimator(int nboxy, int nboxz, double H, double L):
-Estimator(nboxy,nboxz,H,L)
+BoxEstimator::BoxEstimator(int nboxy, int nboxz, double H0, double H, double L0, double L):
+Estimator(nboxy,nboxz,H,L),
+mH0(H0),
+mL0(L0)
 {}
 
 void BoxEstimator::Estimate(const Particles2D& particles)
@@ -88,8 +90,8 @@ void BoxEstimator::Estimate(const Particles2D& particles)
 	double dz = mH/mNboxz;
 	for (int n=0; n<N; n++)
 	{
-		i = std::min(int(particles.mY[n]/dy),mNboxy-1);
-		j = std::min(int(particles.mZ[n]/dz),mNboxz-1);
+		i = std::min(int((particles.mY[n]-mL0)/dy),mNboxy-1);
+		j = std::min(int((particles.mZ[n]-mH0)/dz),mNboxz-1);
 		mEstimator(i,j) += 1.;
 	}
 	mEstimator /= N;

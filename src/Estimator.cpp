@@ -194,6 +194,40 @@ Matrix TPMatrixBoxEstimator::Count(const Particles2D& particles)
 	return mEstimator;
 }
 
+
+TPMatrixBoxEstimatorP2B::TPMatrixBoxEstimatorP2B(int nboxy, int nboxz, double H0, double H, double L0, double L, int Nloc):
+	TPMatrixBoxEstimator(nboxy,nboxz,H0,H,L0,L,Nloc)
+{}
+
+Matrix TPMatrixBoxEstimatorP2B::Count(const Particles2D& particles)
+{
+	int iyStart, izStart, iyEnd, izEnd;
+	int nboxy_left = mNboxy/2;
+	double dy = mL/mNboxy;
+	double dz = mH/mNboxz;
+	for (iyStart=0; iyStart<nboxy_left; iyStart++){
+		for (izStart=0; izStart<mNboxz; izStart++){
+			for (int n=0; n<mNloc; n++){
+				iyEnd = std::min(int((particles.mY[iyStart*mNboxz*mNloc+izStart*mNloc+n]-mL0)/dy),mNboxy-1);
+				izEnd = std::min(int((particles.mZ[iyStart*mNboxz*mNloc+izStart*mNloc+n]-mH0)/dz),mNboxz-1);
+				mEstimator(iyStart*mNboxz+izStart,iyEnd*mNboxz+izEnd) += 1.;
+			}
+		}
+	}
+	int iystartmap, iyendmap;
+	for (iyStart=nboxy_left; iyStart<mNboxy; iyStart++){
+		for (izStart=0; izStart<mNboxz; izStart++){
+			for (iyEnd=0; iyEnd<mNboxy; iyEnd++){
+				for (izEnd=0; izEnd<mNboxz; izEnd++){
+					iystartmap = mNboxy-1-iyStart;
+					iyendmap = mNboxy-1-iyEnd;
+					mEstimator(iyStart*mNboxz+izStart,iyEnd*mNboxz+izEnd) = mEstimator(iystartmap*mNboxz+izStart,iyendmap*mNboxz+izEnd);
+				}
+			}
+		}
+	}
+	return mEstimator;
+}
 /*
 	Utility functions for the Kernel estimators
 */

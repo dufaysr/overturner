@@ -37,8 +37,8 @@ int main(int argc, char *argv[])
 	// StudyCaseTestProblemSemiInf();
 	// StudyCaseOverturnerTPnTimes();
 	// StudyCaseProblem2BoxTraj();
-	// StudyCaseProblem2BoxTP();
-	StudyCaseP2BConcentration2Comp();
+	StudyCaseProblem2BoxTP();
+	// StudyCaseP2BConcentration2Comp();
 
 	return 0;
 }

@@ -26,5 +26,8 @@ void ComputeConcentration(const AbstractAdvDiffProblem &prob, std::string output
 void ComputeTransitionProbabilities(const AbstractAdvDiffProblem& prob, std::string outputdir,
 									int nboxy, int nboxz, int nyloc, int nzloc, double dt,
 									double Times[], int nTimes, bool binary, std::string estimator = "box");
+void ComputeP2BTransitionProbabilities(const Problem2Box& prob, std::string outputdir,
+									  int nboxy, int nboxz, int nyloc, int nzloc, double dt, 
+									  double Times[], int nTimes, bool binary);
 
 #endif

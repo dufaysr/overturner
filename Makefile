@@ -15,7 +15,7 @@ HEADDIR = src
 LIBDIR = lib
 BINDIR = bin
 
-EXEC=problem2box.exe
+EXEC=problem2boxtest.exe
 
 SRC= $(wildcard $(SRCDIR)/*.cpp)
 OBJ= $(SRC:$(SRCDIR)/%.cpp=$(LIBDIR)/%.o)

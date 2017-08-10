@@ -33,7 +33,7 @@ class Estimator
 
 class KernelEstimator : public Estimator
 {
-	private:
+	protected:
 		double mLambda;
 		double (*mKernel)(double y, double z);
 
@@ -45,7 +45,7 @@ class KernelEstimator : public Estimator
 
 class BoxEstimator : public Estimator
 {
-	private:
+	protected:
 		double mH0, mL0;
 
 	public:
@@ -69,7 +69,7 @@ class TPMatrixEstimator
 
 class TPMatrixKernelEstimator : public TPMatrixEstimator
 {
-	private:
+	protected:
 		double mLambda;
 		double (*mKernel)(double y, double z);
 
@@ -81,12 +81,19 @@ class TPMatrixKernelEstimator : public TPMatrixEstimator
 
 class TPMatrixBoxEstimator : public TPMatrixEstimator
 {
-	private:
+	protected:
 		double mH0, mL0;
 
 	public:
 		TPMatrixBoxEstimator(int nboxy, int nboxz, double H0, double H, double L0, double L, int Nloc);
 		void Estimate(const Particles2D& particles);
+		virtual Matrix Count(const Particles2D& particles);
+};
+
+class TPMatrixBoxEstimatorP2B : public TPMatrixBoxEstimator
+{
+	public:
+		TPMatrixBoxEstimatorP2B(int nboxy, int nboxz, double H0, double H, double L0, double L, int Nloc);
 		Matrix Count(const Particles2D& particles);
 };
 

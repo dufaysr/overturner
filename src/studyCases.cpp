@@ -114,18 +114,21 @@ void StudyCaseProblem2BoxTP()
 	double alpha[nalpha] = {.75};
 	int nameindex[nalpha] = {75};
 
-	int nboxy = 2;
-	int nboxz = 1;
-	int nlocy = 100, nlocz = 100;
+	int nboxy = 4;
+	int nboxz = 2;
+	int nlocy = 10, nlocz = 10;
 
 	std::string outputdir;
-	const int nTimes = 10;
-	double Times[nTimes] = {10.*year,20*year,30*year,40*year,50*year,60*year,70*year,80*year,90*year,100*year};
+	// const int nTimes = 10;
+	// double Times[nTimes] = {10.*year,20*year,30*year,40*year,50*year,60*year,70*year,80*year,90*year,100*year};
+	const int nTimes = 1;
+	double Times[nTimes] = {year};
 
 	for (int i=0; i<nalpha; i++){
 		Problem2Box prob(alpha[i]);
-		outputdir = "problem2box_a" + std::to_string(nameindex[i]);
-		ComputeTransitionProbabilities(prob, outputdir, nboxy, nboxz, nlocy, nlocz, dt, Times, nTimes, true);
+		// outputdir = "problem2box_a" + std::to_string(nameindex[i]);
+		outputdir = "problem2box_test";
+		ComputeP2BTransitionProbabilities(prob, outputdir, nboxy, nboxz, nlocy, nlocz, dt, Times, nTimes, true);
 	}
 }
 
@@ -143,22 +146,49 @@ void StudyCaseP2BConcentration2Comp()
 	int Nloc = nyloc*nzloc;
 
 	Problem2Box p2b(alpha);
+
+	// For the 1000 years simulation
 	double L = p2b.getL1()-p2b.getL0();
 	double H = p2b.getH1()-p2b.getH0();
 	double dyloc = L/(nboxy*nyloc);
 	double dzloc = H/(nboxz*nzloc);
+	// case 1 <<
+	// double *ystart = new double [Nloc];
+	// double *zstart = new double [Nloc];
+	// for (int iy=0; iy<nyloc; iy++){
+	// 	for (int iz=0; iz<nzloc; iz++){
+	// 		ystart[iy*nzloc+iz] = p2b.getL0() + (iy+.5)*dyloc;
+	// 		zstart[iy*nzloc+iz] = p2b.getH0() + (iz+.5)*dzloc;
+	// 	}
+	// }
+	// >> case 1
+
+	// case 2 <<
+	// double ystart = p2b.getL0()+dyloc/2;
+	// double zstart = p2b.getH0()+dzloc/2;
+	// >> case 2
+
+	// case 3 <<
+	dyloc = dyloc/2;
 	double *ystart = new double [Nloc];
 	double *zstart = new double [Nloc];
 	for (int iy=0; iy<nyloc; iy++){
 		for (int iz=0; iz<nzloc; iz++){
-			ystart[iy*nzloc+iz] = p2b.getL0() + iy*dyloc;
-			zstart[iy*nzloc+iz] = p2b.getH0() + iz*dzloc;
+			ystart[iy*nzloc+iz] = p2b.getL0() + (iy+.5)*dyloc;
+			zstart[iy*nzloc+iz] = p2b.getH0() + (iz+.5)*dzloc;
 		}
 	}
+	// >> case 3
+
 	Particles2D part(Nloc,ystart,zstart);
 	delete ystart;
 	delete zstart;
-	std::string outputdir = "p2b_a75_2comp";
+
+	// std::string outputdir = "p2b_a75_2comp"; // case 1
+	// std::string outputdir = "p2b_a75_2comp_nwm"; //nwm = not well mixed (case 2)
+	std::string outputdir = "p2b_a75_2comp_case3"; //case 3
+
+
 
 	const int nTimes = 1001;
 	double *Times = new double [nTimes];

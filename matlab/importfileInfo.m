@@ -1,14 +1,15 @@
 function importfileInfo(model, name, startRow, endRow)
-%IMPORTFILE Import numeric data from a text file as column vectors.
-%   [NAMES,VALUES] = IMPORTFILEINFO(MODEL) Reads data from text file
+%IMPORTFILEINFO Import numeric data from a text file and store them in the
+%workspace.
+%   IMPORTFILEINFO(MODEL) Reads data from text file
 %   /home/renaud/Documents/EPL/tfe/overturner/out/MODEL/info.out
 %   for the default selection STARTROW = 4, ENDROW = inf.
 %
-%   [NAMES,VALUES] = IMPORTFILEINFO(FILENAME, STARTROW, ENDROW) Reads data from
+%   IMPORTFILEINFO(FILENAME, STARTROW, ENDROW) Reads data from
 %   rows STARTROW through ENDROW of text file FILENAME.
 %
 % Example:
-%   [names,values] = importfileInfo('model');
+%   importfileInfo('model');
 
 
 %% Initialize variables.

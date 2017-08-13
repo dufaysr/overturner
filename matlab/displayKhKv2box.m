@@ -5,7 +5,7 @@ set(groot, 'defaultTextFontSize', fontsize);
 set(groot, 'defaultAxesFontSize',fontsize)
 set(groot, 'defaultLegendFontSize',fontsize);
 
-root = '/home/renaud/Documents/EPL/tfe/overturner/out/';
+root = '/home/renaud/Documents/EPL/tfe/code/out/';
 textwidth = 16.06;
 
 nboxy = 30; nboxz = 10;

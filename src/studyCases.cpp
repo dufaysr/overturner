@@ -27,7 +27,7 @@ void StudyCaseTestProblem()
 	double Ly = 10*std::max(V*T, sqrt(Kyy*T));
 	double Lz = 10*std::max(W*T, sqrt(Kzz*T));
 	double y1 = 0., z1 = 0.;
-	int J = 50000;
+	int J = 20000;
 	std::string outputdir = "testcase";
 	TestProblem testprob(Ly,Lz,Kyy,Kzz,V,W,J);
 	
@@ -114,20 +114,17 @@ void StudyCaseProblem2BoxTP()
 	double alpha[nalpha] = {.75};
 	int nameindex[nalpha] = {75};
 
-	int nboxy = 4;
-	int nboxz = 2;
-	int nlocy = 10, nlocz = 10;
+	int nboxy = 30;
+	int nboxz = 10;
+	int nlocy = 100, nlocz = 100;
 
 	std::string outputdir;
-	// const int nTimes = 10;
-	// double Times[nTimes] = {10.*year,20*year,30*year,40*year,50*year,60*year,70*year,80*year,90*year,100*year};
-	const int nTimes = 1;
-	double Times[nTimes] = {year};
+	const int nTimes = 6;
+	double Times[nTimes] = {1*year, 10*year, 20*year, 30*year, 40*year, 50*year};
 
 	for (int i=0; i<nalpha; i++){
 		Problem2Box prob(alpha[i]);
-		// outputdir = "problem2box_a" + std::to_string(nameindex[i]);
-		outputdir = "problem2box_test";
+		outputdir = "problem2box_a" + std::to_string(nameindex[i]);
 		ComputeP2BTransitionProbabilities(prob, outputdir, nboxy, nboxz, nlocy, nlocz, dt, Times, nTimes, true);
 	}
 }
@@ -201,14 +198,13 @@ void StudyCaseP2BConcentration2Comp()
 
 void StudyCaseOverturnerTPnTimes()
 {
-	std::string model = "timmermans";
-	OverturnerProblem prob(model);
+	OverturnerProblem prob();
 
 	double dt = 3600;
 	int nboxy = 15;
 	int nboxz = 10;
 	int nlocy = 100, nlocz = 100;
-	std::string outputdir = model;
+	std::string outputdir = "overturner";
 
 	double year = 365*24*3600;
 	const int nTimes = 11;

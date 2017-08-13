@@ -272,7 +272,7 @@ void ComputeP2BTransitionProbabilities(const Problem2Box& prob, std::string outp
 	BISolver *solver;
 	// timing
 	clock_t tstart,t; // timing
-	double tot_seconds, minutes; // timing
+	double tot_seconds, minutes, hours; // timing
 
 	const double year = 3600*24*365;
 	int Tyear;
@@ -290,25 +290,25 @@ void ComputeP2BTransitionProbabilities(const Problem2Box& prob, std::string outp
 		delete solver;
 		tot_seconds = double(clock()-t)/(double)CLOCKS_PER_SEC;
 		minutes = floor(tot_seconds/60);
-		std::cout << "Finished in " << minutes << " min " << tot_seconds - minutes*60 << " seconds." << std::endl;
+		hours = floor(minutes/60);
+		std::cout << "Finished in " << hours << " h " << minutes-60*hours << " min " << tot_seconds - minutes*60 << " seconds." << std::endl;
 
 		std::cout << "2/3 : Computing estimator..." << std::endl;
 		t = clock();
 		estim.Estimate(part);
 		tot_seconds = double(clock()-t)/(double)CLOCKS_PER_SEC;
-		minutes = floor(tot_seconds/60);
-		std::cout << "Finished in " << minutes << " min " << tot_seconds - minutes*60 << " seconds." << std::endl;
+		std::cout << "Finished in " << tot_seconds << " seconds." << std::endl;
 
 		std::cout << "3/3 : Writing in the files..." << std::endl;
 		t = clock();
 		estim.Print(wd::root + "out/" + outputdir + "/M" + std::to_string(Tyear) +  ".bin", binary);
 		tot_seconds = double(clock()-t)/(double)CLOCKS_PER_SEC;
-		minutes = floor(tot_seconds/60);
-		std::cout << "Finished in " << minutes << " min " << tot_seconds - minutes*60 << " seconds." << std::endl;
+		std::cout << "Finished in " << tot_seconds << " seconds." << std::endl;
 
 		tot_seconds = double(clock()-tstart)/(double)CLOCKS_PER_SEC;
 		minutes = floor(tot_seconds/60);
-		std::cout << "Complete iteration took " << minutes << " min " << tot_seconds - minutes*60 << " seconds." << std::endl;
+		hours = floor(minutes/60);
+		std::cout << "Complete iteration took " << hours << " h " << minutes-60*hours << " min " << tot_seconds - minutes*60 << " seconds." << std::endl;
 	}
 	std::cout << "\nComputeP2BTransitionProbabilities runned successfully." << std::endl;
 }

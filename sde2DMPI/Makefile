@@ -1,5 +1,5 @@
-CPP=g++
-# CPP=mpicxx
+# CPP=g++
+CPP=mpicxx
 
 CPPFLAGS=-Wall -O3
 LDFLAGS=
@@ -15,7 +15,7 @@ HEADDIR = src
 LIBDIR = lib
 BINDIR = bin
 
-EXEC=testcaseSI.exe
+EXEC=overturner.exe
 
 SRC= $(wildcard $(SRCDIR)/*.cpp)
 OBJ= $(SRC:$(SRCDIR)/%.cpp=$(LIBDIR)/%.o)
@@ -30,13 +30,10 @@ $(BINDIR)/$(EXEC): $(OBJ)
 
 $(LIBDIR)/Particles2D.o : $(SRCDIR)/Particles2D.hpp
 $(LIBDIR)/Matrix.o: $(SRCDIR)/Matrix.hpp
-$(LIBDIR)/Structures.o: $(SRCDIR)/Structures.hpp
-$(LIBDIR)/AdvDiffProblem.o: $(SRCDIR)/AdvDiffProblem.hpp $(LIBDIR)/Utilities.o $(LIBDIR)/Structures.o
-$(LIBDIR)/Utilities.o:  $(SRCDIR)/Utilities.hpp $(SRCDIR)/workingdirectory.hpp
-$(LIBDIR)/Solvers.o: $(SRCDIR)/Solvers.hpp $(LIBDIR)/AdvDiffProblem.o $(LIBDIR)/Particles2D.o $(LIBDIR)/Utilities.o
-$(LIBDIR)/Estimator.o: $(SRCDIR)/Estimator.hpp $(LIBDIR)/Matrix.o $(LIBDIR)/Particles2D.o $(LIBDIR)/Utilities.o 
-$(LIBDIR)/Compute.o: $(SRCDIR)/Compute.hpp $(LIBDIR)/Solvers.o $(LIBDIR)/Estimator.o
-$(LIBDIR)/studyCases.o: $(SRCDIR)/studyCases.hpp $(LIBDIR)/Compute.o
+$(LIBDIR)/AdvDiffProblem.o: $(SRCDIR)/AdvDiffProblem.hpp
+$(LIBDIR)/Solvers.o: $(SRCDIR)/Solvers.hpp $(LIBDIR)/AdvDiffProblem.o $(LIBDIR)/Particles2D.o
+$(LIBDIR)/Estimator.o: $(SRCDIR)/Estimator.hpp $(LIBDIR)/Matrix.o $(LIBDIR)/Particles2D.o
+$(LIBDIR)/studyCases.o: $(SRCDIR)/studyCases.hpp $(LIBDIR)/Solvers.o $(LIBDIR)/Estimator.o
 $(LIBDIR)/main.o:  $(LIBDIR)/studyCases.o $(SRCDIR)/workingdirectory.hpp
 
 

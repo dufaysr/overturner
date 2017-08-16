@@ -1,6 +1,6 @@
 /*
   Utilities.hpp
-  "overturner"
+  "sde2D"
 
   Created by Renaud Dufays on 17/03/17.
   Copyright © 2017. All rights reserved.
@@ -18,11 +18,10 @@
 #include <algorithm>
 #include "workingdirectory.hpp"
 
+// Only used for one constructor of "OverturnerProblem"
 double parseMathExpr(std::string value, double H, double L);
-// void ReadIniFile(std::string model);
+
+// check that the file exist and if yes, proposes the user to enter another
+// name for his output file, or to overwrite the existing one
 std::ofstream openOutputFile(std::string filename, bool binary=false);
-void show_usage(std::string name);
-int get_args_traj(int argc, char *argv[], std::string& model, int& Nloc, double& y0, double& z0, bool& adim);
-int get_args_conc(int argc, char *argv[], std::string& model, int& Nloc, int& ncelly, int& ncellz, double& y0, double& z0);
-int get_args_tp(int argc, char *argv[], std::string& model, int& ncelly, int& ncellz, int& nyloc, int& nzloc);
 #endif

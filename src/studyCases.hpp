@@ -19,6 +19,10 @@
 #include "workingdirectory.hpp"
 #include "Compute.hpp"
 
+/*
+	Those are the different "mains" used for the sake of the master's thesis
+*/
+
 void StudyCaseTestProblem();
 void StudyCaseTestProblemSemiInf();
 void StudyCaseProblem2BoxTraj();

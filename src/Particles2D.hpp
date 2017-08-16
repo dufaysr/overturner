@@ -20,6 +20,7 @@
 		- mN is the number of particles
 		- mY stores the y position of each particle (it is thus of size mN)
 		- mZ stores the z position of each particle (it is thus of size mN)
+		- mT : "age" of the particles
 */
 struct Particles2D
 {

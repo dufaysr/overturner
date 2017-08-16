@@ -9,7 +9,7 @@
 #include "Estimator.hpp"
 
 Estimator::Estimator(int ncelly, int ncellz, double H, double L):
-mNboxy(ncelly), mNboxz(ncellz), mH(H), mL(L), mEstimator(ncelly,ncellz)
+mNcelly(ncelly), mNcellz(ncellz), mH(H), mL(L), mEstimator(ncelly,ncellz)
 {}
 
 void Estimator::Print(std::ofstream& f, bool binary) const
@@ -30,12 +30,12 @@ void BoxEstimator::Estimate(const Particles2D& particles)
 {
 	int i, j;
 	int N = particles.mN;
-	double dy = mL/mNboxy;
-	double dz = mH/mNboxz;
+	double dy = mL/mNcelly;
+	double dz = mH/mNcellz;
 	for (int n=0; n<N; n++)
 	{
-		i = std::min(int(particles.mY[n]/dy),mNboxy-1);
-		j = std::min(int(particles.mZ[n]/dz),mNboxz-1);
+		i = std::min(int(particles.mY[n]/dy),mNcelly-1);
+		j = std::min(int(particles.mZ[n]/dz),mNcellz-1);
 		mEstimator(i,j) += 1.;
 	}
 	mEstimator /= N;

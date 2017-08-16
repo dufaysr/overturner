@@ -1,3 +1,10 @@
+/*
+  Matrix.cpp
+  "sde2D"
+
+  Created by Renaud Dufays on 04/04/17
+  Copyright © 2017. All rights reserved.
+*/
 #include "Matrix.hpp"
 
 // Overwritten copy constructor

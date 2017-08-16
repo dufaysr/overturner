@@ -1,3 +1,11 @@
+/*
+  Structures.cpp
+  "sde2D"
+
+  Created by Renaud Dufays.
+  Copyright © 2017. All rights reserved.
+*/
+
 #include "Structures.hpp"
 
 /* LOWERTRIMATRIX */

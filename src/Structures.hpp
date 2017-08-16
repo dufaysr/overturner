@@ -1,14 +1,26 @@
+/*
+  Structures.hpp
+  "sde2D"
+
+  Created by Renaud Dufays.
+  Copyright © 2017. All rights reserved.
+*/
+
 #ifndef STRUCTURES_HEADER_DEF
 #define STRUCTURES_HEADER_DEF
 
 #include <cassert>
+
+/*
+  Auxiliary structures used in AdvDiffProblem.hpp
+*/
 
 class LowerTriMatrix
 {
 	private:
   		double x[3];
   		// Matrix = | x[0]  0   |
-  		// 			| x[1] x[2] |
+  		//          | x[1] x[2] |
 	public:
       LowerTriMatrix();
   		LowerTriMatrix(double a, double b, double c);
@@ -21,15 +33,14 @@ class SymMatrix
 	private:
   		double x[3];
   		// Matrix = | x[0] x[1] |
-  		// 			| x[1] x[2] |
- 
+  		//          | x[1] x[2] |
+
 	public:
       SymMatrix();
   		SymMatrix(double a, double b, double c);
   		double& operator()(int i, int j);
   		SymMatrix& operator=(const SymMatrix& sm);
 };
-
 SymMatrix operator*(double a, SymMatrix sm);
 
 class Vec2

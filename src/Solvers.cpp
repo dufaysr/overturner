@@ -1,6 +1,6 @@
 /*
   Solvers.cpp
-  "overturner"
+  "sde2D"
 
   Created by Renaud Dufays on 17/03/17.
   Copyright © 2017. All rights reserved.
@@ -131,34 +131,6 @@ void Solver::TestWiener()
     	std::cout << std::setw(4) << i-double(width)/2 << " -> " << std::setw(4) << (i+1)-double(width)/2 << ": ";
     	std::cout << std::string(p[i]*nstars/nrolls,'*') << std::endl;
   	}
-}
-
-/*----------------- Derived class from Solver : EMSolver -----------------------*/
-/*--- /!\ Does not take the derivative of the diffusivities (i.e. the gradient dirft term) into account /!\ ---*/
-
-EMSolver::EMSolver(const Particles2D& particles, double dt):
-	Solver(particles,dt)
-{}
-
-void EMSolver::UpdatePosition(const AbstractAdvDiffProblem& prob)
-{
-	// construct a trivial random generator engine from a time-based seed:
-	LowerTriMatrix B;
-	Vec2 U;
-	double sqrt_dt = sqrt(mdt);
-	double R1, R2;
-	for (int i=0; i<mParticles.mN; i++)
-	{
-		B = prob.getB(mParticles.mY[i],mParticles.mZ[i]);
-		U = prob.getU(mParticles.mY[i],mParticles.mZ[i]);
-
-		R1 = wiener(generator);
-		R2 = wiener(generator);
-
-		mParticles.mY[i] += U(1)*mdt + B(1,1)*sqrt_dt*R1;
-		mParticles.mZ[i] += U(2)*mdt + B(2,1)*sqrt_dt*R1 + B(2,2)*sqrt_dt*R2;
-	}
-	mParticles.mTime += mdt;
 }
 
 /*----------- Derived class from Solver : Backward Ito (BI) Solver ------------------*/

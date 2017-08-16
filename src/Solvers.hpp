@@ -1,6 +1,6 @@
 /*
   Solvers.hpp
-  "overturner"
+  "sde2D"
 
   Created by Renaud Dufays on 17/03/17.
   Copyright © 2017. All rights reserved.
@@ -37,15 +37,7 @@ class Solver
 		void DisplayParticles() const;
 		void PrintParticles(std::ofstream& fT, std::ofstream& fY, std::ofstream& fZ) const;
 		void PrintParticlesBinary(std::ofstream& fT, std::ofstream& fY, std::ofstream& fZ) const;
-		void TestWiener();
-};
-
-/*--------------Derived class from Solver : Euler-Maruyama (EM) solver-----------*/
-class EMSolver : public Solver
-{
-	public:
-		EMSolver(const Particles2D& particles, double dt);
-		void UpdatePosition(const AbstractAdvDiffProblem& prob);
+		void TestWiener(); // auxilliary function, test the wiener process
 };
 
 /*--------------Derived class from Solver : Backward Ito (BI) solver-----------*/

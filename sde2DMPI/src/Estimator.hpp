@@ -16,7 +16,7 @@
 class Estimator
 {
 	protected:
-		int mNboxy, mNboxz;
+		int mNcelly, mNcellz;
 		double mH, mL;
 		Matrix mEstimator;
 

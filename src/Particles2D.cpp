@@ -1,6 +1,6 @@
 /*
   Particles2D.cpp
-  "overturner"
+  "sde2D"
 
   Created by Renaud Dufays on 17/03/17.
   Copyright © 2017. All rights reserved.
@@ -39,10 +39,6 @@ mN(N), mTime(0.)
 Particles2D::Particles2D(int Nloc, double* yStart, double* zStart, int n):
 mN(Nloc*n), mTime(0.)
 {
-	/*
-		Nloc particles at every couple (yStart[i], zStart[i]).
-		n is the length of yStart and zStart.
-	*/
 	mY = new double [mN];
 	mZ = new double [mN];
 	for (int i=0; i<n; i++)
@@ -58,10 +54,6 @@ mN(Nloc*n), mTime(0.)
 Particles2D::Particles2D(int Nloc, double* yStart, double* zStart, int ny, int nz):
 mN(Nloc*ny*nz), mTime(0.)
 {
-	/*
-		Nloc particles at every couple (yStart[i], zStart[j]).
-		ny is the length of yStart and nz is the length of zStart.
-	*/
 	mY = new double [mN];
 	mZ = new double [mN];
 	for (int iy=0; iy<ny; iy++)
@@ -80,9 +72,7 @@ mN(Nloc*ny*nz), mTime(0.)
 Particles2D::Particles2D(const Particles2D& otherParticles):
 mN(otherParticles.mN), mTime(otherParticles.mTime)
 {
-	/*
-		Copy constructor
-	*/
+	// Copy constructor
 	mY = new double[mN];
 	mZ = new double[mN];
 	for (int i=0; i<mN; i++)
@@ -94,9 +84,7 @@ mN(otherParticles.mN), mTime(otherParticles.mTime)
 
 Particles2D::~Particles2D()
 {
-	/*
-		Destructor
-	*/
+	// Destructor
 	delete[] mY;
 	delete[] mZ;
 }

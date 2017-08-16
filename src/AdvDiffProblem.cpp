@@ -50,137 +50,6 @@ void AbstractAdvDiffProblem::printInfo(std::ofstream& f) const
 }
 
 /*
-	OverturnerProblem
-*/
-// Default case is using the values from C. Timmermans's master thesis
-OverturnerProblem::OverturnerProblem():
-	AbstractAdvDiffProblem(0.,5e3,0.,15e6),
-	my0(13e6),
-	mz0(4000.),
-	mKh(1e3),
-	mKv1(1e-1), mKv2(1e-4), mKv3(1e-3),
-	mPsi(2.)
-{}
-
-OverturnerProblem::OverturnerProblem(std::string model):
-	AbstractAdvDiffProblem(0.,0.,0.,0.)
-{
-	// Read file
-	std::string filename = wd::root + "in/" + model + ".in";
-    std::ifstream iniFile(filename.c_str(), std::ios::in);
-    if(iniFile)
-    {
-        std::string content, tmp, value;
-        double val;
-        while(std::getline(iniFile, content,' '))
-        {
-            if (content[0] == '#')
-                std::getline(iniFile,tmp);
-            else
-            {
-                std::transform(content.begin(), content.end(), content.begin(), ::tolower);
-                std::getline(iniFile,tmp,' ');
-                std::getline(iniFile, value);
-                val = parseMathExpr(value, mH1, mL1);
-                if (content == "kh"){
-                    mKh = val;
-                }
-                else if (content == "kv1"){
-                    mKv1 = val;
-                }
-                else if (content == "kv2"){
-                    mKv2 = val;
-                }
-                else if (content == "kv3"){
-                    mKv3 = val;
-                }
-                else if (content == "h"){
-                    mH1 = val;
-                }
-                else if (content == "l"){
-                    mL1 = val;
-                }
-                else if (content == "y0"){
-                    my0 = val;
-                }
-                else if (content == "z0"){
-                    mz0 = val;
-                }
-                else if (content == "psi"){
-                    mPsi = val;
-                }
-                else if (content[0] != '#'){ // # is used to comment a line in inifile
-                	std::cout << "INFO : Ignoring content \"" << content 
-                		<< "\" in constructor of OverturnerProblem" << std::endl;
-                }
-            }
-        }
-        iniFile.close();
-    }
-    else
-    {
-        std::cerr << "Unable to open ini file \"" << filename << "\" !" << std::endl;
-        abort();
-    }
-}
-
-SymMatrix OverturnerProblem::getK(double y, double z) const
-{
-    int ChiDomain = (y >= mL0 && y <= mL1 && z >= mH0 && z <= mH1);
-	int ChiZ = (z < mz0);
-    int ChiY = (y < my0);
-    SymMatrix K(ChiDomain*mKh,0,ChiDomain*((1-ChiY)*mKv1 + ChiY*ChiZ*mKv2 + ChiY*(1-ChiZ)*mKv3));
-
-    return K;
-}
-	
-LowerTriMatrix OverturnerProblem::getB(double y, double z) const
-{
-    SymMatrix D = 2*getK(y,z);
-    LowerTriMatrix B(sqrt(D(1,1)),0,sqrt(D(2,2)));
-
-    return B;
-}
-
-Vec2 OverturnerProblem::getU(double y, double z) const
-{
-	int ChiDomain = (y >= mL0 && y <= mL1 && z >= mH0 && z <= mH1);
-    Vec2 U(ChiDomain*mPsi*v(y,my0,z,mz0,mL1,mH1), ChiDomain*mPsi*w(y,my0,z,mz0,mL1,mH1));
-	return U;
-}
-
-void OverturnerProblem::printInfo(std::ofstream& f) const
-{
-    f << "H0 = " << mH0 << "\n";
-    f << "H1 = " << mH1 << "\n";
-    f << "L0 = " << mL0 << "\n";
-    f << "L1 = " << mL1 << "\n";
-    f << "y0 = " << my0 << "\n";
-    f << "z0 = " << mz0 << "\n";
-    f << "Kh = " << mKh << "\n";
-    f << "Kv1 = " << mKv1 << "\n";
-    f << "Kv2 = " << mKv2 << "\n";
-    f << "Kv3 = " << mKv3 << "\n";
-    f << "Psi = " << mPsi << "\n";
-}
-
-void OverturnerProblem::Display() const
-{
-	using namespace std;
-	cout << "mH0 = " << getH0() << endl;
-	cout << "mH1 = " << getH1() << endl;
-	cout << "mL0 = " << getL0() << endl;
-	cout << "mL1 = " << getL1() << endl;
-	cout << "my0 = " << my0 << endl;
-	cout << "mz0 = " << mz0 << endl;
-	cout << "mKh = " << mKh << endl;
-	cout << "mKv1 = " << mKv1 << endl;
-	cout << "mKv2 = " << mKv2 << endl;
-	cout << "mKv3 = " << mKv3 << endl;
-	cout << "mPsi = " << mPsi << endl;
-}
-
-/*
     TestProblem
 */
 TestProblem::TestProblem(double Ly, double Lz, double Kyy, double Kzz, double V, double W, int J, std::string domain):
@@ -307,6 +176,138 @@ void Problem2Box::printInfo(std::ofstream& f) const
     f << "Khp = " << mKhp << "\n";
     f << "Kv = " << mKv << "\n";
     f << "Psi = " << mPsi << "\n";
+}
+
+
+/*
+    OverturnerProblem
+*/
+// Default case is using the values from C. Timmermans's master thesis
+OverturnerProblem::OverturnerProblem():
+    AbstractAdvDiffProblem(0.,5e3,0.,15e6),
+    my0(13e6),
+    mz0(4000.),
+    mKh(1e3),
+    mKv1(1e-1), mKv2(1e-4), mKv3(1e-3),
+    mPsi(2.)
+{}
+
+OverturnerProblem::OverturnerProblem(std::string model):
+    AbstractAdvDiffProblem(0.,0.,0.,0.)
+{
+    // Read file
+    std::string filename = wd::root + "in/" + model + ".in";
+    std::ifstream iniFile(filename.c_str(), std::ios::in);
+    if(iniFile)
+    {
+        std::string content, tmp, value;
+        double val;
+        while(std::getline(iniFile, content,' '))
+        {
+            if (content[0] == '#')
+                std::getline(iniFile,tmp);
+            else
+            {
+                std::transform(content.begin(), content.end(), content.begin(), ::tolower);
+                std::getline(iniFile,tmp,' ');
+                std::getline(iniFile, value);
+                val = parseMathExpr(value, mH1, mL1);
+                if (content == "kh"){
+                    mKh = val;
+                }
+                else if (content == "kv1"){
+                    mKv1 = val;
+                }
+                else if (content == "kv2"){
+                    mKv2 = val;
+                }
+                else if (content == "kv3"){
+                    mKv3 = val;
+                }
+                else if (content == "h"){
+                    mH1 = val;
+                }
+                else if (content == "l"){
+                    mL1 = val;
+                }
+                else if (content == "y0"){
+                    my0 = val;
+                }
+                else if (content == "z0"){
+                    mz0 = val;
+                }
+                else if (content == "psi"){
+                    mPsi = val;
+                }
+                else if (content[0] != '#'){ // # is used to comment a line in inifile
+                    std::cout << "INFO : Ignoring content \"" << content 
+                        << "\" in constructor of OverturnerProblem" << std::endl;
+                }
+            }
+        }
+        iniFile.close();
+    }
+    else
+    {
+        std::cerr << "Unable to open ini file \"" << filename << "\" !" << std::endl;
+        abort();
+    }
+}
+
+SymMatrix OverturnerProblem::getK(double y, double z) const
+{
+    int ChiDomain = (y >= mL0 && y <= mL1 && z >= mH0 && z <= mH1);
+    int ChiZ = (z < mz0);
+    int ChiY = (y < my0);
+    SymMatrix K(ChiDomain*mKh,0,ChiDomain*((1-ChiY)*mKv1 + ChiY*ChiZ*mKv2 + ChiY*(1-ChiZ)*mKv3));
+
+    return K;
+}
+    
+LowerTriMatrix OverturnerProblem::getB(double y, double z) const
+{
+    SymMatrix D = 2*getK(y,z);
+    LowerTriMatrix B(sqrt(D(1,1)),0,sqrt(D(2,2)));
+
+    return B;
+}
+
+Vec2 OverturnerProblem::getU(double y, double z) const
+{
+    int ChiDomain = (y >= mL0 && y <= mL1 && z >= mH0 && z <= mH1);
+    Vec2 U(ChiDomain*mPsi*v(y,my0,z,mz0,mL1,mH1), ChiDomain*mPsi*w(y,my0,z,mz0,mL1,mH1));
+    return U;
+}
+
+void OverturnerProblem::printInfo(std::ofstream& f) const
+{
+    f << "H0 = " << mH0 << "\n";
+    f << "H1 = " << mH1 << "\n";
+    f << "L0 = " << mL0 << "\n";
+    f << "L1 = " << mL1 << "\n";
+    f << "y0 = " << my0 << "\n";
+    f << "z0 = " << mz0 << "\n";
+    f << "Kh = " << mKh << "\n";
+    f << "Kv1 = " << mKv1 << "\n";
+    f << "Kv2 = " << mKv2 << "\n";
+    f << "Kv3 = " << mKv3 << "\n";
+    f << "Psi = " << mPsi << "\n";
+}
+
+void OverturnerProblem::Display() const
+{
+    using namespace std;
+    cout << "mH0 = " << getH0() << endl;
+    cout << "mH1 = " << getH1() << endl;
+    cout << "mL0 = " << getL0() << endl;
+    cout << "mL1 = " << getL1() << endl;
+    cout << "my0 = " << my0 << endl;
+    cout << "mz0 = " << mz0 << endl;
+    cout << "mKh = " << mKh << endl;
+    cout << "mKv1 = " << mKv1 << endl;
+    cout << "mKv2 = " << mKv2 << endl;
+    cout << "mKv3 = " << mKv3 << endl;
+    cout << "mPsi = " << mPsi << endl;
 }
 
 /* Other utility functions */

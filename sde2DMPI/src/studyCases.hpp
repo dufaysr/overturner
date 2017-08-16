@@ -15,5 +15,5 @@
 #include "workingdirectory.hpp"
 
 void StudyCaseTransitionProbabilitiesMPI(const AbstractAdvDiffProblem& prob, std::string model,
-									  int nboxy, int nboxz, int nyloc, int nzloc, 
+									  int ncelly, int ncellz, int nyloc, int nzloc, 
 									  double Times[], int nTimes, bool binary);

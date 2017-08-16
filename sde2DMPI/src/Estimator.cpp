@@ -8,8 +8,8 @@
 
 #include "Estimator.hpp"
 
-Estimator::Estimator(int nboxy, int nboxz, double H, double L):
-mNboxy(nboxy), mNboxz(nboxz), mH(H), mL(L), mEstimator(nboxy,nboxz)
+Estimator::Estimator(int ncelly, int ncellz, double H, double L):
+mNboxy(ncelly), mNboxz(ncellz), mH(H), mL(L), mEstimator(ncelly,ncellz)
 {}
 
 void Estimator::Print(std::ofstream& f, bool binary) const
@@ -22,8 +22,8 @@ void Estimator::Print(std::ofstream& f, bool binary) const
     f.close();
 }
 
-BoxEstimator::BoxEstimator(int nboxy, int nboxz, double H, double L):
-Estimator(nboxy,nboxz,H,L)
+BoxEstimator::BoxEstimator(int ncelly, int ncellz, double H, double L):
+Estimator(ncelly,ncellz,H,L)
 {}
 
 void BoxEstimator::Estimate(const Particles2D& particles)

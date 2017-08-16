@@ -8,8 +8,8 @@
 
 #include "Estimator.hpp"
 
-Estimator::Estimator(int nboxy, int nboxz, double H, double L):
-mNboxy(nboxy), mNboxz(nboxz), mH(H), mL(L), mEstimator(nboxy,nboxz)
+Estimator::Estimator(int ncelly, int ncellz, double H, double L):
+mNboxy(ncelly), mNboxz(ncellz), mH(H), mL(L), mEstimator(ncelly,ncellz)
 {}
 
 void Estimator::Print(std::string filename, bool binary) const
@@ -35,8 +35,8 @@ void Estimator::Print(std::ofstream& f, bool binary) const
     f.close();
 }
 
-KernelEstimator::KernelEstimator(int nboxy, int nboxz, double H, double L, double lambda, std::string kernelFunction):
-Estimator(nboxy,nboxz,H,L), mLambda(lambda)
+KernelEstimator::KernelEstimator(int ncelly, int ncellz, double H, double L, double lambda, std::string kernelFunction):
+Estimator(ncelly,ncellz,H,L), mLambda(lambda)
 {
 	transform(kernelFunction.begin(), kernelFunction.end(), kernelFunction.begin(), ::tolower);
 	if (kernelFunction == "gaussian")
@@ -54,8 +54,8 @@ Estimator(nboxy,nboxz,H,L), mLambda(lambda)
 	}
 }
 
-KernelEstimator::KernelEstimator(int nboxy, int nboxz, double H, double L, double lambda, double (*kernelFunction)(double y, double z)):
-Estimator(nboxy, nboxz,H,L), mLambda(lambda), mKernel(kernelFunction)
+KernelEstimator::KernelEstimator(int ncelly, int ncellz, double H, double L, double lambda, double (*kernelFunction)(double y, double z)):
+Estimator(ncelly, ncellz,H,L), mLambda(lambda), mKernel(kernelFunction)
 {}
 
 void KernelEstimator::Estimate(const Particles2D& particles)
@@ -76,8 +76,8 @@ void KernelEstimator::Estimate(const Particles2D& particles)
 	}
 }
 
-BoxEstimator::BoxEstimator(int nboxy, int nboxz, double H0, double H, double L0, double L):
-Estimator(nboxy,nboxz,H,L),
+BoxEstimator::BoxEstimator(int ncelly, int ncellz, double H0, double H, double L0, double L):
+Estimator(ncelly,ncellz,H,L),
 mH0(H0),
 mL0(L0)
 {}
@@ -97,8 +97,8 @@ void BoxEstimator::Estimate(const Particles2D& particles)
 	mEstimator /= N;
 }
 
-TPMatrixEstimator::TPMatrixEstimator(int nboxy, int nboxz, double H, double L, int Nloc):
-mNboxy(nboxy), mNboxz(nboxz), mNloc(Nloc), mH(H), mL(L), mEstimator(nboxy*nboxz, nboxy*nboxz)
+TPMatrixEstimator::TPMatrixEstimator(int ncelly, int ncellz, double H, double L, int Nloc):
+mNboxy(ncelly), mNboxz(ncellz), mNloc(Nloc), mH(H), mL(L), mEstimator(ncelly*ncellz, ncelly*ncellz)
 {} 
 
 void TPMatrixEstimator::Print(std::string filename, bool binary) const
@@ -113,8 +113,8 @@ void TPMatrixEstimator::Print(std::string filename, bool binary) const
     f.close();
 }
 
-TPMatrixKernelEstimator::TPMatrixKernelEstimator(int nboxy, int nboxz, double H, double L, int Nloc, double lambda, std::string kernelFunction):
-TPMatrixEstimator(nboxy,nboxz,H,L,Nloc), mLambda(lambda)
+TPMatrixKernelEstimator::TPMatrixKernelEstimator(int ncelly, int ncellz, double H, double L, int Nloc, double lambda, std::string kernelFunction):
+TPMatrixEstimator(ncelly,ncellz,H,L,Nloc), mLambda(lambda)
 {
 	transform(kernelFunction.begin(), kernelFunction.end(), kernelFunction.begin(), ::tolower);
 	if (kernelFunction == "gaussian")
@@ -132,8 +132,8 @@ TPMatrixEstimator(nboxy,nboxz,H,L,Nloc), mLambda(lambda)
 	}
 }
 
-TPMatrixKernelEstimator::TPMatrixKernelEstimator(int nboxy, int nboxz, double H, double L, int Nloc, double lambda, double (*kernelFunction)(double y, double z)):
-TPMatrixEstimator(nboxy, nboxz, H, L, Nloc), mLambda(lambda), mKernel(kernelFunction)
+TPMatrixKernelEstimator::TPMatrixKernelEstimator(int ncelly, int ncellz, double H, double L, int Nloc, double lambda, double (*kernelFunction)(double y, double z)):
+TPMatrixEstimator(ncelly, ncellz, H, L, Nloc), mLambda(lambda), mKernel(kernelFunction)
 {}
 
 void TPMatrixKernelEstimator::Estimate(const Particles2D& particles)
@@ -162,8 +162,8 @@ void TPMatrixKernelEstimator::Estimate(const Particles2D& particles)
 	}
 }
 
-TPMatrixBoxEstimator::TPMatrixBoxEstimator(int nboxy, int nboxz, double H0, double H, double L0, double L, int Nloc):
-	TPMatrixEstimator(nboxy,nboxz,H,L,Nloc),
+TPMatrixBoxEstimator::TPMatrixBoxEstimator(int ncelly, int ncellz, double H0, double H, double L0, double L, int Nloc):
+	TPMatrixEstimator(ncelly,ncellz,H,L,Nloc),
 	mH0(H0), 
 	mL0(L0)
 {}
@@ -195,17 +195,17 @@ Matrix TPMatrixBoxEstimator::Count(const Particles2D& particles)
 }
 
 
-TPMatrixBoxEstimatorP2B::TPMatrixBoxEstimatorP2B(int nboxy, int nboxz, double H0, double H, double L0, double L, int Nloc):
-	TPMatrixBoxEstimator(nboxy,nboxz,H0,H,L0,L,Nloc)
+TPMatrixBoxEstimatorP2B::TPMatrixBoxEstimatorP2B(int ncelly, int ncellz, double H0, double H, double L0, double L, int Nloc):
+	TPMatrixBoxEstimator(ncelly,ncellz,H0,H,L0,L,Nloc)
 {}
 
 Matrix TPMatrixBoxEstimatorP2B::Count(const Particles2D& particles)
 {
 	int iyStart, izStart, iyEnd, izEnd;
-	int nboxy_left = mNboxy/2;
+	int ncelly_left = mNboxy/2;
 	double dy = mL/mNboxy;
 	double dz = mH/mNboxz;
-	for (iyStart=0; iyStart<nboxy_left; iyStart++){
+	for (iyStart=0; iyStart<ncelly_left; iyStart++){
 		for (izStart=0; izStart<mNboxz; izStart++){
 			for (int n=0; n<mNloc; n++){
 				iyEnd = std::min(int((particles.mY[iyStart*mNboxz*mNloc+izStart*mNloc+n]-mL0)/dy),mNboxy-1);
@@ -215,7 +215,7 @@ Matrix TPMatrixBoxEstimatorP2B::Count(const Particles2D& particles)
 		}
 	}
 	int iystartmap, iyendmap;
-	for (iyStart=nboxy_left; iyStart<mNboxy; iyStart++){
+	for (iyStart=ncelly_left; iyStart<mNboxy; iyStart++){
 		for (izStart=0; izStart<mNboxz; izStart++){
 			for (iyEnd=0; iyEnd<mNboxy; iyEnd++){
 				for (izEnd=0; izEnd<mNboxz; izEnd++){

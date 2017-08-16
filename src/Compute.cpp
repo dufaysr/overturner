@@ -1,6 +1,6 @@
 /*
   studyCases.cpp
-  "overturner"
+  "sde2D"
 
   Created by Renaud Dufays on 07/04/17
   Copyright © 2017. All rights reserved.
@@ -8,7 +8,7 @@
 
 #include "Compute.hpp"
 
-void ComputeTrajectories(const AbstractAdvDiffProblem& prob, std::string outputdir, double dt, double T, int Nloc, double yStart, double zStart)
+void ComputeTrajectories(const AbstractAdvDiffProblem& prob, std::string outputdir, double dt, double T, Particles2D& part)
 {
 	std::cout << "\nRunning ComputeTrajectories..." << std::endl;
 	
@@ -20,21 +20,18 @@ void ComputeTrajectories(const AbstractAdvDiffProblem& prob, std::string outputd
     fInfo << "ComputeTrajectories\n";
     fInfo << "The values used are :\n";
     prob.printInfo(fInfo);
-    fInfo << "Nloc = " << Nloc << "\n";
-    fInfo << "yStart = " << yStart << "\n";
-    fInfo << "zStart = " << zStart << "\n";
+    fInfo << "Nloc = " << part.mN << "\n";
     fInfo.close();
     std::cout << "fInfo written succesfully !" << std::endl;
 
 	std::cout << "Generating (and writing) trajectories..." << std::endl;
-	Particles2D part(Nloc, yStart, zStart);
 	BISolver solver(part,dt);
 	part = solver.Run(prob, T, outputdir);
 	std::cout << "\nComputeTrajectories runned successfully." << std::endl;
 }
 
 void ComputeConcentration(const AbstractAdvDiffProblem &prob, std::string outputdir, double dt, double Times[],
-						int nTimes, Particles2D& part, int nboxy, int nboxz, bool binary, std::string estimator)
+						int nTimes, Particles2D& part, int ncelly, int ncellz, bool binary)
 {
 	std::cout << "\nRunning ComputeConcentration..." << std::endl;
 	
@@ -46,25 +43,14 @@ void ComputeConcentration(const AbstractAdvDiffProblem &prob, std::string output
     fInfo << "ComputeTrajectories\n";
     fInfo << "The values used are :\n";
     prob.printInfo(fInfo);
-    fInfo << "nboxy = " << nboxy << "\n";
-    fInfo << "nboxz = " << nboxz << "\n";
+    fInfo << "ncelly = " << ncelly << "\n";
+    fInfo << "ncellz = " << ncellz << "\n";
     fInfo.close();
 
 	// Estimator
-	Estimator *estim;
 	double H = prob.getH1()-prob.getH0();
 	double L = prob.getL1()-prob.getL0();
-	transform(estimator.begin(), estimator.end(), estimator.begin(), ::tolower);
-	if (estimator == "box")
-		estim = new BoxEstimator(nboxy,nboxz,prob.getH0(),H,prob.getL0(),L);
-	else if(estimator == "epanechnikov")
-		estim = new KernelEstimator(nboxy,nboxz,H,L,.1*pow(part.mN,-1./6.),"Epanechnikov");
-	else if (estimator == "gaussian")
-		estim = new KernelEstimator(nboxy,nboxz,H,L,.1*pow(part.mN,-1./6.),"Gaussian");
-	else{
-		std::cerr << "Unknown estimator type. Valid estimators are \"epanechnikov\", \"gaussian\" and \"box\"." << std::endl;
-		abort();
-	}
+	Estimator *estim = new BoxEstimator(ncelly,ncellz,prob.getH0(),H,prob.getL0(),L);
 	// Solver
 	BISolver *solver;
 	// timing
@@ -98,7 +84,7 @@ void ComputeConcentration(const AbstractAdvDiffProblem &prob, std::string output
 
 		std::cout << "3/3 : Writing in the files..." << std::endl;
 		t = clock();
-		estim->Print(wd::root + "out/" + outputdir + "/C" + estimator + std::to_string(Tyear) + ".out",binary);
+		estim->Print(wd::root + "out/" + outputdir + "/C" + std::to_string(Tyear) + ".out",binary);
 		tot_seconds = double(clock()-t)/(double)CLOCKS_PER_SEC;
 		minutes = floor(tot_seconds/60);
 		std::cout << "Finished in " << minutes << " min " << tot_seconds - minutes*60 << " seconds." << std::endl;
@@ -112,8 +98,8 @@ void ComputeConcentration(const AbstractAdvDiffProblem &prob, std::string output
 }
 
 void ComputeTransitionProbabilities(const AbstractAdvDiffProblem& prob, std::string outputdir,
-									  int nboxy, int nboxz, int nyloc, int nzloc, double dt, 
-									  double Times[], int nTimes, bool binary, std::string estimator)
+									  int ncelly, int ncellz, int nyloc, int nzloc, double dt, 
+									  double Times[], int nTimes, bool binary)
 {
 	std::cout << "\nRunning ComputeTransitionProbabilities..." << std::endl;
 	
@@ -127,28 +113,28 @@ void ComputeTransitionProbabilities(const AbstractAdvDiffProblem& prob, std::str
     prob.printInfo(fInfo);
     fInfo << "nyloc = " << nyloc << "\n";
     fInfo << "nzloc = " << nzloc << "\n";
-    fInfo << "nboxy = " << nboxy << "\n";
-    fInfo << "nboxz = " << nboxz << "\n";
+    fInfo << "ncelly = " << ncelly << "\n";
+    fInfo << "ncellz = " << ncellz << "\n";
     fInfo.close();
 	
     std::cout << "Generating the initial conditions..." << std::endl;
-	int N = nyloc*nboxy*nzloc*nboxz;
+	int N = nyloc*ncelly*nzloc*ncellz;
 	int Nloc = nyloc*nzloc;
 	double H = prob.getH1()-prob.getH0();
 	double L = prob.getL1()-prob.getL0();
 	double *yStart = new double [N];
 	double *zStart = new double [N];
-	double dy = L/nboxy;
-	double dz = H/nboxz;
+	double dy = L/ncelly;
+	double dz = H/ncellz;
 	double dybox = dy/nyloc;
 	double dzbox = dz/nzloc;
 
-	for (int iy=0; iy<nboxy; iy++){
-		for (int iz=0; iz<nboxz; iz++){
+	for (int iy=0; iy<ncelly; iy++){
+		for (int iz=0; iz<ncellz; iz++){
 			for (int iybox=0; iybox<nyloc; iybox++){
 				for (int izbox=0; izbox<nzloc; izbox++){
-					yStart[iy*nboxz*Nloc+iz*Nloc+iybox*nzloc+izbox] = prob.getL0() + iy*dy + (iybox+.5)*dybox;
-					zStart[iy*nboxz*Nloc+iz*Nloc+iybox*nzloc+izbox] = prob.getH0() + iz*dz + (izbox+.5)*dzbox;
+					yStart[iy*ncellz*Nloc+iz*Nloc+iybox*nzloc+izbox] = prob.getL0() + iy*dy + (iybox+.5)*dybox;
+					zStart[iy*ncellz*Nloc+iz*Nloc+iybox*nzloc+izbox] = prob.getH0() + iz*dz + (izbox+.5)*dzbox;
 				}
 			}
 		}
@@ -157,18 +143,7 @@ void ComputeTransitionProbabilities(const AbstractAdvDiffProblem& prob, std::str
 	Particles2D part(N,yStart,zStart);
 	delete[] yStart; delete[] zStart;
 	// Estimator
-    TPMatrixEstimator *estim;
-	transform(estimator.begin(), estimator.end(), estimator.begin(), ::tolower);
-	if (estimator == "box")
-		estim = new TPMatrixBoxEstimator(nboxy,nboxz,prob.getH0(),H,prob.getL0(),L,Nloc);
-	else if(estimator == "epanechnikov")
-		estim = new TPMatrixKernelEstimator(nboxy,nboxz,H,L,Nloc,.1*pow(Nloc,-1./6.),"Epanechnikov");
-	else if (estimator == "gaussian")
-		estim = new TPMatrixKernelEstimator(nboxy,nboxz,H,L,Nloc,.1*pow(Nloc,-1./6.),"Gaussian");
-	else{
-		std::cerr << "Unknown estimator type. Valid estimators are \"epanechnikov\", \"gaussian\" and \"box\"." << std::endl;
-		abort();
-	}
+    TPMatrixEstimator *estim = new TPMatrixBoxEstimator(ncelly,ncellz,prob.getH0(),H,prob.getL0(),L,Nloc);
 	// Solver
 	BISolver *solver;
 	// timing
@@ -216,7 +191,7 @@ void ComputeTransitionProbabilities(const AbstractAdvDiffProblem& prob, std::str
 }
 
 void ComputeP2BTransitionProbabilities(const Problem2Box& prob, std::string outputdir,
-									  int nboxy, int nboxz, int nyloc, int nzloc, double dt, 
+									  int ncelly, int ncellz, int nyloc, int nzloc, double dt, 
 									  double Times[], int nTimes, bool binary)
 {
 	/* 
@@ -236,29 +211,29 @@ void ComputeP2BTransitionProbabilities(const Problem2Box& prob, std::string outp
     prob.printInfo(fInfo);
     fInfo << "nyloc = " << nyloc << "\n";
     fInfo << "nzloc = " << nzloc << "\n";
-    fInfo << "nboxy = " << nboxy << "\n";
-    fInfo << "nboxz = " << nboxz << "\n";
+    fInfo << "ncelly = " << ncelly << "\n";
+    fInfo << "ncellz = " << ncellz << "\n";
     fInfo.close();
 	
     std::cout << "Generating the initial conditions..." << std::endl;
-    int nboxy_left = nboxy/2;
-	int N = nyloc*nboxy_left*nzloc*nboxz; // we simulate only the trajectories of the particles starting in Omega- 
+    int ncelly_left = ncelly/2;
+	int N = nyloc*ncelly_left*nzloc*ncellz; // we simulate only the trajectories of the particles starting in Omega- 
 	int Nloc = nyloc*nzloc;
 	double H = prob.getH1()-prob.getH0();
 	double L = prob.getL1()-prob.getL0();
 	double *yStart = new double [N];
 	double *zStart = new double [N];
-	double dy = L/nboxy;
-	double dz = H/nboxz;
+	double dy = L/ncelly;
+	double dz = H/ncellz;
 	double dybox = dy/nyloc;
 	double dzbox = dz/nzloc;
 
-	for (int iy=0; iy<nboxy_left; iy++){
-		for (int iz=0; iz<nboxz; iz++){
+	for (int iy=0; iy<ncelly_left; iy++){
+		for (int iz=0; iz<ncellz; iz++){
 			for (int iybox=0; iybox<nyloc; iybox++){
 				for (int izbox=0; izbox<nzloc; izbox++){
-					yStart[iy*nboxz*Nloc+iz*Nloc+iybox*nzloc+izbox] = prob.getL0() + iy*dy + (iybox+.5)*dybox;
-					zStart[iy*nboxz*Nloc+iz*Nloc+iybox*nzloc+izbox] = prob.getH0() + iz*dz + (izbox+.5)*dzbox;
+					yStart[iy*ncellz*Nloc+iz*Nloc+iybox*nzloc+izbox] = prob.getL0() + iy*dy + (iybox+.5)*dybox;
+					zStart[iy*ncellz*Nloc+iz*Nloc+iybox*nzloc+izbox] = prob.getH0() + iz*dz + (izbox+.5)*dzbox;
 				}
 			}
 		}
@@ -267,7 +242,7 @@ void ComputeP2BTransitionProbabilities(const Problem2Box& prob, std::string outp
 	Particles2D part(N,yStart,zStart);
 	delete[] yStart; delete[] zStart;
 	// Estimator
-    TPMatrixBoxEstimatorP2B estim(nboxy,nboxz,prob.getH0(),H,prob.getL0(),L,Nloc);
+    TPMatrixBoxEstimatorP2B estim(ncelly,ncellz,prob.getH0(),H,prob.getL0(),L,Nloc);
 	// Solver
 	BISolver *solver;
 	// timing

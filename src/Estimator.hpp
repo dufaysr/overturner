@@ -1,6 +1,6 @@
 /*
   KernelEstimator.hpp
-  "overturner"
+  "sde2D"
 
   Created by Renaud Dufays on 04/04/17
   Copyright © 2017. All rights reserved.
@@ -24,7 +24,7 @@ class Estimator
 		Matrix mEstimator;
 
 	public:
-		Estimator(int nboxy, int nboxz, double H, double L);
+		Estimator(int ncelly, int ncellz, double H, double L);
 		virtual ~Estimator() {}
 		virtual void Estimate(const Particles2D& particles) =0;
 		void Print(std::string filename, bool binary=false) const;
@@ -38,8 +38,8 @@ class KernelEstimator : public Estimator
 		double (*mKernel)(double y, double z);
 
 	public:
-		KernelEstimator(int nboxy, int nboxz, double H, double L, double lambda, std::string kernelFunction);
-		KernelEstimator(int nboxy, int nboxz, double H, double L, double lambda, double (*kernelFunction)(double y, double z));
+		KernelEstimator(int ncelly, int ncellz, double H, double L, double lambda, std::string kernelFunction);
+		KernelEstimator(int ncelly, int ncellz, double H, double L, double lambda, double (*kernelFunction)(double y, double z));
 		void Estimate(const Particles2D& particles);
 };
 
@@ -49,7 +49,7 @@ class BoxEstimator : public Estimator
 		double mH0, mL0;
 
 	public:
-		BoxEstimator(int nboxy, int nboxz, double H0, double H, double L0, double L);
+		BoxEstimator(int ncelly, int ncellz, double H0, double H, double L0, double L);
 		void Estimate(const Particles2D& particles);
 };
 
@@ -61,7 +61,7 @@ class TPMatrixEstimator
 		Matrix mEstimator;
 
 	public:
-		TPMatrixEstimator(int nboxy, int nboxz, double H, double L, int Nloc);
+		TPMatrixEstimator(int ncelly, int ncellz, double H, double L, int Nloc);
 		virtual ~TPMatrixEstimator() {}
 		virtual void Estimate(const Particles2D& particles) =0;
 		void Print(std::string filename, bool binary=false) const;
@@ -74,8 +74,8 @@ class TPMatrixKernelEstimator : public TPMatrixEstimator
 		double (*mKernel)(double y, double z);
 
 	public:
-		TPMatrixKernelEstimator(int nboxy, int nboxz, double H, double L, int Nloc, double lambda, std::string kernelFunction);
-		TPMatrixKernelEstimator(int nboxy, int nboxz, double H, double L, int Nloc, double lambda, double (*kernelFunction)(double y, double z));
+		TPMatrixKernelEstimator(int ncelly, int ncellz, double H, double L, int Nloc, double lambda, std::string kernelFunction);
+		TPMatrixKernelEstimator(int ncelly, int ncellz, double H, double L, int Nloc, double lambda, double (*kernelFunction)(double y, double z));
 		void Estimate(const Particles2D& particles);
 };
 
@@ -85,7 +85,7 @@ class TPMatrixBoxEstimator : public TPMatrixEstimator
 		double mH0, mL0;
 
 	public:
-		TPMatrixBoxEstimator(int nboxy, int nboxz, double H0, double H, double L0, double L, int Nloc);
+		TPMatrixBoxEstimator(int ncelly, int ncellz, double H0, double H, double L0, double L, int Nloc);
 		void Estimate(const Particles2D& particles);
 		virtual Matrix Count(const Particles2D& particles);
 };
@@ -93,7 +93,7 @@ class TPMatrixBoxEstimator : public TPMatrixEstimator
 class TPMatrixBoxEstimatorP2B : public TPMatrixBoxEstimator
 {
 	public:
-		TPMatrixBoxEstimatorP2B(int nboxy, int nboxz, double H0, double H, double L0, double L, int Nloc);
+		TPMatrixBoxEstimatorP2B(int ncelly, int ncellz, double H0, double H, double L0, double L, int Nloc);
 		Matrix Count(const Particles2D& particles);
 };
 

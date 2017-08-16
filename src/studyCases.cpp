@@ -102,7 +102,8 @@ void StudyCaseProblem2BoxTraj()
 	double T = 1000*year;
 	double alpha = .75;
 	Problem2Box prob(alpha);
-	ComputeTrajectories(prob,"data2box",dt,T,10,-13e6,4.5e3);
+	Particles2D part(10,-13e6,4.5e3);
+	ComputeTrajectories(prob,"data2box",dt,T,part);
 }
 
 void StudyCaseProblem2BoxTP()
@@ -114,8 +115,8 @@ void StudyCaseProblem2BoxTP()
 	double alpha[nalpha] = {.75};
 	int nameindex[nalpha] = {75};
 
-	int nboxy = 30;
-	int nboxz = 10;
+	int ncelly = 30;
+	int ncellz = 10;
 	int nlocy = 100, nlocz = 100;
 
 	std::string outputdir;
@@ -125,7 +126,7 @@ void StudyCaseProblem2BoxTP()
 	for (int i=0; i<nalpha; i++){
 		Problem2Box prob(alpha[i]);
 		outputdir = "problem2box_a" + std::to_string(nameindex[i]);
-		ComputeP2BTransitionProbabilities(prob, outputdir, nboxy, nboxz, nlocy, nlocz, dt, Times, nTimes, true);
+		ComputeP2BTransitionProbabilities(prob, outputdir, ncelly, ncellz, nlocy, nlocz, dt, Times, nTimes, true);
 	}
 }
 
@@ -135,8 +136,8 @@ void StudyCaseP2BConcentration2Comp()
 	double year = 365*24*3600;
 	double alpha = .75;
 
-	int nboxy = 2;
-	int nboxz = 1;
+	int ncelly = 2;
+	int ncellz = 1;
 
 	int nyloc = 200;
 	int nzloc = 100;
@@ -147,8 +148,8 @@ void StudyCaseP2BConcentration2Comp()
 	// For the 1000 years simulation
 	double L = p2b.getL1()-p2b.getL0();
 	double H = p2b.getH1()-p2b.getH0();
-	double dyloc = L/(nboxy*nyloc);
-	double dzloc = H/(nboxz*nzloc);
+	double dyloc = L/(ncelly*nyloc);
+	double dzloc = H/(ncellz*nzloc);
 	// case 1 <<
 	// double *ystart = new double [Nloc];
 	// double *zstart = new double [Nloc];
@@ -192,22 +193,22 @@ void StudyCaseP2BConcentration2Comp()
 	for (int i=0; i<nTimes; i++)
 		Times[i] = i*year;
 
-	ComputeConcentration(p2b, outputdir, dt, Times, nTimes, part, nboxy, nboxz, true);
+	ComputeConcentration(p2b, outputdir, dt, Times, nTimes, part, ncelly, ncellz, true);
 	delete Times;
 }
 
 void StudyCaseOverturnerTPnTimes()
 {
-	OverturnerProblem prob();
+	OverturnerProblem prob;
 
 	double dt = 3600;
-	int nboxy = 15;
-	int nboxz = 10;
+	int ncelly = 15;
+	int ncellz = 10;
 	int nlocy = 100, nlocz = 100;
 	std::string outputdir = "overturner";
 
 	double year = 365*24*3600;
 	const int nTimes = 11;
 	double Times[nTimes] = {1.*year,10.*year,20.*year,30.*year,40.*year,50.*year,60.*year,70.*year,80.*year,90.*year,100.*year};
-	ComputeTransitionProbabilities(prob, outputdir, nboxy, nboxz, nlocy, nlocz, dt, Times, nTimes, true);	
+	ComputeTransitionProbabilities(prob, outputdir, ncelly, ncellz, nlocy, nlocz, dt, Times, nTimes, true);	
 }

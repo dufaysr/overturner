@@ -131,15 +131,15 @@ void show_usage(std::string name)
               << "\t<concentration_param> : \n"
               << "\t\t-m,--model : model name (there must be a \"model.in\" file).\n"
               << "\t\t-N,--Nloc : number of trajectories generated.\n"
-              << "\t\t--nboxy : number of boxes in the y-drection.\n"
-              << "\t\t--nboxz : number of boxes in the z-drection.\n"
+              << "\t\t--ncelly : number of boxes in the y-drection.\n"
+              << "\t\t--ncellz : number of boxes in the z-drection.\n"
               << "\t\t--ystart : initial y position.\n"
               << "\t\t--zstart : initial z position.\n\n"
               << "\t-M,--transition_proba : compute the transition probability matrix M.\n"
               << "\t<transition_proba_param> :\n"
               << "\t\t-m,--model : model name (there must be a \"model.in\" file).\n"
-              << "\t\t--nboxy : number of boxes in the y-drection.\n"
-              << "\t\t--nboxz : number of boxes in the z-drection.\n"
+              << "\t\t--ncelly : number of boxes in the y-drection.\n"
+              << "\t\t--ncellz : number of boxes in the z-drection.\n"
               << "\t\t--nyloc : dimension of the discretization of the\n"
               << "\t\tindividual boxes along the y-direction.\n"
               << "\t\t--nzloc : dimension of the discretization of the\n"
@@ -211,7 +211,7 @@ int get_args_traj(int argc, char *argv[], std::string& model, int& Nloc, double&
     return flag;
 }
 
-int get_args_conc(int argc, char *argv[], std::string& model, int& Nloc, int& nboxy, int& nboxz, double& yStart, double& zStart)
+int get_args_conc(int argc, char *argv[], std::string& model, int& Nloc, int& ncelly, int& ncellz, double& yStart, double& zStart)
 {
     int flag = -6;
     for (int i = 2; i < argc; i++)
@@ -243,23 +243,23 @@ int get_args_conc(int argc, char *argv[], std::string& model, int& Nloc, int& nb
                 return 1;
             }  
         }
-        else if (arg == "--nboxy") {
+        else if (arg == "--ncelly") {
             if (i + 1 < argc) {
-                nboxy = std::stoi(argv[++i]);
+                ncelly = std::stoi(argv[++i]);
                 flag++;
             }
             else {
-                std::cerr << "--nboxy parameter requires one integer argument." << std::endl;
+                std::cerr << "--ncelly parameter requires one integer argument." << std::endl;
                 return 1;
             }  
         }
-        else if (arg == "--nboxz") {
+        else if (arg == "--ncellz") {
             if (i + 1 < argc) {
-                nboxz = std::stoi(argv[++i]);
+                ncellz = std::stoi(argv[++i]);
                 flag++;
             }
             else {
-                std::cerr << "--nboxz parameter requires one integer argument." << std::endl;
+                std::cerr << "--ncellz parameter requires one integer argument." << std::endl;
                 return 1;
             }  
         }
@@ -287,7 +287,7 @@ int get_args_conc(int argc, char *argv[], std::string& model, int& Nloc, int& nb
     return flag;
 }
 
-int get_args_tp(int argc, char *argv[], std::string& model, int& nboxy, int& nboxz, int& nyloc, int& nzloc)
+int get_args_tp(int argc, char *argv[], std::string& model, int& ncelly, int& ncellz, int& nyloc, int& nzloc)
 {
     int flag = -5;
     for (int i = 2; i < argc; i++)
@@ -309,23 +309,23 @@ int get_args_tp(int argc, char *argv[], std::string& model, int& nboxy, int& nbo
                 return 1;
             }
         }
-        else if (arg == "--nboxy") {
+        else if (arg == "--ncelly") {
             if (i + 1 < argc) {
-                nboxy = std::stoi(argv[++i]);
+                ncelly = std::stoi(argv[++i]);
                 flag++;
             }
             else {
-                std::cerr << "--nboxy parameter requires one integer argument." << std::endl;
+                std::cerr << "--ncelly parameter requires one integer argument." << std::endl;
                 return 1;
             }  
         }
-        else if (arg == "--nboxz") {
+        else if (arg == "--ncellz") {
             if (i + 1 < argc) {
-                nboxz = std::stoi(argv[++i]);
+                ncellz = std::stoi(argv[++i]);
                 flag++;
             }
             else {
-                std::cerr << "--nboxz parameter requires one integer argument." << std::endl;
+                std::cerr << "--ncellz parameter requires one integer argument." << std::endl;
                 return 1;
             }  
         }

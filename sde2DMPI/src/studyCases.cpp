@@ -9,7 +9,7 @@
 #include "studyCases.hpp"
 
 void StudyCaseTransitionProbabilitiesMPI(const AbstractAdvDiffProblem& prob, std::string model,
-									  int nboxy, int nboxz, int nyloc, int nzloc, 
+									  int ncelly, int ncellz, int nyloc, int nzloc, 
 									  double Times[], int nTimes, bool binary)
 {
 	int myid, iyproc, izproc, nprocs;
@@ -18,8 +18,8 @@ void StudyCaseTransitionProbabilitiesMPI(const AbstractAdvDiffProblem& prob, std
 	MPI_Status status;
 	std::string filename;
 	int fileIsFree, tagIsFree;
-	iyproc = myid/nboxz;
-	izproc = myid - (iyproc*nboxz);
+	iyproc = myid/ncellz;
+	izproc = myid - (iyproc*ncellz);
 
 	if (myid == 0){
 		std::cout << "Writing fInfo..." << std::endl;
@@ -33,8 +33,8 @@ void StudyCaseTransitionProbabilitiesMPI(const AbstractAdvDiffProblem& prob, std
 		    prob.printInfo(fInfo);
 		    fInfo << "nyloc = " << nyloc << "\n";
 	    	fInfo << "nzloc = " << nzloc << "\n";
-	    	fInfo << "nboxy = " << nboxy << "\n";
-	    	fInfo << "nboxz = " << nboxz << "\n";
+	    	fInfo << "ncelly = " << ncelly << "\n";
+	    	fInfo << "ncellz = " << ncellz << "\n";
 	    	fInfo.close();
 	    }
 	    else{
@@ -47,8 +47,8 @@ void StudyCaseTransitionProbabilitiesMPI(const AbstractAdvDiffProblem& prob, std
 	double L = prob.getL1()-prob.getL0();
 	double *yStart = new double[Nloc];
 	double *zStart = new double[Nloc];
-	double dy = L/nboxy;
-	double dz = H/nboxz;
+	double dy = L/ncelly;
+	double dz = H/ncellz;
 	double dybox = dy/nyloc;
 	double dzbox = dz/nzloc;
 	for (int iybox=0; iybox<nyloc; iybox++){
@@ -61,7 +61,7 @@ void StudyCaseTransitionProbabilitiesMPI(const AbstractAdvDiffProblem& prob, std
 	delete[] yStart; delete[] zStart;
 
 	BISolver *solver;
-	BoxEstimator estim(nboxy,nboxz,H,L);
+	BoxEstimator estim(ncelly,ncellz,H,L);
 
 	for(int i=0; i<nTimes; i++)
 	{

@@ -18,7 +18,7 @@ int main(int argc, char *argv[])
 	double dt = 3600;
 	OverturnerProblem prob(T,dt);
 
-	int nboxy = 15, nboxz = 10;
+	int ncelly = 15, ncellz = 10;
 	int nyloc = 10, nzloc = 10;
 
 	double year = 365*24*3600;
@@ -27,7 +27,7 @@ int main(int argc, char *argv[])
 	const int nTimes = 2;
 	double Times[nTimes] = {year, 2*year};
 
-	StudyCaseTransitionProbabilitiesMPI(prob, model, nboxy, nboxz, nyloc, nzloc, Times, nTimes, true);
+	StudyCaseTransitionProbabilitiesMPI(prob, model, ncelly, ncellz, nyloc, nzloc, Times, nTimes, true);
 
 	
 	MPI_Finalize();

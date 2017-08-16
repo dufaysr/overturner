@@ -1,7 +1,7 @@
 %% p2b_case1
 % IC : 20 000 particles uniformly distributed in compartment 1; 
 %      no particle in compartment 2.
-close all;
+% close all;
 
 fontsize = 12;
 set(groot, 'defaultTextFontSize', fontsize);
@@ -52,7 +52,16 @@ for i = 1:n-1
     Cdiscr(:,i+1) = A*Cdiscr(:,i);
 end
 
-% (A_50)^(1/50)
+% A_50 corrected
+a50 = 0.877339744180938;
+Cdiscr3 = zeros(2,n);
+Cdiscr3(:,1) = C0;
+A3 = [a50 1-a50; 1-a50 a50]^(1/50);
+for i = 1:n-1
+    Cdiscr3(:,i+1) = A3*Cdiscr3(:,i);
+end
+
+% (A_50)^(1/50) then corrected
 a = 0.997193285863386;
 Cdiscr2 = zeros(2,n);
 Cdiscr2(:,1) = C0;
@@ -67,7 +76,8 @@ hold on;
 plot(t,C_1/Cmean,'-k');
 plot(t,Ccomp/Cmean,'--k');
 plot(t,Cdiscr(1,:)/Cmean,':k');
-plot(t(1:100:end),Cdiscr2(1,1:100:end)/Cmean,'-.k');
+plot(t(1:50:end),Cdiscr2(1,1:50:end)/Cmean,'-.k');
+% plot(t(1:100:end),Cdiscr3(1,1:100:end)/Cmean,'-k');
 h = legend('$$C_1^{num}(t)/\bar{C}$$','$$C_1^{cont}(t)/\bar{C}$$','$$C_1^{discr,1}(t)/\bar{C}$$','$$C_1^{discr,2}(t)/\bar{C}$$');
 set(h,'FontSize',14); 
 xlabel('$t$ [years]');

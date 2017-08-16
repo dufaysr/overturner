@@ -21,7 +21,7 @@ class Estimator
 		Matrix mEstimator;
 
 	public:
-		Estimator(int nboxy, int nboxz, double H, double L);
+		Estimator(int ncelly, int ncellz, double H, double L);
 		virtual ~Estimator() {}
 		virtual void Estimate(const Particles2D& particles) =0;
 		void Print(std::ofstream& f, bool binary=false) const;
@@ -30,7 +30,7 @@ class Estimator
 class BoxEstimator : public Estimator
 {
 	public:
-		BoxEstimator(int nboxy, int nboxz, double H, double L);
+		BoxEstimator(int ncelly, int ncellz, double H, double L);
 		void Estimate(const Particles2D& particles);
 };
 #endif
